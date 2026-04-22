@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { QuizState, CalculationResults } from '../types';
 import { formatCurrency, formatNumber } from '../lib/utils';
+import { buildLeadProfile } from '../lib/leadProfile';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -15,6 +16,8 @@ interface Props {
 
 export default function Screen9Results({ state, results, onNext, onBack }: Props) {
   const [showDetails, setShowDetails] = useState(false);
+  const profile = buildLeadProfile(state, results, 'demo');
+  const companyReference = state.companyName || 'jouw bedrijf';
 
   return (
     <div className="flex-1 flex flex-col items-center w-full max-w-5xl mx-auto py-8">
@@ -107,6 +110,21 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           </div>
         </div>
         
+      </div>
+
+      <div className="w-full mb-10 rounded-[24px] border border-amber-gold/14 bg-[linear-gradient(180deg,rgba(224,172,62,0.10),rgba(224,172,62,0.04))] p-6 md:p-7 text-center md:text-left">
+        <span className="inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold mb-4">
+          Volgende stap
+        </span>
+        <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
+          Dit wordt pas echt waardevol als we het samen doorvertalen naar een VloerGroep demo
+        </h3>
+        <p className="max-w-3xl text-white/72 leading-7 mb-4">
+          Je scan laat zien dat er voor {companyReference} vooral winst zit in {profile.primaryAngle.toLowerCase()}. In een demo laten we concreet zien hoe VloerGroep dit in de praktijk voor {companyReference} kan opleveren.
+        </p>
+        <p className="text-white/60 leading-7">
+          We lopen samen door waar de snelste winst zit, hoe dit in jouw workflow past en welke eerste stap het meeste effect heeft op groei, tijdswinst en cashflow.
+        </p>
       </div>
 
       {/* Details Toggle */}
