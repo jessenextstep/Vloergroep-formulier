@@ -211,34 +211,12 @@ export default function App() {
       : 'pb-10 md:pb-28';
 
   const screenVariants = useMemo(
-    () =>
-      shouldUseSimpleMotion
-        ? {
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            exit: { opacity: 0 },
-          }
-        : isMobileViewport
-          ? {
-              initial: (direction: 1 | -1) => ({
-                opacity: 0,
-                clipPath: direction > 0 ? 'inset(0 0 0 10%)' : 'inset(0 10% 0 0)',
-              }),
-              animate: {
-                opacity: 1,
-                clipPath: 'inset(0 0 0 0)',
-              },
-              exit: (direction: 1 | -1) => ({
-                opacity: 0,
-                clipPath: direction > 0 ? 'inset(0 10% 0 0)' : 'inset(0 0 0 10%)',
-              }),
-            }
-          : {
-              initial: { opacity: 0, clipPath: 'inset(2% 0 0 0)' },
-              animate: { opacity: 1, clipPath: 'inset(0 0 0 0)' },
-              exit: { opacity: 0, clipPath: 'inset(0 0 2% 0)' },
-            },
-    [isMobileViewport, shouldUseSimpleMotion],
+    () => ({
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+    }),
+    [],
   );
 
   const screenTransition = useMemo(
