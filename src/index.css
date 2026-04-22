@@ -54,6 +54,12 @@ select {
   font: inherit;
 }
 
+button {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
 input, textarea, select, .prose {
   user-select: auto;
 }

@@ -20,6 +20,29 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
   const teamFactor = getFteEstimate(state.teamSize);
   const yearlyHours = state.hoursPerWeek * state.weeksPerYear * teamFactor;
   const yearlyRevenue = yearlyHours * state.hourlyRate;
+  const hourlyRateMarks = [
+    { value: 30, label: '€30' },
+    { value: 60, label: '€60' },
+    { value: 90, label: '€90' },
+    { value: 120, label: '€120' },
+    { value: 150, label: '€150' },
+  ];
+  const weeklyHoursMarks = [
+    { value: 10, label: '10' },
+    { value: 20, label: '20' },
+    { value: 30, label: '30' },
+    { value: 40, label: '40' },
+    { value: 50, label: '50' },
+    { value: 60, label: '60' },
+  ];
+  const yearlyWeeksMarks = [
+    { value: 25, label: '25' },
+    { value: 30, label: '30' },
+    { value: 35, label: '35' },
+    { value: 40, label: '40' },
+    { value: 45, label: '45' },
+    { value: 52, label: '52' },
+  ];
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
@@ -48,11 +71,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
           min={30}
           max={150}
           step={5}
-          marks={[
-            { value: 30, label: '€30' },
-            { value: 90, label: '€90' },
-            { value: 150, label: '€150' },
-          ]}
+          marks={hourlyRateMarks}
           formatValue={v => `€ ${v}`}
         />
         
@@ -65,11 +84,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
           min={10}
           max={60}
           step={2}
-          marks={[
-            { value: 10, label: '10' },
-            { value: 35, label: '35' },
-            { value: 60, label: '60' },
-          ]}
+          marks={weeklyHoursMarks}
           formatValue={v => `${v} u`}
         />
 
@@ -81,11 +96,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
           min={25}
           max={52}
           step={1}
-          marks={[
-            { value: 25, label: '25' },
-            { value: 40, label: '40' },
-            { value: 52, label: '52' },
-          ]}
+          marks={yearlyWeeksMarks}
           formatValue={v => `${v} w`}
         />
       </div>

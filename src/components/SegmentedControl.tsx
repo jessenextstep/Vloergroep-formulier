@@ -35,7 +35,7 @@ export function SegmentedControl<T extends string | number>({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "relative flex flex-col items-center justify-center font-medium transition-colors w-full rounded-xl z-10",
+              "relative z-10 flex w-full flex-col items-center justify-center rounded-xl font-display font-bold tracking-[-0.02em] transition-colors",
               size === 'sm' ? "py-2 px-3 text-sm" : 
               size === 'md' ? "py-3 px-4 text-[15px]" : 
               "py-4 px-6 text-base",

@@ -26,8 +26,10 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
   const pctMarks = [
     { value: 25, label: '25%' },
-    { value: 50, label: '50%' },
-    { value: 75, label: '75%' },
+    { value: 40, label: '40%' },
+    { value: 55, label: '55%' },
+    { value: 70, label: '70%' },
+    { value: 85, label: '85%' },
     { value: 100, label: '100%' },
   ];
 
@@ -58,7 +60,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
                 type="button"
                 role="radio"
                 aria-checked={state.paymentDays === opt.value}
-                className={`py-3.5 px-3 rounded-xl text-[14px] leading-snug font-medium border transition-all ${
+                className={`py-3.5 px-3 rounded-xl text-[14px] leading-snug font-display font-bold tracking-[-0.02em] border transition-all ${
                   state.paymentDays === opt.value 
                     ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
                     : 'bg-white/5 border-white/10 text-[#FBEFD5]/76 hover:bg-white/10'

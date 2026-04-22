@@ -155,7 +155,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
   const successNote =
     deliveryMode === 'preview'
       ? 'Je aanvraag staat goed in ons systeem. Ook als je bevestigingsmail niet direct binnenkomt, nemen we je aanvraag gewoon mee in de opvolging.'
-      : 'Je ontvangt ook een bevestiging in je mailbox.';
+      : '';
 
   const validate = useCallback(() => {
     const nextErrors: FormErrors = {};
@@ -338,7 +338,6 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   id="capture-name"
                   name="name"
                   label="Naam"
-                  helperText="Zodat we je demo persoonlijk kunnen voorbereiden."
                   icon={User}
                   value={formData.name}
                   onChange={handleInputChange}
@@ -355,7 +354,6 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   id="capture-company"
                   name="company"
                   label="Bedrijfsnaam"
-                  helperText="Zo stemmen we de demo af op je bedrijf."
                   icon={Building2}
                   value={formData.company}
                   onChange={handleInputChange}
@@ -375,7 +373,6 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   id="capture-email"
                   name="email"
                   label="E-mailadres"
-                  helperText="Hier sturen we je bevestiging heen."
                   icon={Mail}
                   value={formData.email}
                   onChange={handleInputChange}
@@ -394,7 +391,6 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   id="capture-phone"
                   name="phone"
                   label="Telefoonnummer"
-                  helperText="Voor het plannen van je demo."
                   icon={Phone}
                   value={formData.phone}
                   onChange={handleInputChange}
@@ -506,9 +502,11 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 </p>
               </div>
 
-              <div className="mb-8 rounded-2xl border border-white/8 bg-[#0f1b1b]/72 p-4 text-center text-sm leading-6 text-white/62">
-                {successNote}
-              </div>
+              {successNote ? (
+                <div className="mb-8 rounded-2xl border border-white/8 bg-[#0f1b1b]/72 p-4 text-center text-sm leading-6 text-white/62">
+                  {successNote}
+                </div>
+              ) : null}
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
                 <Button onClick={() => window.location.assign(DEMO_URL)} className="w-full !px-8 !py-4 text-base sm:w-auto">

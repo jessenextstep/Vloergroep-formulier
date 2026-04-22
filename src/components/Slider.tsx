@@ -31,6 +31,30 @@ function SliderComponent({
   const sliderId = React.useId();
   const descriptionId = description ? `${sliderId}-description` : undefined;
   const percentage = ((value - min) / (max - min)) * 100;
+  const scaleTicks = React.useMemo(() => {
+    const totalSteps = Math.round((max - min) / step);
+
+    if (!Number.isFinite(totalSteps) || totalSteps <= 0) {
+      return [];
+    }
+
+    if (totalSteps <= 18) {
+      return Array.from({ length: totalSteps + 1 }, (_, index) => Number((min + index * step).toFixed(4)));
+    }
+
+    const interval = Math.ceil(totalSteps / 12);
+    const ticks = new Set<number>();
+
+    for (let index = 0; index <= totalSteps; index += interval) {
+      ticks.add(Number((min + index * step).toFixed(4)));
+    }
+
+    ticks.add(min);
+    ticks.add(max);
+    marks?.forEach((mark) => ticks.add(Number(mark.value.toFixed(4))));
+
+    return Array.from(ticks).sort((a, b) => a - b);
+  }, [marks, max, min, step]);
 
   return (
     <div
@@ -39,12 +63,12 @@ function SliderComponent({
         className,
       )}
     >
-       <div className="flex justify-between items-start mb-2">
-         <div className="flex items-center gap-3">
+       <div className="mb-2 flex items-start justify-between gap-4">
+         <div className="flex min-w-0 flex-1 items-start gap-3 text-left">
            {icon && <div className="rounded-xl bg-amber-gold/12 p-2.5 text-amber-gold transition-all duration-200 group-hover:scale-[1.04] group-focus-within:bg-amber-gold/16">{icon}</div>}
-           <div className="flex flex-col">
-             <label htmlFor={sliderId} className="font-semibold text-white px-2 leading-tight pr-2">{label}</label>
-             {description && <span id={descriptionId} className="mt-1 text-[12px] leading-5 text-white/80">{description}</span>}
+           <div className="flex min-w-0 flex-1 flex-col items-start text-left">
+             <label htmlFor={sliderId} className="block w-full text-left font-semibold leading-tight text-white">{label}</label>
+             {description && <span id={descriptionId} className="mt-1 block w-full text-left text-[12px] leading-5 text-white/80">{description}</span>}
            </div>
          </div>
          <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/12 bg-[#081212]/92 px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.45)] transition-colors duration-200 group-focus-within:border-amber-gold/30 sm:text-lg">
@@ -52,7 +76,7 @@ function SliderComponent({
          </div>
        </div>
        
-       <div className="relative pt-4 pb-6 px-1">
+       <div className="relative px-1 pb-7 pt-4 sm:pb-8">
          
          {/* Custom Track Background for better depth */}
          <div className="pointer-events-none absolute left-1 right-1 top-[22px] h-2 rounded-full bg-[#050c0c] shadow-[inset_0_1px_4px_rgba(255,255,255,0.04),inset_0_2px_6px_rgba(0,0,0,0.6)]" />
@@ -73,19 +97,41 @@ function SliderComponent({
              background: `linear-gradient(to right, var(--color-amber-gold) 0%, var(--color-amber-gold) ${percentage}%, transparent ${percentage}%, transparent 100%)`
            }}
          />
+
+         {scaleTicks.length > 0 && (
+           <div className="pointer-events-none absolute left-2 right-2 top-[36px]">
+             {scaleTicks.map((tickValue, index) => {
+               const tickPercent = ((tickValue - min) / (max - min)) * 100;
+               const edgeAlignedTransform =
+                 tickPercent <= 0 ? 'translateX(0%)' : tickPercent >= 100 ? 'translateX(-100%)' : 'translateX(-50%)';
+
+               return (
+                 <span
+                   key={`${tickValue}-${index}`}
+                   className="absolute block h-2 w-px rounded-full bg-white/22"
+                   style={{ left: `${tickPercent}%`, transform: edgeAlignedTransform }}
+                 />
+               );
+             })}
+           </div>
+         )}
          
          {/* Visible Scale / Tick Marks */}
          {marks && (
-           <div className="absolute top-[38px] left-2 right-2 flex justify-between pointer-events-none">
+           <div className="pointer-events-none absolute left-2 right-2 top-[34px]">
              {marks.map((m, i) => {
+                const markPercent = ((m.value - min) / (max - min)) * 100;
+                const markTransform =
+                  markPercent <= 0 ? 'translateX(0%)' : markPercent >= 100 ? 'translateX(-100%)' : 'translateX(-50%)';
+
                 return (
                   <div 
                     key={i} 
-                    className="absolute flex flex-col items-center -translate-x-1/2"
-                    style={{ left: ((m.value - min) / (max - min)) * 100 + "%" }}
+                    className="absolute flex flex-col items-center"
+                    style={{ left: `${markPercent}%`, transform: markTransform }}
                   >
-                    <div className="w-0.5 h-1.5 bg-white/40 rounded-full mb-1" />
-                    <span className="text-[10px] text-white/60 font-medium whitespace-nowrap">
+                    <div className="mb-1 h-2.5 w-0.5 rounded-full bg-white/44" />
+                    <span className="whitespace-nowrap text-[10px] font-medium text-white/62 sm:text-[11px]">
                       {m.label}
                     </span>
                   </div>

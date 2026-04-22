@@ -86,7 +86,6 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
           id="profile-first-name"
           label="Voornaam"
           labelHint="Optioneel"
-          helperText="Voor een persoonlijkere scan."
           icon={User}
           type="text"
           placeholder="Bijv. Mark"
@@ -101,7 +100,6 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
           id="profile-company-name"
           label="Bedrijfsnaam"
           labelHint="Optioneel"
-          helperText="Handig voor een herkenbare demo."
           icon={Building2}
           type="text"
           placeholder="Bijv. Vloerenbedrijf Jansen"

@@ -54,7 +54,7 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
                 type="button"
                 role="radio"
                 aria-checked={state.missedProjects === opt.value}
-                className={`py-4 px-4 rounded-[20px] font-medium border transition-all ${
+                className={`py-4 px-4 rounded-[20px] font-display font-bold tracking-[-0.02em] border transition-all ${
                   state.missedProjects === opt.value 
                     ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
                     : 'bg-white/5 border-white/10 text-[#FBEFD5]/80 hover:bg-white/10'

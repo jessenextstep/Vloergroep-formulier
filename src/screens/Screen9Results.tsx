@@ -4,7 +4,7 @@ import { formatCurrency, formatNumber } from '../lib/utils';
 import { buildLeadProfile } from '../lib/leadProfile';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { ChevronDown, ChevronUp, Clock3, TrendingUp, Wallet } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -116,39 +116,19 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
         <span className="inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold mb-4">
           Volgende stap
         </span>
-        <div className="grid gap-5 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:items-center">
-          <div>
-            <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
-              Van scan naar een demo die echt past bij {companyReference}
-            </h3>
-            <p className="max-w-2xl text-white/78 leading-7">
-              Voor {companyReference} ligt de snelste winst nu in {profile.primaryAngle.toLowerCase()}. In de demo maken we dit meteen praktisch en laten we zien waar de eerste echte versnelling zit.
-            </p>
-          </div>
-
-          <div className="grid gap-3">
-            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
-              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
-                <TrendingUp size={14} />
-                Focus
-              </div>
-              <p className="text-sm font-medium text-white">{profile.primaryAngle}</p>
+        <div className="max-w-3xl">
+          <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
+            Klaar om te zien waar voor {companyReference} de eerste winst zit?
+          </h3>
+          <p className="max-w-2xl text-white/80 leading-7">
+            Deze scan laat het potentieel zien. In een persoonlijke VloerGroep demo maken we het concreet: waar zit voor jou de snelste winst in {profile.primaryAngle.toLowerCase()} en wat is slim om als eerste op te pakken.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white">
+              Persoonlijk voor {companyReference}
             </div>
-
-            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
-              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
-                <Clock3 size={14} />
-                In De Demo
-              </div>
-              <p className="text-sm font-medium text-white">Waar tijd, cashflow en groei het snelst winst geven in jouw werkdag.</p>
-            </div>
-
-            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
-              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
-                <Wallet size={14} />
-                Uitkomst
-              </div>
-              <p className="text-sm font-medium text-white">Een heldere eerste stap die het meeste oplevert voor {companyReference}.</p>
+            <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white">
+              Heldere eerste stap
             </div>
           </div>
         </div>

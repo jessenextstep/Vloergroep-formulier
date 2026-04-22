@@ -12,12 +12,18 @@ interface Props {
 export default function Screen1Hero({ onNext }: Props) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col pt-4 md:py-8">
+      <div className="mb-4 flex md:hidden">
+        <div className="rounded-[20px] border border-white/10 bg-[#061010]/88 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <BrandLogo className="h-6 w-auto" />
+        </div>
+      </div>
+
       <div className="relative mb-8">
         <ScreenHeroImage
           src={heroScreen1}
           alt="VloerGroep introductie"
         />
-        <div className="pointer-events-none absolute left-4 top-4 rounded-[20px] border border-white/10 bg-[#061010]/88 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute left-4 top-4 hidden rounded-[20px] border border-white/10 bg-[#061010]/88 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl md:block">
           <BrandLogo className="h-6 w-auto sm:h-7" />
         </div>
       </div>
