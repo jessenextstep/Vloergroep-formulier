@@ -36,7 +36,7 @@ export default function Screen1Hero({ onNext }: Props) {
         </p>
       </div>
 
-      <div className="mb-10 rounded-[24px] border border-white/8 bg-[#0b1515]/75 px-5 py-4">
+      <div className="mb-10 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(58,58,58,0.44),rgba(45,45,45,0.24))] px-5 py-4 backdrop-blur-xl">
         <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />

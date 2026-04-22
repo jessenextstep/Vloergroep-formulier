@@ -11,7 +11,7 @@ function ProofCalloutComponent({
   body,
 }: ProofCalloutProps) {
   return (
-    <div className="mb-8 flex items-start gap-4 rounded-[20px] border border-white/10 bg-white/[0.03] p-5 text-left backdrop-blur-xl">
+    <div className="mb-8 flex items-start gap-4 rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(58,58,58,0.42),rgba(45,45,45,0.22))] p-5 text-left backdrop-blur-xl">
       <BrandMark className="mt-0.5 h-10 w-10 shrink-0 rounded-[14px]" />
       <div className="min-w-0 flex-1 text-left">
         <h4 className="mb-1 text-left text-sm font-medium text-white">{title}</h4>

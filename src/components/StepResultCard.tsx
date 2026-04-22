@@ -17,7 +17,7 @@ export function StepResultCard({ className, children, ...props }: StepResultCard
   return (
     <div
       className={cn(
-        'mb-12 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-5 text-center shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-xl md:p-6',
+        'mb-12 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(58,58,58,0.46),rgba(45,45,45,0.22))] p-5 text-center shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-xl md:p-6',
         className,
       )}
       {...props}

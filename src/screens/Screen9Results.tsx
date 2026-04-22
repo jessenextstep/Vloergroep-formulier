@@ -86,7 +86,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
       {/* Comparisons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-10">
         
-        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent p-5 text-left shadow-lg">
+        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.44),rgba(45,45,45,0.22))] p-5 text-left shadow-lg backdrop-blur-xl">
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">1</div>
           <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Tijdswinst per week</h4>
@@ -94,7 +94,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           </div>
         </div>
 
-        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent p-5 text-left shadow-lg">
+        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.44),rgba(45,45,45,0.22))] p-5 text-left shadow-lg backdrop-blur-xl">
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">2</div>
           <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Focus op betere leads</h4>
@@ -102,7 +102,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           </div>
         </div>
 
-        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent p-5 text-left shadow-lg">
+        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.44),rgba(45,45,45,0.22))] p-5 text-left shadow-lg backdrop-blur-xl">
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">3</div>
           <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Samenwerking</h4>
@@ -157,7 +157,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-md border border-white/[0.08] shadow-lg p-6 md:p-8 rounded-[20px] mb-12 text-sm text-white/70">
+            <div className="mb-12 rounded-[20px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.44),rgba(45,45,45,0.22))] p-6 text-sm text-white/70 shadow-lg backdrop-blur-md md:p-8">
               <span className="inline-block text-xs font-semibold tracking-wider text-amber-gold uppercase mb-2">
                 Dit verandert er in de werkdag van {state.companyName || 'jouw bedrijf'}
               </span>

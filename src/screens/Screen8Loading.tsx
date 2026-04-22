@@ -67,7 +67,7 @@ export default function Screen8Loading({ onNext }: Props) {
           className="absolute inset-3 rounded-full border border-white/10 border-t-amber-gold/70 will-change-transform"
         />
 
-        <div className="relative z-10 rounded-full bg-[#0f1b1b] p-5 text-amber-gold shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="relative z-10 rounded-full bg-[linear-gradient(180deg,rgba(58,58,58,0.72),rgba(45,45,45,0.58))] p-5 text-amber-gold shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <motion.div
             animate={prefersReducedMotion ? undefined : { scale: [0.96, 1.04, 0.96] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}

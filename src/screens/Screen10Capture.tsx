@@ -330,7 +330,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
               noValidate
               aria-busy={isSubmitting}
               aria-describedby={serverMessage && !submitted ? formStatusId : undefined}
-              className="space-y-6 rounded-[28px] border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-transparent p-6 shadow-lg backdrop-blur-md md:p-8"
+              className="space-y-6 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.46),rgba(45,45,45,0.24))] p-6 shadow-lg backdrop-blur-md md:p-8"
             >
               <fieldset disabled={isSubmitting} className="space-y-6 disabled:opacity-100">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -418,7 +418,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 />
               </div>
 
-              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,27,27,0.96),rgba(10,20,20,0.94))] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(58,58,58,0.52),rgba(45,45,45,0.28))] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <label className="flex cursor-pointer items-start gap-3" htmlFor="capture-consent">
                   <input
                     id="capture-consent"
@@ -471,7 +471,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
             aria-live="polite"
             className="w-full"
           >
-            <div className="rounded-[30px] border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-transparent p-6 shadow-lg backdrop-blur-md md:p-10">
+            <div className="rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.46),rgba(45,45,45,0.24))] p-6 shadow-lg backdrop-blur-md md:p-10">
               <ScreenHeroImage
                 src={heroScreenThanks}
                 alt="VloerGroep bedanktscherm"
@@ -503,7 +503,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
               </div>
 
               {successNote ? (
-                <div className="mb-8 rounded-2xl border border-white/8 bg-[#0f1b1b]/72 p-4 text-center text-sm leading-6 text-white/62">
+                <div className="mb-8 rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(58,58,58,0.42),rgba(45,45,45,0.22))] p-4 text-center text-sm leading-6 text-white/62">
                   {successNote}
                 </div>
               ) : null}
