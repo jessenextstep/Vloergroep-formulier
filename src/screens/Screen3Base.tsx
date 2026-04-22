@@ -105,9 +105,6 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
       </div>
-      <p className="text-center text-sm text-white/50 mt-6">
-        Je antwoorden worden alleen gebruikt om je scan te berekenen.
-      </p>
     </div>
   );
 }

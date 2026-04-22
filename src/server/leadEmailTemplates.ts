@@ -181,7 +181,7 @@ export function buildCustomerConfirmationEmail({
           <table role="presentation" cellspacing="0" cellpadding="0">
             <tr>
               <td style="border-radius: 999px; background: #d6a440;">
-                <a href="${escapeHtml(demoUrl)}" style="display: inline-block; padding: 14px 22px; color: #071111; font-size: 14px; font-weight: 700; text-decoration: none;">Bekijk de volgende stap</a>
+                <a href="${escapeHtml(demoUrl)}" style="display: inline-block; padding: 14px 22px; color: #071111; font-size: 14px; font-weight: 700; text-decoration: none;">Plan je VloerGroep demo</a>
               </td>
             </tr>
           </table>

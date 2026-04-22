@@ -121,9 +121,6 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
           onBack={onBack} 
         />
       </div>
-      <p className="text-center text-sm text-white/50 mt-6">
-        Je antwoorden worden alleen gebruikt om je scan te berekenen.
-      </p>
     </div>
   );
 }

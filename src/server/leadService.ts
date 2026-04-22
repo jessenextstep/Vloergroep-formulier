@@ -186,7 +186,18 @@ async function sendResendEmail(
     body: JSON.stringify(payload),
   });
 
-  const data = (await response.json()) as { id?: string; message?: string; name?: string };
+  const rawBody = await response.text();
+  let data: { id?: string; message?: string; name?: string } = {};
+
+  if (rawBody) {
+    try {
+      data = JSON.parse(rawBody) as { id?: string; message?: string; name?: string };
+    } catch {
+      data = {
+        message: rawBody.slice(0, 240),
+      };
+    }
+  }
 
   if (!response.ok || !data.id) {
     throw new Error(data.message || data.name || 'Resend verzending mislukt.');

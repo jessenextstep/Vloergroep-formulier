@@ -32,16 +32,21 @@ export function Slider({
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
-    <div className={cn("flex flex-col gap-2 p-5 sm:p-6 rounded-[24px] bg-white/10 border border-white/20 backdrop-blur-xl transition-all duration-300 hover:border-amber-gold/50 hover:bg-white/20 relative overflow-hidden group", className)}>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(19,31,31,0.94),rgba(9,18,18,0.9))] p-5 sm:p-6 backdrop-blur-2xl shadow-[0_18px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 hover:border-amber-gold/30 hover:shadow-[0_20px_48px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.06)] group",
+        className,
+      )}
+    >
        <div className="flex justify-between items-start mb-2">
          <div className="flex items-center gap-3">
-           {icon && <div className="text-amber-gold bg-amber-gold/20 p-2.5 rounded-xl group-hover:scale-110 transition-transform">{icon}</div>}
+           {icon && <div className="rounded-xl bg-amber-gold/12 p-2.5 text-amber-gold transition-transform group-hover:scale-[1.04]">{icon}</div>}
            <div className="flex flex-col">
              <label htmlFor={sliderId} className="font-semibold text-white px-2 leading-tight pr-2">{label}</label>
              {description && <span className="text-[12px] text-white/70 mt-1">{description}</span>}
            </div>
          </div>
-         <div className="font-bold font-display text-amber-gold text-base sm:text-lg bg-near-black px-4 py-1.5 rounded-full border border-white/20 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] whitespace-nowrap flex-shrink-0 min-w-[72px] text-center flex items-center justify-center">
+         <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/12 bg-[#081212]/92 px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.45)] sm:text-lg">
            {formatValue(value)}
          </div>
        </div>
@@ -49,7 +54,7 @@ export function Slider({
        <div className="relative pt-4 pb-6 px-1">
          
          {/* Custom Track Background for better depth */}
-         <div className="absolute top-[22px] left-1 right-1 h-2 bg-[#1a1a1a] rounded-full shadow-inner pointer-events-none" />
+         <div className="pointer-events-none absolute left-1 right-1 top-[22px] h-2 rounded-full bg-[#050c0c] shadow-[inset_0_1px_4px_rgba(255,255,255,0.04),inset_0_2px_6px_rgba(0,0,0,0.6)]" />
          
          <input 
            id={sliderId}

@@ -283,23 +283,18 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
       <div className="h-32 w-full shrink-0" />
 
       {/* Sticky footer for both mobile and desktop with primary CTA */}
-      <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-5 pb-[max(env(safe-area-inset-bottom),1rem)] bg-[#061010]/90 backdrop-blur-3xl border-t border-white/5"
-      >
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#061010]/90 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-3xl sm:p-5">
         <div className="w-full max-w-3xl mx-auto flex items-center justify-between px-2 sm:px-6">
           <button onClick={onBack} className="text-white/60 hover:text-white transition-colors text-sm font-medium hidden sm:block">
             Aanpassen
           </button>
           <div className="flex w-full sm:w-auto ml-auto">
             <Button onClick={onNext} className="w-full sm:w-auto !px-10 !py-4 text-[16px] xl:text-[18px] shadow-xl shadow-amber-gold/20 active:scale-95">
-              Ontvang mijn scan per mail
+              Plan mijn VloerGroep demo
             </Button>
           </div>
         </div>
-        <p className="text-center text-xs text-white/50 mt-3">Geen verplichting. Je krijgt eerst een overzicht en vervolgstap die bij jouw situatie past.</p>
-      </motion.div>
+      </div>
 
     </div>
   );

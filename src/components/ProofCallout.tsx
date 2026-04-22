@@ -7,14 +7,14 @@ interface ProofCalloutProps {
 }
 
 export function ProofCallout({
-  title = 'VloerGroep Proof',
+  title = 'Wist je dat VloerGroep...',
   body,
 }: ProofCalloutProps) {
   return (
-    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 mb-8 flex gap-4 items-start">
-      <BrandMark className="h-11 w-11 rounded-[14px] mt-0.5" />
+    <div className="mb-8 flex items-start gap-4 rounded-[20px] border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
+      <BrandMark className="mt-0.5 h-10 w-10 rounded-[14px]" />
       <div>
-        <h4 className="text-white font-medium text-sm mb-1">{title}</h4>
+        <h4 className="mb-1 text-sm font-medium text-white">{title}</h4>
         <p className="text-white/60 text-sm leading-6">{body}</p>
       </div>
     </div>

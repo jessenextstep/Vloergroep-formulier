@@ -101,7 +101,10 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
 
       </div>
 
-      <ProofCallout body="Veel vakmannen verliezen hier elke week ongemerkt veel tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek. Daar begint je eerste winst." />
+      <ProofCallout
+        title="Wist je dat VloerGroep juist hier vaak als eerste tijd terugwint?"
+        body="Veel vakmannen verliezen hier elke week ongemerkt veel tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek. Daar begint je eerste winst."
+      />
 
       <motion.div 
         key={totalHours}
@@ -117,9 +120,6 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
       </div>
-      <p className="text-center text-sm text-white/50 mt-6">
-        Je antwoorden worden alleen gebruikt om je scan te berekenen.
-      </p>
     </div>
   );
 }

@@ -5,12 +5,12 @@ export function BrandWatermark() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed right-[-14vw] bottom-[-12vw] z-0 select-none opacity-[0.05] md:right-[-10vw] md:bottom-[-10vw] md:opacity-[0.06] xl:opacity-[0.07]"
+      className="pointer-events-none fixed right-[-18vw] top-[14vh] z-0 select-none opacity-[0.09] mix-blend-screen md:right-[-11vw] md:top-[10vh] md:opacity-[0.11] xl:opacity-[0.13]"
     >
       <img
         src={brandWatermarkIcon}
         alt=""
-        className="block h-auto w-[58vw] min-w-[240px] max-w-[640px] md:w-[42vw] lg:w-[34vw] xl:w-[30vw]"
+        className="block h-auto w-[74vw] min-w-[280px] max-w-[760px] brightness-110 contrast-125 md:w-[48vw] lg:w-[38vw] xl:w-[34vw]"
       />
     </div>
   );

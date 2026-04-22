@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { QuizState, defaultQuizState } from './types';
 import { calculateResults } from './lib/calculations';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 // Screens
 import Screen1Hero from './screens/Screen1Hero';
@@ -45,12 +45,32 @@ export default function App() {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<QuizState>(() => loadStoredQuizState());
   const [sessionStartedAt] = useState(() => Date.now());
-  
+  const prefersReducedMotion = useReducedMotion();
+  const [useCompactMotion, setUseCompactMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const syncMotionPreference = () => {
+      setUseCompactMotion(mediaQuery.matches);
+    };
+
+    syncMotionPreference();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncMotionPreference);
+      return () => mediaQuery.removeEventListener('change', syncMotionPreference);
+    }
+
+    mediaQuery.addListener(syncMotionPreference);
+    return () => mediaQuery.removeListener(syncMotionPreference);
+  }, []);
+
+  const shouldUseSimpleMotion = prefersReducedMotion || useCompactMotion;
+
   // Auto-scroll to top when step changes
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-  }, [step]);
+    window.scrollTo({ top: 0, behavior: shouldUseSimpleMotion ? 'auto' : 'smooth' });
+  }, [step, shouldUseSimpleMotion]);
 
   useEffect(() => {
     window.localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(state));
@@ -62,12 +82,19 @@ export default function App() {
 
   const currentResults = calculateResults(state);
 
-  const screenTransition = {
-    initial: { opacity: 0, x: 20 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
-    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
-  };
+  const screenTransition = shouldUseSimpleMotion
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.2, ease: 'easeOut' as const },
+      }
+    : {
+        initial: { opacity: 0, y: 16, scale: 0.995 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -8, scale: 0.995 },
+        transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const },
+      };
 
   return (
     <div className="min-h-screen w-full bg-[#061010] text-[#FBEFD5] flex flex-col font-sans selection:bg-amber-gold/30 relative isolate overflow-x-clip">

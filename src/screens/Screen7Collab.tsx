@@ -58,14 +58,14 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
         </div>
       </div>
 
-      <ProofCallout body="Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zónder privé zorgen." />
+      <ProofCallout
+        title="Wist je dat VloerGroep grotere klussen veiliger laat samenwerken?"
+        body="Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zonder privé zorgen."
+      />
 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} nextLabel="Bereken mijn scan" />
       </div>
-      <p className="text-center text-sm text-white/50 mt-6">
-        Je antwoorden worden alleen gebruikt om je scan te berekenen.
-      </p>
     </div>
   );
 }
