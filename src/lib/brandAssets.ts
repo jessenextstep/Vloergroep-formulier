@@ -7,6 +7,7 @@ import heroScreen3 from '../Afbeeldingen/optimized/hero-screen-3.webp';
 import heroScreen4 from '../Afbeeldingen/optimized/hero-screen-4.webp';
 import heroScreen5 from '../Afbeeldingen/optimized/hero-screen-5.webp';
 import heroScreen6 from '../Afbeeldingen/optimized/hero-screen-6.webp';
+import heroScreenThanks from '../Afbeeldingen/optimized/hero-screen-thanks.webp';
 
 export {
   brandFavicon,
@@ -18,4 +19,5 @@ export {
   heroScreen4,
   heroScreen5,
   heroScreen6,
+  heroScreenThanks,
 };

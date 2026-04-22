@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Mail, Phone } from 'lucide-react';
 
 import { Button } from '../components/Button';
+import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { heroScreenThanks } from '../lib/brandAssets';
 import {
   CalculationResults,
   LeadCaptureFormData,
@@ -125,6 +127,15 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
   const introText = companyName
     ? `We gebruiken je scan voor een gratis persoonlijke demo voor ${companyName}. Daarin laten we zien waar volgens jouw antwoorden de meeste winst zit in ${growthFocus} en hoe we ${companyName} nog verder kunnen laten groeien.`
     : `We gebruiken je scan voor een gratis persoonlijke demo. Daarin laten we zien waar volgens jouw antwoorden de meeste winst zit in ${growthFocus} en hoe we jouw bedrijf nog verder kunnen laten groeien.`;
+  const successHeading = firstName ? `Dankjewel, ${firstName}` : 'Dankjewel';
+  const successIntro = 'Je aanvraag voor een gratis persoonlijke VloerGroep demo is goed ontvangen.';
+  const successBody = companyName
+    ? `We gaan nu iets moois voorbereiden voor ${companyName}: een demo waarin we samen ontdekken hoe VloerGroep het meeste voordeel kan opleveren in ${growthFocus} en waar de grootste groeikans ligt.`
+    : `We gaan nu een persoonlijke demo voor je voorbereiden waarin we samen ontdekken hoe VloerGroep het meeste voordeel kan opleveren in ${growthFocus} en waar de grootste groeikans ligt.`;
+  const successNote =
+    deliveryMode === 'preview'
+      ? 'Je aanvraag staat goed in ons systeem. Ook als je bevestigingsmail niet direct binnenkomt, nemen we je aanvraag gewoon mee in de opvolging.'
+      : 'Je ontvangt ook een bevestiging in je mailbox.';
 
   const validate = () => {
     const nextErrors: FormErrors = {};
@@ -463,46 +474,41 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
             className="w-full"
           >
             <div className="rounded-[30px] border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-transparent p-6 shadow-lg backdrop-blur-md md:p-10">
+              <ScreenHeroImage
+                src={heroScreenThanks}
+                alt="VloerGroep bedanktscherm"
+                className="mb-8"
+              />
+
               <div className="mb-8 flex flex-col items-center text-center">
                 <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-gold/12 text-amber-gold">
                   <Check size={40} strokeWidth={2.5} />
                 </div>
                 <span className="mb-4 inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                  Aanvraag ontvangen
+                  Tot snel
                 </span>
                 <h3 className="mb-4 text-3xl font-bold md:text-5xl">
-                  {firstName ? `${firstName}, je gratis demo-aanvraag is ontvangen` : 'Je gratis demo-aanvraag is ontvangen'}
+                  {successHeading}
                 </h3>
-                <p className="max-w-2xl text-lg leading-relaxed text-white/72">
-                  Je bevestiging is onderweg en VloerGroep heeft je leadprofiel direct ontvangen. Daardoor kunnen we in de demo meteen laten zien wat meer voordeel voor {companyReference} oplevert en hoe {companyReference} verder kan groeien via {growthFocus}.
+                <p className="mb-3 max-w-2xl text-lg leading-relaxed text-white">
+                  {successIntro}
+                </p>
+                <p className="max-w-2xl text-base leading-7 text-white/70">
+                  {successBody}
                 </p>
               </div>
 
-              {deliveryMode === 'preview' && (
-                <div className="mb-8 rounded-2xl border border-amber-gold/18 bg-amber-gold/10 p-4 text-sm text-amber-gold">
-                  {serverMessage || 'Previewmodus: de flow werkt, maar zodra `RESEND_API_KEY` live staat in Vercel worden mails ook echt verzonden.'}
+              <div className="mb-8 rounded-[24px] border border-amber-gold/14 bg-amber-gold/6 p-5 text-center md:p-6">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
+                  In jouw demo
                 </div>
-              )}
-
-              <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="rounded-[24px] border border-white/8 bg-[#0f1b1b]/82 p-5">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">1. Bevestiging</div>
-                  <p className="text-sm leading-6 text-white/72">De gebruiker ontvangt automatisch een nette bevestiging met scanoverzicht.</p>
-                </div>
-                <div className="rounded-[24px] border border-white/8 bg-[#0f1b1b]/82 p-5">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">2. Interne lead</div>
-                  <p className="text-sm leading-6 text-white/72">info@vloergroep.nl krijgt direct de lead binnen met profiel, kansen en opvolging.</p>
-                </div>
-                <div className="rounded-[24px] border border-white/8 bg-[#0f1b1b]/82 p-5">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">3. Demo</div>
-                  <p className="text-sm leading-6 text-white/72">De vervolgactie is gericht op het inplannen van een VloerGroep demo.</p>
-                </div>
+                <p className="text-base leading-7 text-white/82">
+                  We zoomen als eerste in op <strong className="text-white">{growthFocus}</strong> en laten zien hoe VloerGroep dit concreet voor <strong className="text-white">{companyReference}</strong> kan versnellen.
+                </p>
               </div>
 
-              <div className="rounded-[24px] border border-amber-gold/14 bg-amber-gold/6 p-5 text-left">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">Focus voor deze demo</div>
-                <div className="mb-2 text-xl font-semibold text-white">{profile.primaryAngle}</div>
-                <p className="text-sm leading-6 text-white/70">{profile.primaryMessage}</p>
+              <div className="mb-8 rounded-2xl border border-white/8 bg-[#0f1b1b]/72 p-4 text-center text-sm leading-6 text-white/62">
+                {successNote}
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">

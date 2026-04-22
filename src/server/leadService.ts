@@ -317,50 +317,16 @@ export async function processLeadSubmission(
     process.env.VITE_VLOERGROEP_DEMO_URL ||
     'https://vloergroep.nl';
   const environment = env.environment || process.env.NODE_ENV || 'development';
-
-  if (!resendApiKey) {
-    if (environment === 'production') {
-      return {
-        status: 503,
-        body: {
-          ok: false,
-          deliveryMode: 'preview',
-          message: 'Mailomgeving is nog niet geconfigureerd.',
-        },
-      };
-    }
-
-    return {
-      status: 200,
-      body: {
-        ok: true,
-        deliveryMode: 'preview',
-        message: 'Previewmodus: mails zijn opgebouwd, maar nog niet verzonden.',
-      },
-    };
-  }
-
-  if (environment === 'production' && !configuredResendFromEmail) {
-    return {
-      status: 503,
-      body: {
-        ok: false,
-        deliveryMode: 'preview',
-        message: 'RESEND_FROM_EMAIL ontbreekt in Vercel. Gebruik een afzender op een geverifieerd Resend-domein.',
-      },
-    };
-  }
-
-  if (environment === 'production' && usesResendTestingDomain(resendFromEmail)) {
-    return {
-      status: 503,
-      body: {
-        ok: false,
-        deliveryMode: 'preview',
-        message: 'RESEND_FROM_EMAIL staat nog op resend.dev. Verifieer eerst een domein in Resend en gebruik daarna een afzender op dat domein.',
-      },
-    };
-  }
+  const resendConfigurationIssue =
+    !resendApiKey
+      ? environment === 'production'
+        ? 'Mailomgeving is nog niet geconfigureerd.'
+        : null
+      : environment === 'production' && !configuredResendFromEmail
+        ? 'RESEND_FROM_EMAIL ontbreekt in Vercel. Gebruik een afzender op een geverifieerd Resend-domein.'
+        : environment === 'production' && usesResendTestingDomain(resendFromEmail)
+          ? 'RESEND_FROM_EMAIL staat nog op resend.dev. Verifieer eerst een domein in Resend en gebruik daarna een afzender op dat domein.'
+          : null;
 
   const customerMail = buildCustomerConfirmationEmail({
     contact: payload.contact,
@@ -380,8 +346,88 @@ export async function processLeadSubmission(
   const submissionFingerprint = `${payload.contact.email}:${payload.meta.submittedAt}`;
   const intentTag = payload.contact.intent === 'demo' ? 'demo' : 'info';
   const temperatureTag = profile.temperature.toLowerCase();
+  let brevoSynced = false;
+  let brevoErrorMessage: string | null = null;
+
+  if (brevoApiKey) {
+    console.info('Brevo sync started', {
+      email: payload.contact.email,
+      listIds: brevoListIds,
+      mode: brevoListIds.length > 0 ? 'contact+lists' : 'contact-only',
+    });
+
+    try {
+      await syncLeadToBrevo({
+        apiKey: brevoApiKey,
+        listIds: brevoListIds,
+        contact: payload.contact,
+        state: payload.quiz,
+        results,
+        profile,
+        submittedAt: payload.meta.submittedAt,
+        source: payload.meta.source,
+      });
+
+      brevoSynced = true;
+      console.info('Brevo sync succeeded', {
+        email: payload.contact.email,
+        listIds: brevoListIds,
+      });
+    } catch (error) {
+      brevoErrorMessage =
+        error instanceof Error ? error.message : 'Onbekende Brevo-fout';
+      console.error('Brevo sync failed', {
+        email: payload.contact.email,
+        listIds: brevoListIds,
+        error: brevoErrorMessage,
+      });
+    }
+  } else {
+    console.info('Brevo sync skipped: BREVO_API ontbreekt', {
+      email: payload.contact.email,
+    });
+  }
+
+  if (!resendApiKey && environment !== 'production') {
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        deliveryMode: 'preview',
+        message: 'Previewmodus: mails zijn opgebouwd, maar nog niet verzonden.',
+      },
+    };
+  }
+
+  if (resendConfigurationIssue) {
+    if (brevoSynced) {
+      return {
+        status: 200,
+        body: {
+          ok: true,
+          deliveryMode: 'preview',
+          message: 'Je aanvraag is ontvangen. Je gegevens staan al goed in ons systeem, maar de bevestigingsmail is nog niet actief.',
+        },
+      };
+    }
+
+    return {
+      status: 503,
+      body: {
+        ok: false,
+        deliveryMode: 'preview',
+        message: resendConfigurationIssue,
+      },
+    };
+  }
 
   try {
+    console.info('Resend send started', {
+      customerEmail: payload.contact.email,
+      internalEmail,
+      from: resendFromEmail,
+    });
+
     await Promise.all([
       sendResendEmail(
         resendApiKey,
@@ -417,23 +463,11 @@ export async function processLeadSubmission(
         `internal:${submissionFingerprint}`,
       ),
     ]);
-
-    if (brevoApiKey) {
-      try {
-        await syncLeadToBrevo({
-          apiKey: brevoApiKey,
-          listIds: brevoListIds,
-          contact: payload.contact,
-          state: payload.quiz,
-          results,
-          profile,
-          submittedAt: payload.meta.submittedAt,
-          source: payload.meta.source,
-        });
-      } catch (error) {
-        console.error('Brevo sync failed', error);
-      }
-    }
+    console.info('Resend send succeeded', {
+      customerEmail: payload.contact.email,
+      internalEmail,
+      from: resendFromEmail,
+    });
 
     return {
       status: 200,
@@ -451,12 +485,26 @@ export async function processLeadSubmission(
         ? 'Resend gebruikt nog een testafzender. Zet in Vercel `RESEND_FROM_EMAIL` op een adres van een geverifieerd Resend-domein.'
         : null;
 
+    if (brevoSynced) {
+      return {
+        status: 200,
+        body: {
+          ok: true,
+          deliveryMode: 'preview',
+          message: 'Je aanvraag is ontvangen. De bevestigingsmail kon nog niet worden verstuurd, maar je gegevens zijn wel goed binnengekomen.',
+        },
+      };
+    }
+
     return {
       status: 502,
       body: {
         ok: false,
         deliveryMode: 'preview',
-        message: resendConfigurationMessage || 'De aanvraag kon niet worden verzonden. Probeer het zo nog eens.',
+        message:
+          resendConfigurationMessage ||
+          brevoErrorMessage ||
+          'De aanvraag kon niet worden verzonden. Probeer het zo nog eens.',
       },
     };
   }
