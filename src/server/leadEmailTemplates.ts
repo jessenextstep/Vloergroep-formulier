@@ -161,14 +161,12 @@ export function buildCustomerConfirmationEmail({
   state,
   results,
   profile,
-  demoUrl,
   logoSrc,
 }: {
   contact: LeadCaptureFormData;
   state: QuizState;
   results: CalculationResults;
   profile: LeadInsightProfile;
-  demoUrl: string;
   logoSrc?: string | null;
 }) {
   const summaryRows = buildLeadSummary(state, results, contact.intent).filter((row) =>
@@ -220,14 +218,7 @@ export function buildCustomerConfirmationEmail({
       </tr>
       <tr>
         <td style="padding: 18px 34px 34px;">
-          <table role="presentation" cellspacing="0" cellpadding="0">
-            <tr>
-              <td style="border-radius: 999px; background: #d6a440;">
-                <a href="${escapeHtml(demoUrl)}" style="display: inline-block; padding: 14px 22px; color: #071111; font-size: 14px; font-weight: 700; text-decoration: none;">Plan je VloerGroep demo</a>
-              </td>
-            </tr>
-          </table>
-          <div style="color: #8d9d99; font-size: 12px; line-height: 1.6; margin-top: 14px;">
+          <div style="color: #8d9d99; font-size: 12px; line-height: 1.6;">
             Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.
           </div>
         </td>
@@ -248,7 +239,7 @@ export function buildCustomerConfirmationEmail({
     'Kort ingevuld:',
     ...summaryRows.map((row) => `- ${row.label}: ${row.value}`),
     '',
-    `Plan je demo: ${demoUrl}`,
+    'Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.',
   ].join('\n');
 
   return {

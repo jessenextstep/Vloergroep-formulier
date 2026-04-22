@@ -75,6 +75,27 @@ function normalizeAbsoluteUrl(value?: string): string | null {
   }
 }
 
+function extractEmailAddress(value?: string): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const angleMatch = trimmed.match(/<([^>]+)>/);
+  const candidate = (angleMatch?.[1] ?? trimmed).trim().replace(/^['"]+|['"]+$/g, '');
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
+
+function buildResendFromEmail(value?: string): string {
+  const emailAddress = extractEmailAddress(value);
+  return emailAddress ? `VloerGroep <${emailAddress}>` : 'VloerGroep <onboarding@resend.dev>';
+}
+
 function resolveSiteUrl(env: LeadEnvironment): string | undefined {
   const candidates = [
     env.siteUrl,
@@ -352,8 +373,7 @@ export async function processLeadSubmission(
   const profile = buildLeadProfile(payload.quiz, results, payload.contact.intent);
   const resendApiKey = env.resendApiKey || process.env.RESEND_API_KEY;
   const configuredResendFromEmail = env.resendFromEmail || process.env.RESEND_FROM_EMAIL;
-  const resendFromEmail =
-    configuredResendFromEmail || 'VloerGroep <onboarding@resend.dev>';
+  const resendFromEmail = buildResendFromEmail(configuredResendFromEmail);
   const internalEmail =
     env.internalEmail || process.env.LEAD_NOTIFICATION_EMAIL || 'info@vloergroep.nl';
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
@@ -365,16 +385,7 @@ export async function processLeadSubmission(
     'https://vloergroep.nl';
   const siteUrl = resolveSiteUrl(env);
   const logoUrl = buildEmailLogoUrl(siteUrl);
-  const logoSrc = logoUrl ? 'cid:vloergroep-logo' : null;
-  const logoAttachment = logoUrl
-    ? [
-        {
-          path: logoUrl,
-          filename: 'vloergroep-logo-white.png',
-          contentId: 'vloergroep-logo',
-        },
-      ]
-    : undefined;
+  const logoSrc = logoUrl;
   const environment = env.environment || process.env.NODE_ENV || 'development';
   const resendConfigurationIssue =
     !resendApiKey
@@ -392,7 +403,6 @@ export async function processLeadSubmission(
     state: payload.quiz,
     results,
     profile,
-    demoUrl,
     logoSrc,
   });
 
@@ -499,7 +509,6 @@ export async function processLeadSubmission(
           html: customerMail.html,
           text: customerMail.text,
           reply_to: internalEmail,
-          attachments: logoAttachment,
           tags: [
             { name: 'category', value: 'lead_scan' },
             { name: 'intent', value: intentTag },
@@ -516,7 +525,6 @@ export async function processLeadSubmission(
           html: internalMail.html,
           text: internalMail.text,
           reply_to: payload.contact.email,
-          attachments: logoAttachment,
           tags: [
             { name: 'category', value: 'lead_scan' },
             { name: 'intent', value: intentTag },
