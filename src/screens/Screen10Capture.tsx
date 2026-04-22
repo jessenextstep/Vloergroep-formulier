@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone } from 'lucide-react';
+import { Building2, Mail, Phone, User } from 'lucide-react';
 
 import { Button } from '../components/Button';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { TextField } from '../components/TextField';
 import { heroScreenThanks } from '../lib/brandAssets';
 import {
   CalculationResults,
@@ -333,129 +334,79 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
             >
               <fieldset disabled={isSubmitting} className="space-y-6 disabled:opacity-100">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block pl-1 text-sm font-medium text-white/90" htmlFor="capture-name">
-                    Naam
-                  </label>
-                  <input
-                    id="capture-name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    type="text"
-                    maxLength={80}
-                    autoComplete="name"
-                    autoCapitalize="words"
-                    enterKeyHint="next"
-                    className={`w-full rounded-2xl border-2 bg-[#0f1b1b] px-5 py-4 text-[16px] text-white placeholder-white/35 shadow-inner transition-all focus:outline-none md:text-[18px] ${
-                      errors.name
-                        ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
-                        : 'border-white/14 focus:border-amber-gold/55 focus:ring-4 focus:ring-amber-gold/10'
-                    }`}
-                    aria-invalid={Boolean(errors.name)}
-                    aria-describedby={errors.name ? 'capture-name-error' : undefined}
-                  />
-                  {errors.name && (
-                    <p id="capture-name-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
-                      {errors.name}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="mb-2 block pl-1 text-sm font-medium text-white/90" htmlFor="capture-company">
-                    Bedrijfsnaam
-                  </label>
-                  <input
-                    id="capture-company"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    type="text"
-                    maxLength={120}
-                    autoComplete="organization"
-                    autoCapitalize="words"
-                    enterKeyHint="next"
-                    className={`w-full rounded-2xl border-2 bg-[#0f1b1b] px-5 py-4 text-[16px] text-white placeholder-white/35 shadow-inner transition-all focus:outline-none md:text-[18px] ${
-                      errors.company
-                        ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
-                        : 'border-white/14 focus:border-amber-gold/55 focus:ring-4 focus:ring-amber-gold/10'
-                    }`}
-                    aria-invalid={Boolean(errors.company)}
-                    aria-describedby={errors.company ? 'capture-company-error' : undefined}
-                  />
-                  {errors.company && (
-                    <p id="capture-company-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
-                      {errors.company}
-                    </p>
-                  )}
-                </div>
+                <TextField
+                  id="capture-name"
+                  name="name"
+                  label="Naam"
+                  helperText="Zodat we je demo persoonlijk kunnen voorbereiden."
+                  icon={User}
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  type="text"
+                  placeholder="Bijv. Mark Jansen"
+                  maxLength={80}
+                  autoComplete="name"
+                  autoCapitalize="words"
+                  enterKeyHint="next"
+                  required
+                  error={errors.name}
+                />
+                <TextField
+                  id="capture-company"
+                  name="company"
+                  label="Bedrijfsnaam"
+                  helperText="Zo stemmen we de demo af op je bedrijf."
+                  icon={Building2}
+                  value={formData.company}
+                  onChange={handleInputChange}
+                  type="text"
+                  placeholder="Bijv. Vloerenbedrijf Jansen"
+                  maxLength={120}
+                  autoComplete="organization"
+                  autoCapitalize="words"
+                  enterKeyHint="next"
+                  required
+                  error={errors.company}
+                />
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block pl-1 text-sm font-medium text-white/90" htmlFor="capture-email">
-                    E-mailadres
-                  </label>
-                  <div className="relative">
-                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35" />
-                    <input
-                      id="capture-email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      type="email"
-                      maxLength={160}
-                      autoComplete="email"
-                      autoCapitalize="none"
-                      spellCheck={false}
-                      inputMode="email"
-                      enterKeyHint="next"
-                      className={`w-full rounded-2xl border-2 bg-[#0f1b1b] py-4 pl-12 pr-5 text-[16px] text-white placeholder-white/35 shadow-inner transition-all focus:outline-none md:text-[18px] ${
-                        errors.email
-                          ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
-                          : 'border-white/14 focus:border-amber-gold/55 focus:ring-4 focus:ring-amber-gold/10'
-                      }`}
-                      aria-invalid={Boolean(errors.email)}
-                      aria-describedby={errors.email ? 'capture-email-error' : undefined}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p id="capture-email-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="mb-2 block pl-1 text-sm font-medium text-white/90" htmlFor="capture-phone">
-                    Telefoonnummer
-                  </label>
-                  <div className="relative">
-                    <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35" />
-                    <input
-                      id="capture-phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      type="tel"
-                      maxLength={40}
-                      autoComplete="tel"
-                      inputMode="tel"
-                      enterKeyHint="done"
-                      className={`w-full rounded-2xl border-2 bg-[#0f1b1b] py-4 pl-12 pr-5 text-[16px] text-white placeholder-white/35 shadow-inner transition-all focus:outline-none md:text-[18px] ${
-                        errors.phone
-                          ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
-                          : 'border-white/14 focus:border-amber-gold/55 focus:ring-4 focus:ring-amber-gold/10'
-                      }`}
-                      aria-invalid={Boolean(errors.phone)}
-                      aria-describedby={errors.phone ? 'capture-phone-error' : undefined}
-                    />
-                  </div>
-                  {errors.phone && (
-                    <p id="capture-phone-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
-                      {errors.phone}
-                    </p>
-                  )}
-                </div>
+                <TextField
+                  id="capture-email"
+                  name="email"
+                  label="E-mailadres"
+                  helperText="Hier sturen we je bevestiging heen."
+                  icon={Mail}
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  type="email"
+                  placeholder="naam@bedrijf.nl"
+                  maxLength={160}
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  inputMode="email"
+                  enterKeyHint="next"
+                  required
+                  error={errors.email}
+                />
+                <TextField
+                  id="capture-phone"
+                  name="phone"
+                  label="Telefoonnummer"
+                  helperText="Voor het plannen van je demo."
+                  icon={Phone}
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  type="tel"
+                  placeholder="Bijv. 06 12 34 56 78"
+                  maxLength={40}
+                  autoComplete="tel"
+                  inputMode="tel"
+                  enterKeyHint="done"
+                  required
+                  error={errors.phone}
+                />
               </div>
 
               <div className="hidden" aria-hidden="true">
@@ -471,7 +422,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 />
               </div>
 
-              <div className="rounded-2xl border border-white/8 bg-[#0f1b1b]/85 p-4">
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,27,27,0.96),rgba(10,20,20,0.94))] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <label className="flex cursor-pointer items-start gap-3" htmlFor="capture-consent">
                   <input
                     id="capture-consent"
@@ -479,9 +430,10 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     type="checkbox"
                     checked={formData.consent}
                     onChange={handleInputChange}
-                    className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-amber-gold focus:ring-amber-gold"
+                    required
+                    className="mt-0.5 h-5 w-5 rounded-md border-white/35 bg-transparent text-amber-gold shadow-[0_0_0_1px_rgba(255,255,255,0.02)] focus:ring-2 focus:ring-amber-gold/70 focus:ring-offset-2 focus:ring-offset-[#0d1717]"
                   />
-                  <span className="text-sm leading-6 text-white/72">
+                  <span className="text-sm leading-6 text-white/80">
                     Ik geef toestemming dat VloerGroep contact met mij opneemt over mijn scan en een gratis persoonlijke demo voor {companyReference}.
                   </span>
                 </label>

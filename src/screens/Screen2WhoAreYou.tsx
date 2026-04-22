@@ -3,6 +3,7 @@ import { QuizState, TeamSize } from '../types';
 import { BottomNav } from '../components/BottomNav';
 import { Card } from '../components/Card';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { TextField } from '../components/TextField';
 import { heroScreen2 } from '../lib/brandAssets';
 import { User, Users, Building2, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,40 +82,36 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
       </div>
 
       <div className="space-y-4 mb-12">
-        <div>
-          <label htmlFor="profile-first-name" className="block text-sm font-medium text-white/70 mb-2 pl-1">
-            Voornaam <span className="text-white/30 font-normal">(Optioneel, voor een persoonlijke uitslag)</span>
-          </label>
-          <input
-            id="profile-first-name"
-            type="text"
-            className="w-full bg-charcoal/40 border border-white/14 rounded-2xl px-5 py-4 text-white placeholder-white/38 focus:outline-none focus:ring-2 focus:ring-amber-gold/50 focus:border-amber-gold/50 transition-all font-medium text-lg"
-            placeholder="Bijv. Mark"
-            value={state.firstName}
-            onChange={(e) => updateState({ firstName: e.target.value })}
-            autoComplete="given-name"
-            autoCapitalize="words"
-            enterKeyHint="next"
-            maxLength={80}
-          />
-        </div>
-        <div>
-          <label htmlFor="profile-company-name" className="block text-sm font-medium text-white/70 mb-2 pl-1">
-            Bedrijfsnaam <span className="text-white/30 font-normal">(Optioneel)</span>
-          </label>
-          <input
-            id="profile-company-name"
-            type="text"
-            className="w-full bg-charcoal/40 border border-white/14 rounded-2xl px-5 py-4 text-white placeholder-white/38 focus:outline-none focus:ring-2 focus:ring-amber-gold/50 focus:border-amber-gold/50 transition-all font-medium text-lg"
-            placeholder="Jouw vloerenbedrijf"
-            value={state.companyName}
-            onChange={(e) => updateState({ companyName: e.target.value })}
-            autoComplete="organization"
-            autoCapitalize="words"
-            enterKeyHint="done"
-            maxLength={120}
-          />
-        </div>
+        <TextField
+          id="profile-first-name"
+          label="Voornaam"
+          labelHint="Optioneel"
+          helperText="Voor een persoonlijkere scan."
+          icon={User}
+          type="text"
+          placeholder="Bijv. Mark"
+          value={state.firstName}
+          onChange={(e) => updateState({ firstName: e.target.value })}
+          autoComplete="given-name"
+          autoCapitalize="words"
+          enterKeyHint="next"
+          maxLength={80}
+        />
+        <TextField
+          id="profile-company-name"
+          label="Bedrijfsnaam"
+          labelHint="Optioneel"
+          helperText="Handig voor een herkenbare demo."
+          icon={Building2}
+          type="text"
+          placeholder="Bijv. Vloerenbedrijf Jansen"
+          value={state.companyName}
+          onChange={(e) => updateState({ companyName: e.target.value })}
+          autoComplete="organization"
+          autoCapitalize="words"
+          enterKeyHint="done"
+          maxLength={120}
+        />
       </div>
 
       <div className="mt-auto">

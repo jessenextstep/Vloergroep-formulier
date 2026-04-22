@@ -35,19 +35,19 @@ function SliderComponent({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(19,31,31,0.94),rgba(9,18,18,0.9))] p-5 sm:p-6 backdrop-blur-2xl shadow-[0_18px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 hover:border-amber-gold/30 hover:shadow-[0_20px_48px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.06)] group",
+        "group relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(19,31,31,0.94),rgba(9,18,18,0.9))] p-5 sm:p-6 backdrop-blur-2xl shadow-[0_18px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 hover:border-amber-gold/30 hover:shadow-[0_20px_48px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.06)] focus-within:border-amber-gold/45 focus-within:shadow-[0_0_0_4px_rgba(224,172,62,0.08),0_20px_48px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.06)]",
         className,
       )}
     >
        <div className="flex justify-between items-start mb-2">
          <div className="flex items-center gap-3">
-           {icon && <div className="rounded-xl bg-amber-gold/12 p-2.5 text-amber-gold transition-transform group-hover:scale-[1.04]">{icon}</div>}
+           {icon && <div className="rounded-xl bg-amber-gold/12 p-2.5 text-amber-gold transition-all duration-200 group-hover:scale-[1.04] group-focus-within:bg-amber-gold/16">{icon}</div>}
            <div className="flex flex-col">
              <label htmlFor={sliderId} className="font-semibold text-white px-2 leading-tight pr-2">{label}</label>
-             {description && <span id={descriptionId} className="mt-1 text-[12px] text-white/76">{description}</span>}
+             {description && <span id={descriptionId} className="mt-1 text-[12px] leading-5 text-white/80">{description}</span>}
            </div>
          </div>
-         <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/12 bg-[#081212]/92 px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.45)] sm:text-lg">
+         <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/12 bg-[#081212]/92 px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.45)] transition-colors duration-200 group-focus-within:border-amber-gold/30 sm:text-lg">
            {formatValue(value)}
          </div>
        </div>
