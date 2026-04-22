@@ -2,6 +2,7 @@ export type TeamSize = '' | 'alone' | '1-2' | 'small-team' | 'large-team';
 export type PaymentDays = 14 | 30 | 45 | 60 | 90;
 export type MissedProjects = 0 | 1 | 2 | 3;
 export type LeadScenario = 'conservative' | 'realistic' | 'ambitious';
+export type LeadIntent = 'demo' | 'info';
 
 export interface QuizState {
   teamSize: TeamSize;
@@ -83,4 +84,32 @@ export interface CalculationResults {
     totalExtraProfit: number;
     totalExtraCapacityWeeks: number;
   };
+}
+
+export interface LeadCaptureFormData {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  intent: LeadIntent;
+  consent: boolean;
+  website: string;
+}
+
+export interface LeadSubmissionPayload {
+  contact: LeadCaptureFormData;
+  quiz: QuizState;
+  meta: {
+    source: 'groeiscan';
+    sessionStartedAt: number;
+    submittedAt: number;
+    pathname?: string;
+    userAgent?: string;
+  };
+}
+
+export interface LeadSubmissionResponse {
+  ok: boolean;
+  deliveryMode: 'live' | 'preview';
+  message?: string;
 }

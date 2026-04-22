@@ -1,11 +1,15 @@
 import { QuizState, CalculationResults } from '../types';
 
+export function getFteEstimate(teamSize: QuizState['teamSize']): number {
+  if (teamSize === '1-2') return 2;
+  if (teamSize === 'small-team') return 4;
+  if (teamSize === 'large-team') return 8;
+  return 1;
+}
+
 export function calculateResults(state: QuizState, customMargin: number = 51.8): CalculationResults {
   // 0. FTE BEPALING (Realistische schaling i.p.v. blinde vermenigvuldiging)
-  let fte = 1;
-  if (state.teamSize === '1-2') fte = 2; // Zelf + 1 a 2 
-  else if (state.teamSize === 'small-team') fte = 4; // Zelf + ca 3
-  else if (state.teamSize === 'large-team') fte = 8; // Zelf + ca 7
+  const fte = getFteEstimate(state.teamSize);
   
   // 1. BASIS
   // Jaaromzet groeit mee met het aantal mensen dat op de vloer staat

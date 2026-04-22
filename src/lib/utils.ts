@@ -18,3 +18,7 @@ export function formatNumber(amount: number, digits: number = 1): string {
     maximumFractionDigits: digits,
   }).format(amount);
 }
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}

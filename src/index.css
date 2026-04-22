@@ -3,6 +3,8 @@
 
 @theme {
   --color-near-black: #061010;
+  --color-near-black-soft: #0b1717;
+  --color-near-black-elevated: #102020;
   --color-amber-gold: #e0ac3e;
   --color-amber-gold-hover: #f0bc50;
   --color-amber-gold-dark: #c09030;
@@ -25,38 +27,55 @@
   .border-amber-gold { border-color: var(--color-amber-gold); }
 }
 
+html {
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at top, rgba(224, 172, 62, 0.12), transparent 28%),
+    linear-gradient(180deg, #0b1717 0%, #061010 100%);
+}
+
 body {
-  background-color: var(--color-near-black);
+  background:
+    radial-gradient(circle at top, rgba(224, 172, 62, 0.12), transparent 28%),
+    linear-gradient(180deg, #0b1717 0%, #061010 100%);
   color: var(--color-soft-sand);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
-  user-select: none; /* App feels */
+  min-height: 100vh;
 }
 
-/* Allow text selection in inputs and prose areas */
-input, textarea, .prose {
+input, textarea, select, .prose {
   user-select: auto;
 }
 
-/* Hide scrollbar for a cleaner feel but keep functionality */
-::-webkit-scrollbar {
-  display: none; /* Complete app feel */
-}
-::-webkit-scrollbar-track {
-  background: var(--color-near-black);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-charcoal);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-charcoal-light);
+::selection {
+  background: rgba(224, 172, 62, 0.28);
+  color: var(--color-soft-sand);
 }
 
-/* Custom Range Slider Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(224, 172, 62, 0.45);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(224, 172, 62, 0.62);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(224, 172, 62, 0.9);
+  outline-offset: 2px;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -115,6 +134,13 @@ input[type="range"]::-moz-range-track {
   height: 8px;
   cursor: pointer;
   border-radius: 99px;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-soft-sand);
+  box-shadow: 0 0 0 1000px rgba(16, 32, 32, 0.92) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .glass-card {

@@ -17,23 +17,35 @@ export default function Screen8Loading({ onNext }: Props) {
   ];
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let cancelled = false;
+    const timers: number[] = [];
 
     const cycleLines = async () => {
-      // 1.25 sec per line
       for (let i = 0; i < lines.length; i++) {
+        if (cancelled) {
+          return;
+        }
         setCurrentLine(i);
         await new Promise(res => {
-          timeoutId = setTimeout(res, 1250);
+          const timeoutId = window.setTimeout(res, 1250);
+          timers.push(timeoutId);
         });
       }
-      setTimeout(onNext, 400);
+      const finalTimeout = window.setTimeout(() => {
+        if (!cancelled) {
+          onNext();
+        }
+      }, 400);
+      timers.push(finalTimeout);
     };
 
     cycleLines();
 
-    return () => clearTimeout(timeoutId);
-  }, []);
+    return () => {
+      cancelled = true;
+      timers.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    };
+  }, [onNext]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-sm mx-auto w-full">
@@ -74,7 +86,7 @@ export default function Screen8Loading({ onNext }: Props) {
 
       <h2 className="text-2xl md:text-3xl font-bold font-display mb-6 tracking-tight text-white">Scan afronden...</h2>
 
-      <div className="h-10 relative w-full overflow-hidden flex justify-center items-center">
+      <div className="h-10 relative w-full overflow-hidden flex justify-center items-center" aria-live="polite">
         <AnimatePresence mode="popLayout">
           <motion.div
             key={currentLine}

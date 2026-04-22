@@ -28,6 +28,7 @@ export function Slider({
   formatValue = v => `${v}`,
   className 
 }: SliderProps) {
+  const sliderId = React.useId();
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
@@ -36,7 +37,7 @@ export function Slider({
          <div className="flex items-center gap-3">
            {icon && <div className="text-amber-gold bg-amber-gold/20 p-2.5 rounded-xl group-hover:scale-110 transition-transform">{icon}</div>}
            <div className="flex flex-col">
-             <span className="font-semibold text-white px-2 leading-tight pr-2">{label}</span>
+             <label htmlFor={sliderId} className="font-semibold text-white px-2 leading-tight pr-2">{label}</label>
              {description && <span className="text-[12px] text-white/70 mt-1">{description}</span>}
            </div>
          </div>
@@ -51,13 +52,16 @@ export function Slider({
          <div className="absolute top-[22px] left-1 right-1 h-2 bg-[#1a1a1a] rounded-full shadow-inner pointer-events-none" />
          
          <input 
+           id={sliderId}
            type="range"
            min={min}
            max={max}
            step={step}
            value={value}
            onChange={e => onChange(parseFloat(e.target.value))}
-           className="w-full relative z-10"
+            className="w-full relative z-10"
+           aria-label={label}
+           aria-valuetext={formatValue(value)}
            style={{
              background: `linear-gradient(to right, var(--color-amber-gold) 0%, var(--color-amber-gold) ${percentage}%, transparent ${percentage}%, transparent 100%)`
            }}
@@ -67,11 +71,6 @@ export function Slider({
          {marks && (
            <div className="absolute top-[38px] left-2 right-2 flex justify-between pointer-events-none">
              {marks.map((m, i) => {
-                const isStart = i === 0;
-                const isEnd = i === marks.length - 1;
-                // Calculate position considering thumb radius (approx 12px)
-                const leftPos = `calc(${((m.value - min) / (max - min)) * 100}% ${isStart ? '+ 6px' : isEnd ? '- 6px' : ''})`;
-                
                 return (
                   <div 
                     key={i} 

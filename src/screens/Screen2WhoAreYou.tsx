@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { QuizState, TeamSize } from '../types';
 import { BottomNav } from '../components/BottomNav';
 import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { heroScreen2 } from '../lib/brandAssets';
 import { User, Users, Building2, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,23 +21,21 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
     { value: 'alone', label: 'Ik werk alleen', icon: <User size={24} /> },
     { value: '1-2', label: 'Ik werk met 1\u20132 man', icon: <Users size={24} /> },
     { value: 'small-team', label: 'Klein team (3\u20135 man)', icon: <Building2 size={24} /> },
-    { value: 'large-team', label: 'Groot (5+ personen)', icon: <TrendingUp size={24} /> },
+    { value: 'large-team', label: 'Groter team (6+ personen)', icon: <TrendingUp size={24} /> },
   ];
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
-      
-      {/* Mobile-only header image */}
-      <img 
-        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800&h=300" 
-        alt="Teamwork" 
-        referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
+      <ScreenHeroImage
+        src={heroScreen2}
+        alt="Bedrijfsprofiel VloerGroep"
+        className="mb-6"
       />
 
       <div className="mb-8 text-center md:text-left">
+        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Profiel</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Met hoeveel mensen werk je?</h2>
-        <p className="text-base text-white/80">
+        <p className="text-base text-white/80 leading-relaxed">
           We stemmen de calculatie af op jouw actuele bedrijfsgrootte.
         </p>
       </div>
@@ -86,6 +85,8 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
             placeholder="Bijv. Mark"
             value={state.firstName}
             onChange={(e) => updateState({ firstName: e.target.value })}
+            autoComplete="given-name"
+            maxLength={80}
           />
         </div>
         <div>
@@ -98,6 +99,8 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
             placeholder="Jouw vloerenbedrijf"
             value={state.companyName}
             onChange={(e) => updateState({ companyName: e.target.value })}
+            autoComplete="organization"
+            maxLength={120}
           />
         </div>
       </div>
@@ -118,7 +121,7 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
           onBack={onBack} 
         />
       </div>
-      <p className="text-center text-sm text-white/30 mt-6">
+      <p className="text-center text-sm text-white/50 mt-6">
         Je antwoorden worden alleen gebruikt om je scan te berekenen.
       </p>
     </div>

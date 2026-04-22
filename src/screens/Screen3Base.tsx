@@ -1,8 +1,11 @@
 import React from 'react';
 import { QuizState } from '../types';
 import { BottomNav } from '../components/BottomNav';
+import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { Slider } from '../components/Slider';
+import { heroScreen3 } from '../lib/brandAssets';
 import { formatCurrency } from '../lib/utils';
+import { getFteEstimate } from '../lib/calculations';
 import { motion } from 'framer-motion';
 import { Wallet, Clock, CalendarDays } from 'lucide-react';
 
@@ -14,22 +17,20 @@ interface Props {
 }
 
 export default function Screen3Base({ state, updateState, onNext, onBack }: Props) {
-  
-  const yearlyHours = state.hoursPerWeek * state.weeksPerYear;
+  const teamFactor = getFteEstimate(state.teamSize);
+  const yearlyHours = state.hoursPerWeek * state.weeksPerYear * teamFactor;
   const yearlyRevenue = yearlyHours * state.hourlyRate;
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
-      
-      {/* Mobile-only header image */}
-      <img 
-        src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800&h=300" 
-        alt="Omzet basis" 
-        referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
+      <ScreenHeroImage
+        src={heroScreen3}
+        alt="Uurtarief en werkweek overzicht"
+        className="mb-6"
       />
 
       <div className="mb-8 text-center md:text-left">
+        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Basis</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
           {state.firstName ? `Wat is je tarief en werkweek, ${state.firstName}?` : 'Wat is je uurtarief en uren per week?'}
         </h2>
@@ -96,14 +97,15 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
         className="mb-12 bg-amber-gold/5 border border-amber-gold/20 rounded-2xl p-5 text-center"
       >
         <p className="text-amber-gold/90 text-[15px] font-medium">
-          Dat komt neer op ongeveer <span className="text-amber-gold">{yearlyHours} uur</span> per jaar en <span className="text-amber-gold">{formatCurrency(yearlyRevenue)}</span> omzet.
+          Dat komt neer op ongeveer <span className="text-amber-gold">{yearlyHours} uur</span> per jaar en <span className="text-amber-gold">{formatCurrency(yearlyRevenue)}</span> omzet
+          {teamFactor > 1 ? ' voor je huidige teamomvang' : ''}.
         </p>
       </motion.div>
 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
       </div>
-      <p className="text-center text-sm text-white/30 mt-6">
+      <p className="text-center text-sm text-white/50 mt-6">
         Je antwoorden worden alleen gebruikt om je scan te berekenen.
       </p>
     </div>

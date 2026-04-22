@@ -294,10 +294,11 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           </button>
           <div className="flex w-full sm:w-auto ml-auto">
             <Button onClick={onNext} className="w-full sm:w-auto !px-10 !py-4 text-[16px] xl:text-[18px] shadow-xl shadow-amber-gold/20 active:scale-95">
-              Boek je VloerGroep Demo
+              Ontvang mijn scan per mail
             </Button>
           </div>
         </div>
+        <p className="text-center text-xs text-white/50 mt-3">Geen verplichting. Je krijgt eerst een overzicht en vervolgstap die bij jouw situatie past.</p>
       </motion.div>
 
     </div>

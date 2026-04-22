@@ -1,7 +1,9 @@
 import React from 'react';
 import { QuizState, MissedProjects } from '../types';
 import { BottomNav } from '../components/BottomNav';
-import { Users } from 'lucide-react';
+import { ProofCallout } from '../components/ProofCallout';
+import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { heroScreen6 } from '../lib/brandAssets';
 
 interface Props {
   state: QuizState;
@@ -21,16 +23,14 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
-      
-      {/* Mobile-only header image */}
-      <img 
-        src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800&h=300" 
-        alt="Samenwerking" 
-        referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-xl mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
+      <ScreenHeroImage
+        src={heroScreen6}
+        alt="Samenwerken aan grotere vloerprojecten"
+        className="mb-6"
       />
 
       <div className="mb-10 text-center md:text-left">
+        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Groeikans</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoeveel grote klussen moet je weleens afwijzen?</h2>
         <p className="text-base text-[#FBEFD5]/80">
           Met VloerGroep kun je gericht samenwerken met andere vakmannen, zodat je mega projecten die je nu laat schieten wél kunt aannemen.
@@ -58,20 +58,12 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
         </div>
       </div>
 
-      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 mb-10 flex gap-4 items-start">
-        <div className="p-2 bg-amber-gold/10 rounded-lg text-amber-gold shrink-0">
-          <Users size={20} />
-        </div>
-        <div>
-          <h4 className="text-white font-medium text-sm mb-1">VloerGroep Proof</h4>
-          <p className="text-white/60 text-sm">Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zónder privé zorgen.</p>
-        </div>
-      </div>
+      <ProofCallout body="Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zónder privé zorgen." />
 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} nextLabel="Bereken mijn scan" />
       </div>
-      <p className="text-center text-sm text-white/30 mt-6">
+      <p className="text-center text-sm text-white/50 mt-6">
         Je antwoorden worden alleen gebruikt om je scan te berekenen.
       </p>
     </div>

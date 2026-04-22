@@ -1,9 +1,12 @@
 import React from 'react';
 import { QuizState } from '../types';
 import { BottomNav } from '../components/BottomNav';
+import { ProofCallout } from '../components/ProofCallout';
+import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { Slider } from '../components/Slider';
+import { heroScreen4 } from '../lib/brandAssets';
 import { motion } from 'framer-motion';
-import { FileText, CalendarClock, MessageSquare, DollarSign, Clock } from 'lucide-react';
+import { FileText, CalendarClock, MessageSquare, DollarSign } from 'lucide-react';
 
 interface Props {
   state: QuizState;
@@ -28,16 +31,14 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
-      
-      {/* Mobile-only header image */}
-      <img 
-        src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&q=80&w=800&h=300" 
-        alt="Tijdlek" 
-        referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
+      <ScreenHeroImage
+        src={heroScreen4}
+        alt="Tijdlekken in het werkproces"
+        className="mb-6"
       />
 
       <div className="mb-8 text-center md:text-left">
+        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Tijdlekken</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
           {state.firstName 
             ? `Hoeveel uren vliegen eruit aan dit regelwerk, ${state.firstName}?` 
@@ -100,15 +101,7 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
 
       </div>
 
-      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 mb-8 flex gap-4 items-start">
-        <div className="p-2 bg-amber-gold/10 rounded-lg text-amber-gold shrink-0">
-          <Clock size={20} />
-        </div>
-        <div>
-          <h4 className="text-white font-medium text-sm mb-1">VloerGroep Proof</h4>
-          <p className="text-white/60 text-sm">Veel vakmannen verliezen hier elke week ongemerkt veel tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek. Daar begint je eerste winst.</p>
-        </div>
-      </div>
+      <ProofCallout body="Veel vakmannen verliezen hier elke week ongemerkt veel tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek. Daar begint je eerste winst." />
 
       <motion.div 
         key={totalHours}
@@ -124,7 +117,7 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
       </div>
-      <p className="text-center text-sm text-white/30 mt-6">
+      <p className="text-center text-sm text-white/50 mt-6">
         Je antwoorden worden alleen gebruikt om je scan te berekenen.
       </p>
     </div>

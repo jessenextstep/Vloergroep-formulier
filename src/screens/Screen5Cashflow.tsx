@@ -1,8 +1,11 @@
 import React from 'react';
 import { QuizState, PaymentDays } from '../types';
 import { BottomNav } from '../components/BottomNav';
+import { ProofCallout } from '../components/ProofCallout';
+import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { Slider } from '../components/Slider';
-import { Wallet, Percent, ShieldCheck } from 'lucide-react';
+import { heroScreen5 } from '../lib/brandAssets';
+import { Wallet, Percent } from 'lucide-react';
 
 interface Props {
   state: QuizState;
@@ -29,16 +32,14 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
-      
-      {/* Mobile-only header image */}
-      <img 
-        src="https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&q=80&w=800&h=300" 
-        alt="Direct Betaald" 
-        referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
+      <ScreenHeroImage
+        src={heroScreen5}
+        alt="Cashflow en sneller betaald krijgen"
+        className="mb-6"
       />
 
       <div className="mb-10 text-center md:text-left">
+        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Cashflow</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoe snel krijg je nu meestal betaald?</h2>
         <p className="text-base text-[#FBEFD5]/80">
           VloerGroep werkt met een veilig projectdepot. Kies hier hoelang je vandaag de dag vaak nog op je geld moet wachten.
@@ -72,10 +73,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
         <div className="space-y-4">
           <label className="block text-lg font-semibold text-white/90">Hoeveel van je omzet zou je via VloerGroep willen laten lopen?</label>
           
-          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-charcoal/30 border border-white/5 text-xs text-[#FBEFD5]/50 leading-relaxed mb-4">
-             <ShieldCheck size={18} className="shrink-0 mt-0.5 text-amber-gold/80" />
-             <p>Dit deel van je omzet groeit direct mee in snelheid. Je geld is vliegensvlug beschikbaar doordat wij het debiteurenrisico wegnemen.</p>
-          </div>
+          <ProofCallout body="Dit deel van je omzet groeit direct mee in snelheid. Je geld is vliegensvlug beschikbaar doordat wij het debiteurenrisico wegnemen." />
 
           <Slider
             label="Aandeel via VloerGroep"
@@ -95,6 +93,9 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
       </div>
+      <p className="text-center text-sm text-white/50 mt-6">
+        Dit gebruiken we om je cashflowvoordeel realistisch in te schatten.
+      </p>
     </div>
   );
 }

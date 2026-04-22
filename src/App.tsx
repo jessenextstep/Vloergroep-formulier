@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { QuizState, defaultQuizState, TeamSize, PaymentDays, LeadScenario, MissedProjects } from './types';
+import React, { useEffect, useState } from 'react';
+import { QuizState, defaultQuizState } from './types';
 import { calculateResults } from './lib/calculations';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,18 +14,47 @@ import Screen8Loading from './screens/Screen8Loading';
 import Screen9Results from './screens/Screen9Results';
 import Screen10Capture from './screens/Screen10Capture';
 
+import { BrandLogo } from './components/BrandLogo';
+import { BrandWatermark } from './components/BrandWatermark';
 import { StepIndicator } from './components/StepIndicator';
 
 const TOTAL_STEPS = 5;
+const QUIZ_STORAGE_KEY = 'vloergroep-groeiscan-state/v1';
+
+function loadStoredQuizState() {
+  if (typeof window === 'undefined') {
+    return defaultQuizState;
+  }
+
+  try {
+    const storedState = window.localStorage.getItem(QUIZ_STORAGE_KEY);
+    if (!storedState) {
+      return defaultQuizState;
+    }
+
+    return {
+      ...defaultQuizState,
+      ...JSON.parse(storedState),
+    } as QuizState;
+  } catch {
+    return defaultQuizState;
+  }
+}
 
 export default function App() {
   const [step, setStep] = useState(0);
-  const [state, setState] = useState<QuizState>(defaultQuizState);
+  const [state, setState] = useState<QuizState>(() => loadStoredQuizState());
+  const [sessionStartedAt] = useState(() => Date.now());
   
   // Auto-scroll to top when step changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   }, [step]);
+
+  useEffect(() => {
+    window.localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
   
   const handleNext = () => setStep(s => s + 1);
   const handleBack = () => setStep(s => Math.max(0, s - 1));
@@ -41,14 +70,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#061010] text-[#FBEFD5] flex flex-col font-sans selection:bg-amber-gold/30">
+    <div className="min-h-screen w-full bg-[#061010] text-[#FBEFD5] flex flex-col font-sans selection:bg-amber-gold/30 relative isolate overflow-x-clip">
+      <BrandWatermark />
       
       {/* Header / Progress */}
       {step > 0 && step <= TOTAL_STEPS && (
         <header className="flex justify-between items-center p-8 z-50">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-amber-gold rounded-lg flex items-center justify-center font-bold text-near-black">VG</div>
-            <span className="text-xl font-bold tracking-tight uppercase">VloerGroep</span>
+            <BrandLogo className="h-8 sm:h-9" />
           </div>
           <div className="flex flex-col items-end gap-2 w-64 max-w-[40%]">
              <div className="w-full">
@@ -62,7 +91,7 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full px-6 pt-6 md:pt-12 pb-[140px] md:pb-28">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full px-6 pt-6 md:pt-12 pb-[140px] md:pb-28">
         <AnimatePresence mode="wait">
           
           {step === 0 && (
@@ -115,7 +144,7 @@ export default function App() {
 
           {step === 8 && (
             <motion.div key="step-8" {...screenTransition} className="w-full h-full flex flex-col">
-              <Screen10Capture state={state} />
+              <Screen10Capture state={state} results={currentResults} sessionStartedAt={sessionStartedAt} />
             </motion.div>
           )}
 
