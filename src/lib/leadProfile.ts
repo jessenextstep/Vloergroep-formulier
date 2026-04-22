@@ -4,8 +4,8 @@ import {
   PaymentDays,
   QuizState,
   TeamSize,
-} from '../types';
-import { clamp, formatCurrency, formatNumber } from './utils';
+} from '../types.js';
+import { clamp, formatCurrency, formatNumber } from './utils.js';
 
 export interface LeadInsightProfile {
   score: number;

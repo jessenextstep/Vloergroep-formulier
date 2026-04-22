@@ -1,4 +1,4 @@
-import { QuizState, CalculationResults } from '../types';
+import { QuizState, CalculationResults } from '../types.js';
 
 export function getFteEstimate(teamSize: QuizState['teamSize']): number {
   if (teamSize === '1-2') return 2;

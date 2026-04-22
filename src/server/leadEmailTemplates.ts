@@ -1,10 +1,10 @@
-import { CalculationResults, LeadCaptureFormData, QuizState } from '../types';
+import { CalculationResults, LeadCaptureFormData, QuizState } from '../types.js';
 import {
   LeadInsightProfile,
   buildLeadKpis,
   buildLeadSummary,
-} from '../lib/leadProfile';
-import { brandLogoEmailDataUri } from './emailBranding';
+} from '../lib/leadProfile.js';
+import { brandLogoEmailDataUri } from './emailBranding.js';
 
 function escapeHtml(value: string): string {
   return value

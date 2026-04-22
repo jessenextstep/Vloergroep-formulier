@@ -122,7 +122,7 @@ export default function App() {
         <AnimatePresence mode="wait">
           
           {step === 0 && (
-            <motion.div key="step-0" {...screenTransition} className="w-full max-w-2xl mx-auto">
+            <motion.div key="step-0" {...screenTransition} className="w-full">
               <Screen1Hero onNext={handleNext} />
             </motion.div>
           )}

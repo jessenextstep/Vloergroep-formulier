@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarCheck2, Check, Mail, Phone, ShieldCheck } from 'lucide-react';
+import { Check, Mail, Phone } from 'lucide-react';
 
 import { Button } from '../components/Button';
 import {
@@ -255,26 +255,11 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 Laatste stap
               </span>
               <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl">
-                Plan je VloerGroep demo
+                Laat je gegevens achter voor je scan
               </h2>
               <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/78 lg:mx-0">
-                Laat je gegevens achter. Je ontvangt je scan automatisch per mail en ons team krijgt direct jouw ingevulde info binnen om een demo voor te bereiden die echt aansluit op je situatie.
+                Je ontvangt je scan automatisch per mail. VloerGroep gebruikt je antwoorden om de juiste vervolgstap voor te bereiden.
               </p>
-            </div>
-
-            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 backdrop-blur-xl">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">Direct geregeld</div>
-                <div className="text-sm text-white/78 leading-6">Je bevestiging en scan worden automatisch klaargezet.</div>
-              </div>
-              <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 backdrop-blur-xl">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">Intern compleet</div>
-                <div className="text-sm text-white/78 leading-6">VloerGroep ontvangt meteen je leadprofiel met alle antwoorden.</div>
-              </div>
-              <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 backdrop-blur-xl">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">Demo op maat</div>
-                <div className="text-sm text-white/78 leading-6">De opvolging kan direct focussen op {profile.primaryAngle.toLowerCase()}.</div>
-              </div>
             </div>
 
             <form
@@ -420,23 +405,6 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 />
               </div>
 
-              <div className="rounded-2xl border border-white/8 bg-[#0f1b1b]/88 p-4">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                  Ingeplande vervolgstap
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 rounded-2xl bg-amber-gold/12 p-2 text-amber-gold">
-                    <CalendarCheck2 size={18} />
-                  </div>
-                  <div>
-                    <div className="text-base font-semibold text-white">VloerGroep demo voorbereiden</div>
-                    <p className="mt-1 text-sm leading-6 text-white/68">
-                      We zetten deze aanvraag direct klaar als demo-aanvraag. Je scan wordt wel automatisch meegestuurd, maar de opvolging is gericht op een concrete demo.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               <div className="rounded-2xl border border-white/8 bg-[#0f1b1b]/85 p-4">
                 <label className="flex cursor-pointer items-start gap-3" htmlFor="capture-consent">
                   <input
@@ -469,13 +437,9 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 )}
               </AnimatePresence>
 
-              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2 text-sm text-white/55">
-                  <ShieldCheck size={16} className="shrink-0 text-amber-gold" />
-                  Klaar voor server-side validatie en mailverzending.
-                </div>
+              <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={isSubmitting} className="w-full !px-8 !py-4 text-base shadow-xl shadow-amber-gold/20 sm:w-auto">
-                  {isSubmitting ? 'Bezig met versturen...' : 'Plan mijn demo'}
+                  {isSubmitting ? 'Bezig met versturen...' : 'Verstuur mijn gegevens'}
                 </Button>
               </div>
             </form>

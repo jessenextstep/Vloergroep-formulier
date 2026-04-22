@@ -1,15 +1,16 @@
-import { calculateResults } from '../lib/calculations';
-import { buildLeadProfile } from '../lib/leadProfile';
+import { calculateResults } from '../lib/calculations.js';
+import { buildLeadProfile } from '../lib/leadProfile.js';
 import {
   LeadCaptureFormData,
   LeadSubmissionPayload,
   LeadSubmissionResponse,
   QuizState,
-} from '../types';
+} from '../types.js';
 import {
   buildCustomerConfirmationEmail,
   buildInternalLeadEmail,
-} from './leadEmailTemplates';
+} from './leadEmailTemplates.js';
+import { syncLeadToBrevo } from './brevoService.js';
 
 interface LeadEnvironment {
   resendApiKey?: string;
@@ -17,6 +18,10 @@ interface LeadEnvironment {
   internalEmail?: string;
   demoUrl?: string;
   environment?: string;
+  brevoApiKey?: string;
+  brevoListIds?: string | number[];
+  brevoDemoListId?: string | number;
+  brevoInfoListId?: string | number;
 }
 
 interface LeadHandlerResult {
@@ -38,6 +43,52 @@ const TEAM_SIZES = new Set(['alone', '1-2', 'small-team', 'large-team']);
 const PAYMENT_DAYS = new Set([14, 30, 45, 60, 90]);
 const MISSED_PROJECTS = new Set([0, 1, 2, 3]);
 const LEAD_INTENTS = new Set(['demo', 'info']);
+
+function parseNumericEnvValue(value: string | number | undefined): number | null {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+    return value;
+  }
+
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value.trim(), 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parseNumericList(value: string | number[] | undefined): number[] {
+  if (Array.isArray(value)) {
+    return value.filter((item) => Number.isInteger(item) && item > 0);
+  }
+
+  if (typeof value !== 'string') {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map((item) => Number.parseInt(item.trim(), 10))
+    .filter((item) => Number.isInteger(item) && item > 0);
+}
+
+function resolveBrevoListIds(
+  intent: LeadCaptureFormData['intent'],
+  env: LeadEnvironment,
+): number[] {
+  const sharedListIds = parseNumericList(env.brevoListIds || process.env.BREVO_LIST_IDS);
+  const intentSpecificListId =
+    intent === 'demo'
+      ? parseNumericEnvValue(env.brevoDemoListId || process.env.BREVO_DEMO_LIST_ID)
+      : parseNumericEnvValue(env.brevoInfoListId || process.env.BREVO_INFO_LIST_ID);
+
+  return [
+    ...new Set([
+      ...sharedListIds,
+      ...(intentSpecificListId ? [intentSpecificListId] : []),
+    ]),
+  ];
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -253,6 +304,8 @@ export async function processLeadSubmission(
     env.resendFromEmail || process.env.RESEND_FROM_EMAIL || 'VloerGroep <onboarding@resend.dev>';
   const internalEmail =
     env.internalEmail || process.env.LEAD_NOTIFICATION_EMAIL || 'info@vloergroep.nl';
+  const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
+  const brevoListIds = resolveBrevoListIds(payload.contact.intent, env);
   const demoUrl =
     env.demoUrl ||
     process.env.VLOERGROEP_DEMO_URL ||
@@ -337,6 +390,23 @@ export async function processLeadSubmission(
         `internal:${submissionFingerprint}`,
       ),
     ]);
+
+    if (brevoApiKey) {
+      try {
+        await syncLeadToBrevo({
+          apiKey: brevoApiKey,
+          listIds: brevoListIds,
+          contact: payload.contact,
+          state: payload.quiz,
+          results,
+          profile,
+          submittedAt: payload.meta.submittedAt,
+          source: payload.meta.source,
+        });
+      } catch (error) {
+        console.error('Brevo sync failed', error);
+      }
+    }
 
     return {
       status: 200,

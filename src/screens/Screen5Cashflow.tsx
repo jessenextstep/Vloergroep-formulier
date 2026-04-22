@@ -72,11 +72,6 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
         <div className="space-y-4">
           <label className="block text-lg font-semibold text-white/90">Hoeveel van je omzet zou je via VloerGroep willen laten lopen?</label>
-          
-          <ProofCallout
-            title="Wist je dat VloerGroep hier direct cashflow kan versnellen?"
-            body="Dit deel van je omzet groeit direct mee in snelheid. Je geld is vliegensvlug beschikbaar doordat wij het debiteurenrisico wegnemen."
-          />
 
           <Slider
             label="Aandeel via VloerGroep"
@@ -88,6 +83,11 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
             step={5}
             marks={pctMarks}
             formatValue={v => `${v}%`}
+          />
+
+          <ProofCallout
+            title="Wist je dat VloerGroep betalingen sneller beschikbaar maakt via het projectdepot?"
+            body="Hoe meer omzet je via VloerGroep laat lopen, hoe meer geld sneller vrijkomt en minder lang vastzit in openstaande posten."
           />
         </div>
 

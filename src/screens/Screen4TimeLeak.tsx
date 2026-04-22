@@ -41,8 +41,8 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
         <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Tijdlekken</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
           {state.firstName 
-            ? `Hoeveel uren vliegen eruit aan dit regelwerk, ${state.firstName}?` 
-            : `Hoeveel uren vliegen eruit aan dit regelwerk?`}
+            ? `Hoeveel tijd gaat er per week op aan regelwerk, ${state.firstName}?` 
+            : `Hoeveel tijd gaat er per week op aan regelwerk?`}
         </h2>
         <p className="text-base text-[#FBEFD5]/80 pr-2">
           Selecteer hoeveel uur per week jij (of je team) hieraan kwijt is.
@@ -102,8 +102,8 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
       </div>
 
       <ProofCallout
-        title="Wist je dat VloerGroep juist hier vaak als eerste tijd terugwint?"
-        body="Veel vakmannen verliezen hier elke week ongemerkt veel tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek. Daar begint je eerste winst."
+        title="Wist je dat VloerGroep vaak tijd terugwint op planning, communicatie en betalingen?"
+        body="Veel vakmannen verliezen hier elke week ongemerkt tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek."
       />
 
       <motion.div 

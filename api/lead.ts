@@ -1,4 +1,4 @@
-import { processLeadSubmission } from '../src/server/leadService';
+import { processLeadSubmission } from '../src/server/leadService.js';
 
 type MinimalRequest = {
   method?: string;
