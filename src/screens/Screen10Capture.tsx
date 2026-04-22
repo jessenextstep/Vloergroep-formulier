@@ -98,36 +98,36 @@ export default function Screen10Capture({ state }: Props) {
             className="w-full"
           >
             <div className="mb-10 text-center md:text-left">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Zullen we samen naar jouw situatie kijken?</h2>
-              <p className="text-lg text-white/60">
+              <h2 className="text-3xl md:text-4xl font-bold font-display mb-4 tracking-tight text-white">Zullen we samen naar jouw situatie kijken?</h2>
+              <p className="text-lg text-white/80">
                 Deze scan geeft je een realistisch beeld. In een demo laten we zien hoe dit er in de praktijk voor jouw bedrijf uitziet.
               </p>
             </div>
 
-            <form id="capture-form" onSubmit={handleSubmit} className="space-y-6 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 md:p-8 rounded-[28px]">
+            <form id="capture-form" onSubmit={handleSubmit} className="space-y-6 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-md border border-white/[0.08] shadow-lg p-6 md:p-8 rounded-[20px]">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2 pl-1">Naam</label>
-                  <input name="name" value={formData.name} onChange={handleChange} type="text" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/20 focus:outline-none transition-all shadow-inner ${errors.name ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/5 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
+                  <label className="block text-sm font-medium text-white/90 mb-2 pl-1">Naam</label>
+                  <input name="name" value={formData.name} onChange={handleChange} type="text" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/40 focus:outline-none transition-all shadow-inner ${errors.name ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/20 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
                   {errors.name && <p className="text-red-400 text-xs mt-1.5 pl-1">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2 pl-1">Bedrijfsnaam</label>
-                  <input name="company" value={formData.company} onChange={handleChange} type="text" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/20 focus:outline-none transition-all shadow-inner ${errors.company ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/5 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
+                  <label className="block text-sm font-medium text-white/90 mb-2 pl-1">Bedrijfsnaam</label>
+                  <input name="company" value={formData.company} onChange={handleChange} type="text" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/40 focus:outline-none transition-all shadow-inner ${errors.company ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/20 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
                   {errors.company && <p className="text-red-400 text-xs mt-1.5 pl-1">{errors.company}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2 pl-1">E-mailadres</label>
-                  <input name="email" value={formData.email} onChange={handleChange} type="email" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/20 focus:outline-none transition-all shadow-inner ${errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/5 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
+                  <label className="block text-sm font-medium text-white/90 mb-2 pl-1">E-mailadres</label>
+                  <input name="email" value={formData.email} onChange={handleChange} type="email" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/40 focus:outline-none transition-all shadow-inner ${errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/20 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
                   {errors.email && <p className="text-red-400 text-xs mt-1.5 pl-1">{errors.email}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2 pl-1">Telefoonnummer</label>
-                  <input name="phone" value={formData.phone} onChange={handleChange} type="tel" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/20 focus:outline-none transition-all shadow-inner ${errors.phone ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/5 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
+                  <label className="block text-sm font-medium text-white/90 mb-2 pl-1">Telefoonnummer</label>
+                  <input name="phone" value={formData.phone} onChange={handleChange} type="tel" className={`w-full bg-near-black border-2 rounded-2xl px-5 py-4 text-[16px] md:text-[18px] text-white placeholder-white/40 focus:outline-none transition-all shadow-inner ${errors.phone ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-white/20 focus:border-amber-gold/50 focus:ring-4 focus:ring-amber-gold/10'}`} />
                   {errors.phone && <p className="text-red-400 text-xs mt-1.5 pl-1">{errors.phone}</p>}
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default function Screen10Capture({ state }: Props) {
                       onClick={() => setIntent(opt.value)}
                       className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all active:scale-[0.98] ${
                         intent === opt.value 
-                          ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_20px_rgba(224,172,62,0.15)]' 
+                          ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)]' 
                           : 'bg-near-black border-white/5 hover:border-white/20 text-white/60'
                       }`}
                     >
@@ -197,7 +197,7 @@ export default function Screen10Capture({ state }: Props) {
             key="capture-success"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full flex flex-col items-center justify-center text-center p-8 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-[28px]"
+            className="w-full flex flex-col items-center justify-center text-center p-8 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-md border border-white/[0.08] shadow-lg rounded-[20px]"
           >
             <div className="w-20 h-20 bg-amber-gold/10 rounded-full flex items-center justify-center text-amber-gold mb-6">
               <Check size={40} strokeWidth={2.5} />

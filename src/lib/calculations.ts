@@ -1,14 +1,27 @@
 import { QuizState, CalculationResults } from '../types';
 
 export function calculateResults(state: QuizState, customMargin: number = 51.8): CalculationResults {
+  // 0. FTE BEPALING (Realistische schaling i.p.v. blinde vermenigvuldiging)
+  let fte = 1;
+  if (state.teamSize === '1-2') fte = 2; // Zelf + 1 a 2 
+  else if (state.teamSize === 'small-team') fte = 4; // Zelf + ca 3
+  else if (state.teamSize === 'large-team') fte = 8; // Zelf + ca 7
+  
   // 1. BASIS
-  const baseYearlyHours = state.hoursPerWeek * state.weeksPerYear;
+  // Jaaromzet groeit mee met het aantal mensen dat op de vloer staat
+  const baseYearlyHours = state.hoursPerWeek * state.weeksPerYear * fte;
   const baseYearlyRevenue = baseYearlyHours * state.hourlyRate;
 
   // 2. TIJDSWINST
-  const timeSavedPerWeek = state.timeAdmin + state.timePlanning + state.timeComm + state.timePayment;
-  const timeSavedPerYear = timeSavedPerWeek * state.weeksPerYear;
-  // 85% is realistically monetizable
+  // Tijdswinst zit hem in de eigenaar / kantoor (ingevulde sliders), PLUS verhoogde efficiëntie voor de operatie.
+  // We rekenen super conservatief: 1,5 uur winst per medewerker buiten de eigenaar (minder bellen, zoeken, foutjes).
+  const ownerTimeSavedPerWeek = state.timeAdmin + state.timePlanning + state.timeComm + state.timePayment;
+  const teamEfficiencySavedPerWeek = (fte > 1) ? (fte - 1) * 1.5 : 0;
+  
+  const totalTimeSavedPerWeek = ownerTimeSavedPerWeek + teamEfficiencySavedPerWeek;
+  const timeSavedPerYear = totalTimeSavedPerWeek * state.weeksPerYear;
+  
+  // 85% is in de praktijk realistisch te factureren of converteert in vrije werkcapaciteit
   const monetizableHoursYear = timeSavedPerYear * 0.85;
   const extraRevenueTime = monetizableHoursYear * state.hourlyRate;
 
@@ -16,39 +29,32 @@ export function calculateResults(state: QuizState, customMargin: number = 51.8):
   const extraProfitTime = extraRevenueTime * (customMargin / 100);
 
   // 4. EXTRA CAPACITEIT
-  // Additional work weeks freed up
-  const extraWorkWeeks = monetizableHoursYear / state.hoursPerWeek;
+  // Hoeveel netto extra werkweken voor 1 volle FTE levert dit op?
+  const extraWorkWeeks = monetizableHoursYear / (state.hoursPerWeek || 40);
 
   // 5. CASHFLOW
-  // Max 60 days used in calc unless explicitly longer, but we just use the user's input up to 60 as per typical bounds if they were given.
-  // Actually, standard math given: cashflow_sneller_beschikbaar = jaaromzet_huidig * aandeel_omzet_via_vloergroep * gemiddelde_betaaldagen / 365
+  // Schaalt lineair en correct mee. Groter bedrijf = véél meer omzet = exponentieel groter voordeel van sneller cash vastklikken in VloerGroep.
   const capDays = Math.min(state.paymentDays, 60);
   const fasterCashflow = baseYearlyRevenue * (state.percentageVloergroep / 100) * (capDays / 365);
 
   // 6. GROEI VIA BETERE LEADS
-  // Business case constants: 6 leads/month, 12 hours billable per won job.
-  const BASE_LEADS_PER_MONTH = 6;
+  // Een groter bedrijf kan van nature meer leads aan, maar we laten de lead-aanstroom degressief stijgen (realistischer).
+  const BASE_LEADS_PER_MONTH = 4 + (fte * 2); // al=6, 1-2=8, sm=12, lg=20
   const BASE_HOURS_PER_LEAD = 12;
 
-  let uplift = 0;
-  if (state.leadScenario === 'conservative') uplift = 0.05; // 5 pp
-  else if (state.leadScenario === 'realistic') uplift = 0.10; // 10 pp
-  else if (state.leadScenario === 'ambitious') uplift = 0.125; // 12.5 pp
+  // Realistische aanname: 10% uplift in conversie / beter geprijsde klussen d.m.v. betere leadkwalificatie
+  const uplift = 0.10; 
 
   const extraProjectsLeadsYear = BASE_LEADS_PER_MONTH * 12 * uplift;
   const extraHoursLeadsYear = extraProjectsLeadsYear * BASE_HOURS_PER_LEAD;
   const extraRevenueLeads = extraHoursLeadsYear * state.hourlyRate;
 
   // 7. GROEI VIA GROTERE KLUSSEN
-  // 1 teamed project share = 75 billable hours
-  // 2 teamed shares = 150 billable hours
-  // We use missedProjects as multiplier. Assuming 1 project = 1 share for simplicity, or 2 projects = 2 shares.
-  const extraRevenueTeam = state.missedProjects * 75 * state.hourlyRate;
+  // Een klus die afgeketst wordt door capaciteitsgebrek bij een 6-manszaak had een veel massievere omvang (200+ uur) dan een afgeketste klus bij 1 man (80 uur).
+  const missedProjectSizeHours = 60 + (fte * 20); // al=80h, 1-2=100h, sm=140h, lg=220h
+  const extraRevenueTeam = state.missedProjects * missedProjectSizeHours * state.hourlyRate;
 
   // 8. TOTALS
-  // A. Basisresultaat = tijdswinst + cashflow
-  // B. Groeipotentieel = tijdswinst + leads + samenwerking (in terms of Revenue/Capacity)
-  
   const totalExtraRevenue = extraRevenueTime + extraRevenueLeads + extraRevenueTeam;
   const totalExtraProfit = totalExtraRevenue * (customMargin / 100);
   const totalExtraCapacityWeeks = extraWorkWeeks;
@@ -59,7 +65,9 @@ export function calculateResults(state: QuizState, customMargin: number = 51.8):
       baseYearlyHours,
     },
     timeSaved: {
-      hoursPerWeekSaved: timeSavedPerWeek,
+      hoursPerWeekSaved: totalTimeSavedPerWeek,
+      ownerHoursSaved: ownerTimeSavedPerWeek,
+      teamEfficiencySaved: teamEfficiencySavedPerWeek,
       monetizableHoursYear,
       extraRevenueTime,
       extraProfitTime,
@@ -80,6 +88,6 @@ export function calculateResults(state: QuizState, customMargin: number = 51.8):
       totalExtraRevenue,
       totalExtraProfit,
       totalExtraCapacityWeeks,
-    }
+    },
   };
 }

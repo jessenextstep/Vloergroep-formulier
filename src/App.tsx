@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { QuizState, defaultQuizState, TeamSize, PaymentDays, LeadScenario, MissedProjects, WillCollaborate } from './types';
+import { QuizState, defaultQuizState, TeamSize, PaymentDays, LeadScenario, MissedProjects } from './types';
 import { calculateResults } from './lib/calculations';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,7 +9,6 @@ import Screen2WhoAreYou from './screens/Screen2WhoAreYou';
 import Screen3Base from './screens/Screen3Base';
 import Screen4TimeLeak from './screens/Screen4TimeLeak';
 import Screen5Cashflow from './screens/Screen5Cashflow';
-import Screen6Leads from './screens/Screen6Leads';
 import Screen7Collab from './screens/Screen7Collab';
 import Screen8Loading from './screens/Screen8Loading';
 import Screen9Results from './screens/Screen9Results';
@@ -17,7 +16,7 @@ import Screen10Capture from './screens/Screen10Capture';
 
 import { StepIndicator } from './components/StepIndicator';
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 export default function App() {
   const [step, setStep] = useState(0);
@@ -63,7 +62,7 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full px-6 pt-12 pb-[140px] md:pb-28">
+      <main className="flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full px-6 pt-6 md:pt-12 pb-[140px] md:pb-28">
         <AnimatePresence mode="wait">
           
           {step === 0 && (
@@ -98,30 +97,24 @@ export default function App() {
 
           {step === 5 && (
             <motion.div key="step-5" {...screenTransition} className="w-full h-full flex flex-col">
-              <Screen6Leads state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
+              <Screen7Collab state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
             </motion.div>
           )}
 
           {step === 6 && (
             <motion.div key="step-6" {...screenTransition} className="w-full h-full flex flex-col">
-              <Screen7Collab state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
-            </motion.div>
-          )}
-
-          {step === 7 && (
-            <motion.div key="step-7" {...screenTransition} className="w-full h-full flex flex-col">
               <Screen8Loading onNext={handleNext} />
             </motion.div>
           )}
 
-          {step === 8 && (
-            <motion.div key="step-8" {...screenTransition} className="w-full max-w-4xl mx-auto">
-              <Screen9Results state={state} results={currentResults} onNext={handleNext} onBack={() => setStep(6)} />
+          {step === 7 && (
+            <motion.div key="step-7" {...screenTransition} className="w-full max-w-4xl mx-auto">
+              <Screen9Results state={state} results={currentResults} onNext={handleNext} onBack={() => setStep(5)} />
             </motion.div>
           )}
 
-          {step === 9 && (
-            <motion.div key="step-9" {...screenTransition} className="w-full h-full flex flex-col">
+          {step === 8 && (
+            <motion.div key="step-8" {...screenTransition} className="w-full h-full flex flex-col">
               <Screen10Capture state={state} />
             </motion.div>
           )}

@@ -1,7 +1,6 @@
-export type TeamSize = '' | 'alone' | '1-2' | 'small-team' | 'scale';
+export type TeamSize = '' | 'alone' | '1-2' | 'small-team' | 'large-team';
 export type PaymentDays = 14 | 30 | 45 | 60 | 90;
 export type MissedProjects = 0 | 1 | 2 | 3;
-export type WillCollaborate = 'yes' | 'maybe' | 'certainly';
 export type LeadScenario = 'conservative' | 'realistic' | 'ambitious';
 
 export interface QuizState {
@@ -27,7 +26,6 @@ export interface QuizState {
   leadScenario: LeadScenario;
 
   missedProjects: MissedProjects;
-  willCollaborate: WillCollaborate;
 }
 
 export const defaultQuizState: QuizState = {
@@ -53,7 +51,6 @@ export const defaultQuizState: QuizState = {
   leadScenario: 'realistic',
 
   missedProjects: 0,
-  willCollaborate: 'maybe',
 };
 
 export interface CalculationResults {
@@ -63,6 +60,8 @@ export interface CalculationResults {
   };
   timeSaved: {
     hoursPerWeekSaved: number;
+    ownerHoursSaved: number;
+    teamEfficiencySaved: number;
     monetizableHoursYear: number;
     extraRevenueTime: number;
     extraProfitTime: number;

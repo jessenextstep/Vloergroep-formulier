@@ -1,7 +1,7 @@
 import React from 'react';
-import { QuizState, MissedProjects, WillCollaborate } from '../types';
+import { QuizState, MissedProjects } from '../types';
 import { BottomNav } from '../components/BottomNav';
-import { SegmentedControl } from '../components/SegmentedControl';
+import { Users } from 'lucide-react';
 
 interface Props {
   state: QuizState;
@@ -19,11 +19,6 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
     { label: '3+ per jaar', value: 3 },
   ];
 
-  const willOptions: { label: string; value: WillCollaborate }[] = [
-    { label: 'Misschien', value: 'maybe' },
-    { label: 'Zeker weten', value: 'certainly' },
-  ];
-
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
       
@@ -32,28 +27,26 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
         src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800&h=300" 
         alt="Samenwerking" 
         referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-2xl mb-6 border border-white/5 shadow-lg block md:hidden bg-near-black"
+        className="w-full h-32 object-cover rounded-xl mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
       />
 
       <div className="mb-10 text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Groei via samenwerking</h2>
-        <p className="text-base text-[#FBEFD5]/60">
-          Grote, mooie projecten moet je soms afwijzen omdat je handjes of capaciteit mist. Met VloerGroep kun je gericht samenwerken met andere vakmannen, zodat je die klussen wél kunt aannemen.
+        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoeveel grote klussen moet je weleens afwijzen?</h2>
+        <p className="text-base text-[#FBEFD5]/80">
+          Met VloerGroep kun je gericht samenwerken met andere vakmannen, zodat je mega projecten die je nu laat schieten wél kunt aannemen.
         </p>
       </div>
 
       <div className="space-y-12 mb-12">
-        
         <div className="space-y-5">
-          <label className="block text-xl font-semibold text-white">Hoeveel grotere klussen zeg je nu jaarlijks af uit tijd- of capaciteitsgebrek?</label>
           <div className="grid grid-cols-2 gap-3">
             {missedOptions.map(opt => (
               <button
                 key={opt.value}
                 type="button"
-                className={`py-4 px-4 rounded-2xl font-medium border transition-all ${
+                className={`py-4 px-4 rounded-[20px] font-medium border transition-all ${
                   state.missedProjects === opt.value 
-                    ? 'bg-amber-gold/10 border-amber-gold text-amber-gold'
+                    ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
                     : 'bg-white/5 border-white/10 text-[#FBEFD5]/70 hover:bg-white/10'
                 }`}
                 onClick={() => updateState({ missedProjects: opt.value })}
@@ -63,26 +56,20 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
             ))}
           </div>
         </div>
+      </div>
 
-        {state.missedProjects > 0 && (
-          <>
-            <div className="w-full h-px bg-white/10" />
-            <div className="space-y-5">
-              <label className="block text-xl font-semibold text-white">Zou je die wél aannemen als je kon samenwerken via het netwerk?</label>
-              <SegmentedControl
-                options={willOptions}
-                value={state.willCollaborate === 'yes' ? 'certainly' : state.willCollaborate} // quick map mapping
-                onChange={(v) => updateState({ willCollaborate: v })}
-                size="lg"
-              />
-            </div>
-          </>
-        )}
-
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 mb-10 flex gap-4 items-start">
+        <div className="p-2 bg-amber-gold/10 rounded-lg text-amber-gold shrink-0">
+          <Users size={20} />
+        </div>
+        <div>
+          <h4 className="text-white font-medium text-sm mb-1">VloerGroep Proof</h4>
+          <p className="text-white/60 text-sm">Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zónder privé zorgen.</p>
+        </div>
       </div>
 
       <div className="mt-auto">
-        <BottomNav onNext={onNext} onBack={onBack} nextLabel={state.missedProjects === 0 ? "Volgende" : "Bereken mijn scan"} />
+        <BottomNav onNext={onNext} onBack={onBack} nextLabel="Bereken mijn scan" />
       </div>
       <p className="text-center text-sm text-white/30 mt-6">
         Je antwoorden worden alleen gebruikt om je scan te berekenen.

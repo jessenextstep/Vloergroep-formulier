@@ -72,7 +72,7 @@ export default function Screen8Loading({ onNext }: Props) {
         </div>
       </div>
 
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 tracking-tight text-white/95">Scan afronden...</h2>
+      <h2 className="text-2xl md:text-3xl font-bold font-display mb-6 tracking-tight text-white">Scan afronden...</h2>
 
       <div className="h-10 relative w-full overflow-hidden flex justify-center items-center">
         <AnimatePresence mode="popLayout">

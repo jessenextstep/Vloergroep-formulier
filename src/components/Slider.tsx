@@ -31,16 +31,16 @@ export function Slider({
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
-    <div className={cn("flex flex-col gap-2 p-5 sm:p-6 rounded-[24px] bg-white/5 border border-white/10 backdrop-blur-xl transition-all duration-300 hover:border-amber-gold/30 hover:bg-white/10 relative overflow-hidden group", className)}>
+    <div className={cn("flex flex-col gap-2 p-5 sm:p-6 rounded-[24px] bg-white/10 border border-white/20 backdrop-blur-xl transition-all duration-300 hover:border-amber-gold/50 hover:bg-white/20 relative overflow-hidden group", className)}>
        <div className="flex justify-between items-start mb-2">
          <div className="flex items-center gap-3">
-           {icon && <div className="text-amber-gold bg-amber-gold/10 p-2.5 rounded-xl group-hover:scale-110 transition-transform">{icon}</div>}
+           {icon && <div className="text-amber-gold bg-amber-gold/20 p-2.5 rounded-xl group-hover:scale-110 transition-transform">{icon}</div>}
            <div className="flex flex-col">
-             <span className="font-semibold text-white/90 text-[15px] sm:text-base leading-tight pr-2">{label}</span>
-             {description && <span className="text-[12px] text-white/40 mt-1">{description}</span>}
+             <span className="font-semibold text-white px-2 leading-tight pr-2">{label}</span>
+             {description && <span className="text-[12px] text-white/70 mt-1">{description}</span>}
            </div>
          </div>
-         <div className="font-bold text-amber-gold text-base sm:text-lg bg-near-black px-4 py-1.5 rounded-full border border-white/5 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] whitespace-nowrap flex-shrink-0 min-w-[72px] text-center flex items-center justify-center">
+         <div className="font-bold font-display text-amber-gold text-base sm:text-lg bg-near-black px-4 py-1.5 rounded-full border border-white/20 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] whitespace-nowrap flex-shrink-0 min-w-[72px] text-center flex items-center justify-center">
            {formatValue(value)}
          </div>
        </div>
@@ -78,8 +78,8 @@ export function Slider({
                     className="absolute flex flex-col items-center -translate-x-1/2"
                     style={{ left: ((m.value - min) / (max - min)) * 100 + "%" }}
                   >
-                    <div className="w-0.5 h-1.5 bg-white/20 rounded-full mb-1" />
-                    <span className="text-[10px] text-white/40 font-medium whitespace-nowrap">
+                    <div className="w-0.5 h-1.5 bg-white/40 rounded-full mb-1" />
+                    <span className="text-[10px] text-white/60 font-medium whitespace-nowrap">
                       {m.label}
                     </span>
                   </div>

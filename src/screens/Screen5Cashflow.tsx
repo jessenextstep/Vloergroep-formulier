@@ -35,13 +35,13 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
         src="https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&q=80&w=800&h=300" 
         alt="Direct Betaald" 
         referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-2xl mb-6 border border-white/5 shadow-lg block md:hidden bg-near-black"
+        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
       />
 
       <div className="mb-10 text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Direct betaald voor je werk</h2>
-        <p className="text-base text-[#FBEFD5]/60">
-          Bij VloerGroep staat het geld vooraf veilig in een depot. Dit voorkomt lang wachten op uitbetaling.
+        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoe snel krijg je nu meestal betaald?</h2>
+        <p className="text-base text-[#FBEFD5]/80">
+          VloerGroep werkt met een veilig projectdepot. Kies hier hoelang je vandaag de dag vaak nog op je geld moet wachten.
         </p>
       </div>
 
@@ -56,7 +56,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
                 type="button"
                 className={`py-3.5 px-3 rounded-xl text-[14px] leading-snug font-medium border transition-all ${
                   state.paymentDays === opt.value 
-                    ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)]'
+                    ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
                     : 'bg-white/5 border-white/10 text-[#FBEFD5]/60 hover:bg-white/10'
                 }`}
                 onClick={() => updateState({ paymentDays: opt.value })}

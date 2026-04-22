@@ -26,13 +26,15 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
         src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800&h=300" 
         alt="Omzet basis" 
         referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-2xl mb-6 border border-white/5 shadow-lg block md:hidden bg-near-black"
+        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
       />
 
       <div className="mb-8 text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Jouw huidige situatie</h2>
-        <p className="text-base text-[#FBEFD5]/60 pr-2">
-          Start met je tarief en uren, schuif naar wat voor jou geldt.
+        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
+          {state.firstName ? `Wat is je tarief en werkweek, ${state.firstName}?` : 'Wat is je uurtarief en uren per week?'}
+        </h2>
+        <p className="text-base text-[#FBEFD5]/80 pr-2">
+          Deze basisgegevens gebruiken we om jouw financiële groeipotentieel te berekenen.
         </p>
       </div>
 

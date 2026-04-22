@@ -3,7 +3,7 @@ import { QuizState } from '../types';
 import { BottomNav } from '../components/BottomNav';
 import { Slider } from '../components/Slider';
 import { motion } from 'framer-motion';
-import { FileText, CalendarClock, MessageSquare, DollarSign } from 'lucide-react';
+import { FileText, CalendarClock, MessageSquare, DollarSign, Clock } from 'lucide-react';
 
 interface Props {
   state: QuizState;
@@ -34,13 +34,17 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
         src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&q=80&w=800&h=300" 
         alt="Tijdlek" 
         referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-2xl mb-6 border border-white/5 shadow-lg block md:hidden bg-near-black"
+        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
       />
 
       <div className="mb-8 text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Waar lekt jouw tijd op weg?</h2>
-        <p className="text-base text-[#FBEFD5]/60 pr-2">
-          Hoeveel tijd ben je wekelijks kwijt aan regelwerk buiten de klus om? Schuif in wat realistisch voelt.
+        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
+          {state.firstName 
+            ? `Hoeveel uren vliegen eruit aan dit regelwerk, ${state.firstName}?` 
+            : `Hoeveel uren vliegen eruit aan dit regelwerk?`}
+        </h2>
+        <p className="text-base text-[#FBEFD5]/80 pr-2">
+          Selecteer hoeveel uur per week jij (of je team) hieraan kwijt is.
         </p>
       </div>
 
@@ -94,6 +98,16 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
           formatValue={formatHrs}
         />
 
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 mb-8 flex gap-4 items-start">
+        <div className="p-2 bg-amber-gold/10 rounded-lg text-amber-gold shrink-0">
+          <Clock size={20} />
+        </div>
+        <div>
+          <h4 className="text-white font-medium text-sm mb-1">VloerGroep Proof</h4>
+          <p className="text-white/60 text-sm">Veel vakmannen verliezen hier elke week ongemerkt veel tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek. Daar begint je eerste winst.</p>
+        </div>
       </div>
 
       <motion.div 

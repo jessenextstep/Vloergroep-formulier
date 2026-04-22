@@ -19,8 +19,8 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
   const teamOptions: { value: TeamSize; label: string; icon: React.ReactNode }[] = [
     { value: 'alone', label: 'Ik werk alleen', icon: <User size={24} /> },
     { value: '1-2', label: 'Ik werk met 1\u20132 man', icon: <Users size={24} /> },
-    { value: 'small-team', label: 'Ik werk met een klein team', icon: <Building2 size={24} /> },
-    { value: 'scale', label: 'Ik wil juist kunnen opschalen', icon: <TrendingUp size={24} /> },
+    { value: 'small-team', label: 'Klein team (3\u20135 man)', icon: <Building2 size={24} /> },
+    { value: 'large-team', label: 'Groot (5+ personen)', icon: <TrendingUp size={24} /> },
   ];
 
   return (
@@ -31,13 +31,13 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
         src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800&h=300" 
         alt="Teamwork" 
         referrerPolicy="no-referrer"
-        className="w-full h-32 object-cover rounded-2xl mb-6 border border-white/5 shadow-lg block md:hidden bg-near-black"
+        className="w-full h-32 object-cover rounded-[20px] mb-6 border border-white/5 shadow-md block md:hidden bg-near-black"
       />
 
       <div className="mb-8 text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Hoe werk jij nu?</h2>
-        <p className="text-base text-white/60">
-          Zo maken we de uitkomst beter passend bij jouw situatie.
+        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Met hoeveel mensen werk je?</h2>
+        <p className="text-base text-white/80">
+          We stemmen de calculatie af op jouw actuele bedrijfsgrootte.
         </p>
       </div>
 
