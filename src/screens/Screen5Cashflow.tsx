@@ -4,8 +4,9 @@ import { BottomNav } from '../components/BottomNav';
 import { ProofCallout } from '../components/ProofCallout';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { Slider } from '../components/Slider';
+import { AnimatedResultValue, StepResultCard } from '../components/StepResultCard';
 import { heroScreen5 } from '../lib/brandAssets';
-import { Wallet, Percent } from 'lucide-react';
+import { Percent } from 'lucide-react';
 
 interface Props {
   state: QuizState;
@@ -48,17 +49,19 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
       <div className="space-y-10 mb-8">
         
-        <div className="space-y-4">
-          <label className="block text-lg font-semibold text-white/90">Hoe snel word jij nu gemiddeld betaald?</label>
-          <div className="grid grid-cols-2 gap-3">
+        <fieldset className="space-y-4">
+          <legend id="payment-days-label" className="block text-lg font-semibold text-white/90">Hoe snel word jij nu gemiddeld betaald?</legend>
+          <div role="radiogroup" aria-labelledby="payment-days-label" className="grid grid-cols-2 gap-3">
             {paymentOptions.map(opt => (
               <button
                 key={opt.value}
                 type="button"
+                role="radio"
+                aria-checked={state.paymentDays === opt.value}
                 className={`py-3.5 px-3 rounded-xl text-[14px] leading-snug font-medium border transition-all ${
                   state.paymentDays === opt.value 
                     ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
-                    : 'bg-white/5 border-white/10 text-[#FBEFD5]/60 hover:bg-white/10'
+                    : 'bg-white/5 border-white/10 text-[#FBEFD5]/76 hover:bg-white/10'
                 }`}
                 onClick={() => updateState({ paymentDays: opt.value })}
               >
@@ -66,7 +69,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
@@ -93,12 +96,15 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
       </div>
 
+      <StepResultCard>
+        <p className="text-sm font-medium leading-7 text-white md:text-base">
+          We rekenen nu met <AnimatedResultValue value={`${state.paymentDays} dagen`} /> betaaltermijn en <AnimatedResultValue value={`${state.percentageVloergroep}%`} /> van je omzet via VloerGroep.
+        </p>
+      </StepResultCard>
+
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
       </div>
-      <p className="text-center text-sm text-white/50 mt-6">
-        Dit gebruiken we om je cashflowvoordeel realistisch in te schatten.
-      </p>
     </div>
   );
 }

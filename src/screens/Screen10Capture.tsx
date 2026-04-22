@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Mail, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 
 import { Button } from '../components/Button';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
@@ -23,6 +23,9 @@ interface Props {
 type FormErrors = Partial<Record<'name' | 'company' | 'email' | 'phone' | 'consent', string>>;
 
 const CAPTURE_STORAGE_KEY = 'vloergroep-groeiscan-contact/v1';
+const QUIZ_PROGRESS_STORAGE_KEY = 'vloergroep-groeiscan-progress/v1';
+const FORM_STORAGE_WRITE_DELAY_MS = 220;
+const SUBMIT_TIMEOUT_MS = 15000;
 const DEMO_URL = import.meta.env.VITE_VLOERGROEP_DEMO_URL || 'https://vloergroep.nl';
 
 function readStoredFormData(defaults: LeadCaptureFormData): LeadCaptureFormData {
@@ -66,6 +69,9 @@ async function parseLeadSubmissionResponse(response: Response): Promise<LeadSubm
 }
 
 export default function Screen10Capture({ state, results, sessionStartedAt }: Props) {
+  const formStatusId = useId();
+  const submitAbortRef = useRef<AbortController | null>(null);
+  const submitTimeoutRef = useRef<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [deliveryMode, setDeliveryMode] = useState<'live' | 'preview' | null>(null);
   const [serverMessage, setServerMessage] = useState('');
@@ -106,14 +112,27 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       return;
     }
 
-    window.localStorage.setItem(
-      CAPTURE_STORAGE_KEY,
-      JSON.stringify({
-        ...formData,
-        intent: 'demo',
-      }),
-    );
+    const persistTimer = window.setTimeout(() => {
+      window.localStorage.setItem(
+        CAPTURE_STORAGE_KEY,
+        JSON.stringify({
+          ...formData,
+          intent: 'demo',
+        }),
+      );
+    }, FORM_STORAGE_WRITE_DELAY_MS);
+
+    return () => window.clearTimeout(persistTimer);
   }, [formData, submitted]);
+
+  useEffect(() => {
+    return () => {
+      submitAbortRef.current?.abort();
+      if (submitTimeoutRef.current !== null) {
+        window.clearTimeout(submitTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const profile = buildLeadProfile(state, results, 'demo');
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
@@ -137,7 +156,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       ? 'Je aanvraag staat goed in ons systeem. Ook als je bevestigingsmail niet direct binnenkomt, nemen we je aanvraag gewoon mee in de opvolging.'
       : 'Je ontvangt ook een bevestiging in je mailbox.';
 
-  const validate = () => {
+  const validate = useCallback(() => {
     const nextErrors: FormErrors = {};
 
     if (!formData.name.trim()) {
@@ -169,9 +188,9 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
 
     setErrors(nextErrors);
     return nextErrors;
-  };
+  }, [formData]);
 
-  const focusField = (fieldName: keyof FormErrors) => {
+  const focusField = useCallback((fieldName: keyof FormErrors) => {
     const selector = fieldName === 'consent' ? '#capture-consent' : `input[name="${fieldName}"]`;
     const field = document.querySelector(selector) as HTMLElement | null;
 
@@ -179,9 +198,9 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       field.scrollIntoView({ behavior: 'smooth', block: 'center' });
       window.setTimeout(() => field.focus({ preventScroll: true }), 120);
     }
-  };
+  }, []);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
 
     setFormData((current) => ({
@@ -200,10 +219,14 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
     if (serverMessage) {
       setServerMessage('');
     }
-  };
+  }, [errors, serverMessage]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
     const validationErrors = validate();
     const errorFields = Object.keys(validationErrors) as Array<keyof FormErrors>;
 
@@ -214,6 +237,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
 
     setIsSubmitting(true);
     setServerMessage('');
+    submitAbortRef.current?.abort();
 
     const payload: LeadSubmissionPayload = {
       contact: {
@@ -231,12 +255,17 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
     };
 
     try {
+      const abortController = new AbortController();
+      submitAbortRef.current = abortController;
+      submitTimeoutRef.current = window.setTimeout(() => abortController.abort(), SUBMIT_TIMEOUT_MS);
+
       const response = await fetch('/api/lead', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
+        signal: abortController.signal,
         body: JSON.stringify(payload),
       });
 
@@ -250,13 +279,23 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       setDeliveryMode(data.deliveryMode);
       setServerMessage(data.message || '');
       window.localStorage.removeItem(CAPTURE_STORAGE_KEY);
+      window.localStorage.removeItem(QUIZ_PROGRESS_STORAGE_KEY);
     } catch (error) {
       setServerMessage(
-        error instanceof Error
-          ? error.message
-          : 'De aanvraag kon niet worden verstuurd. Probeer het zo nog eens.',
+        error instanceof DOMException && error.name === 'AbortError'
+          ? navigator.onLine
+            ? 'De server reageert te traag. Probeer het opnieuw.'
+            : 'Je lijkt offline. Controleer je verbinding en probeer het opnieuw.'
+          : error instanceof Error
+            ? error.message
+            : 'De aanvraag kon niet worden verstuurd. Probeer het zo nog eens.',
       );
     } finally {
+      if (submitTimeoutRef.current !== null) {
+        window.clearTimeout(submitTimeoutRef.current);
+        submitTimeoutRef.current = null;
+      }
+      submitAbortRef.current = null;
       setIsSubmitting(false);
     }
   };
@@ -288,8 +327,11 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
               id="capture-form"
               onSubmit={handleSubmit}
               noValidate
+              aria-busy={isSubmitting}
+              aria-describedby={serverMessage && !submitted ? formStatusId : undefined}
               className="space-y-6 rounded-[28px] border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-transparent p-6 shadow-lg backdrop-blur-md md:p-8"
             >
+              <fieldset disabled={isSubmitting} className="space-y-6 disabled:opacity-100">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block pl-1 text-sm font-medium text-white/90" htmlFor="capture-name">
@@ -314,7 +356,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     aria-describedby={errors.name ? 'capture-name-error' : undefined}
                   />
                   {errors.name && (
-                    <p id="capture-name-error" className="mt-1.5 pl-1 text-xs text-red-300">
+                    <p id="capture-name-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
                       {errors.name}
                     </p>
                   )}
@@ -342,7 +384,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     aria-describedby={errors.company ? 'capture-company-error' : undefined}
                   />
                   {errors.company && (
-                    <p id="capture-company-error" className="mt-1.5 pl-1 text-xs text-red-300">
+                    <p id="capture-company-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
                       {errors.company}
                     </p>
                   )}
@@ -364,6 +406,8 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                       type="email"
                       maxLength={160}
                       autoComplete="email"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       inputMode="email"
                       enterKeyHint="next"
                       className={`w-full rounded-2xl border-2 bg-[#0f1b1b] py-4 pl-12 pr-5 text-[16px] text-white placeholder-white/35 shadow-inner transition-all focus:outline-none md:text-[18px] ${
@@ -376,7 +420,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     />
                   </div>
                   {errors.email && (
-                    <p id="capture-email-error" className="mt-1.5 pl-1 text-xs text-red-300">
+                    <p id="capture-email-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
                       {errors.email}
                     </p>
                   )}
@@ -407,7 +451,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     />
                   </div>
                   {errors.phone && (
-                    <p id="capture-phone-error" className="mt-1.5 pl-1 text-xs text-red-300">
+                    <p id="capture-phone-error" role="alert" className="mt-1.5 pl-1 text-xs text-red-300">
                       {errors.phone}
                     </p>
                   )}
@@ -442,17 +486,20 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   </span>
                 </label>
                 {errors.consent && (
-                  <p className="mt-2 pl-7 text-xs text-red-300">{errors.consent}</p>
+                  <p role="alert" className="mt-2 pl-7 text-xs text-red-300">{errors.consent}</p>
                 )}
               </div>
 
               <AnimatePresence>
                 {serverMessage && !submitted && (
                   <motion.div
+                    id={formStatusId}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
-                    className="rounded-2xl border border-amber-gold/20 bg-amber-gold/10 p-4 text-sm text-amber-gold"
+                    role="alert"
+                    aria-live="assertive"
+                    className="rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-200"
                   >
                     {serverMessage}
                   </motion.div>
@@ -464,6 +511,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   {isSubmitting ? 'Bezig met versturen...' : 'Vraag mijn gratis demo aan'}
                 </Button>
               </div>
+              </fieldset>
             </form>
           </motion.div>
         ) : (
@@ -471,6 +519,8 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
             key="capture-success"
             initial={{ opacity: 0, scale: 0.985 }}
             animate={{ opacity: 1, scale: 1 }}
+            role="status"
+            aria-live="polite"
             className="w-full"
           >
             <div className="rounded-[30px] border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-transparent p-6 shadow-lg backdrop-blur-md md:p-10">
@@ -481,13 +531,10 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
               />
 
               <div className="mb-8 flex flex-col items-center text-center">
-                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-gold/12 text-amber-gold">
-                  <Check size={40} strokeWidth={2.5} />
-                </div>
                 <span className="mb-4 inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
                   Tot snel
                 </span>
-                <h3 className="mb-4 text-3xl font-bold md:text-5xl">
+                <h3 className="mb-4 text-3xl font-bold font-display tracking-tight text-white md:text-5xl">
                   {successHeading}
                 </h3>
                 <p className="mb-3 max-w-2xl text-lg leading-relaxed text-white">

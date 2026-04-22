@@ -10,6 +10,7 @@ import {
   buildCustomerConfirmationEmail,
   buildInternalLeadEmail,
 } from './leadEmailTemplates.js';
+import { buildEmailLogoUrl } from './emailBranding.js';
 import { syncLeadToBrevo } from './brevoService.js';
 
 interface LeadEnvironment {
@@ -18,6 +19,7 @@ interface LeadEnvironment {
   internalEmail?: string;
   demoUrl?: string;
   environment?: string;
+  siteUrl?: string;
   brevoApiKey?: string;
   brevoListIds?: string | number[];
   brevoDemoListId?: string | number;
@@ -36,6 +38,12 @@ interface ResendEmailPayload {
   html: string;
   text: string;
   reply_to?: string | string[];
+  attachments?: Array<{
+    path?: string;
+    content?: string;
+    filename: string;
+    contentId?: string;
+  }>;
   tags?: Array<{ name: string; value: string }>;
 }
 
@@ -46,6 +54,44 @@ const LEAD_INTENTS = new Set(['demo', 'info']);
 
 function usesResendTestingDomain(fromAddress: string): boolean {
   return /@resend\.dev>?$/i.test(fromAddress.trim());
+}
+
+function normalizeAbsoluteUrl(value?: string): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+  try {
+    return new URL(withProtocol).toString().replace(/\/$/, '');
+  } catch {
+    return null;
+  }
+}
+
+function resolveSiteUrl(env: LeadEnvironment): string | undefined {
+  const candidates = [
+    env.siteUrl,
+    process.env.PUBLIC_SITE_URL,
+    process.env.SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeAbsoluteUrl(candidate);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return undefined;
 }
 
 function parseNumericEnvValue(value: string | number | undefined): number | null {
@@ -237,6 +283,7 @@ async function sendResendEmail(
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'Idempotency-Key': idempotencyKey,
+      'User-Agent': 'vloergroep-formulier/1.0',
     },
     body: JSON.stringify(payload),
   });
@@ -316,6 +363,18 @@ export async function processLeadSubmission(
     process.env.VLOERGROEP_DEMO_URL ||
     process.env.VITE_VLOERGROEP_DEMO_URL ||
     'https://vloergroep.nl';
+  const siteUrl = resolveSiteUrl(env);
+  const logoUrl = buildEmailLogoUrl(siteUrl);
+  const logoSrc = logoUrl ? 'cid:vloergroep-logo' : null;
+  const logoAttachment = logoUrl
+    ? [
+        {
+          path: logoUrl,
+          filename: 'vloergroep-logo-white.png',
+          contentId: 'vloergroep-logo',
+        },
+      ]
+    : undefined;
   const environment = env.environment || process.env.NODE_ENV || 'development';
   const resendConfigurationIssue =
     !resendApiKey
@@ -334,6 +393,7 @@ export async function processLeadSubmission(
     results,
     profile,
     demoUrl,
+    logoSrc,
   });
 
   const internalMail = buildInternalLeadEmail({
@@ -341,6 +401,7 @@ export async function processLeadSubmission(
     state: payload.quiz,
     results,
     profile,
+    logoSrc,
   });
 
   const submissionFingerprint = `${payload.contact.email}:${payload.meta.submittedAt}`;
@@ -438,6 +499,7 @@ export async function processLeadSubmission(
           html: customerMail.html,
           text: customerMail.text,
           reply_to: internalEmail,
+          attachments: logoAttachment,
           tags: [
             { name: 'category', value: 'lead_scan' },
             { name: 'intent', value: intentTag },
@@ -454,6 +516,7 @@ export async function processLeadSubmission(
           html: internalMail.html,
           text: internalMail.text,
           reply_to: payload.contact.email,
+          attachments: logoAttachment,
           tags: [
             { name: 'category', value: 'lead_scan' },
             { name: 'intent', value: intentTag },

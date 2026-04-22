@@ -1,15 +1,14 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { motion, HTMLMotionProps } from 'framer-motion';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost';
   fullWidth?: boolean;
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonBase = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', fullWidth, children, ...props }, ref) => {
-    const baseStyles = "inline-flex items-center justify-center rounded-full font-display font-black tracking-[-0.03em] [font-weight:800] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-gold focus:ring-offset-near-black disabled:opacity-50 disabled:pointer-events-none";
+    const baseStyles = "inline-flex min-h-[44px] items-center justify-center rounded-full font-display font-black tracking-[-0.03em] [font-weight:800] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-gold focus:ring-offset-near-black disabled:opacity-50 disabled:pointer-events-none";
     
     const variants = {
       primary: "bg-[#e0ac3e] text-[#061010] hover:scale-105 shadow-[0_0_30px_rgba(224,172,62,0.3)]",
@@ -22,6 +21,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        type={props.type ?? 'button'}
         className={cn(
           baseStyles,
           variants[variant],
@@ -37,4 +37,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-Button.displayName = 'Button';
+ButtonBase.displayName = 'Button';
+
+export const Button = React.memo(ButtonBase);

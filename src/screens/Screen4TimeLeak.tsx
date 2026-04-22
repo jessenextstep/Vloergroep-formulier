@@ -4,8 +4,9 @@ import { BottomNav } from '../components/BottomNav';
 import { ProofCallout } from '../components/ProofCallout';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { Slider } from '../components/Slider';
+import { AnimatedResultValue, StepResultCard } from '../components/StepResultCard';
 import { heroScreen4 } from '../lib/brandAssets';
-import { motion } from 'framer-motion';
+import { formatNumber } from '../lib/utils';
 import { FileText, CalendarClock, MessageSquare, DollarSign } from 'lucide-react';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: Props) {
   
   const totalHours = state.timeAdmin + state.timePlanning + state.timeComm + state.timePayment;
+  const formattedTotalHours = `${formatNumber(totalHours, totalHours % 1 === 0 ? 0 : 1)} uur per week`;
   
   const formatHrs = (val: number) => val === 0 ? '0 u' : val >= 2 ? '2+ u' : `${val} u`;
 
@@ -106,16 +108,11 @@ export default function Screen4TimeLeak({ state, updateState, onNext, onBack }: 
         body="Veel vakmannen verliezen hier elke week ongemerkt tijd. VloerGroep brengt afspraken, communicatie en betalingen samen op één plek."
       />
 
-      <motion.div 
-        key={totalHours}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="mb-12 bg-charcoal/30 rounded-2xl p-5 text-center flex items-center justify-center gap-4 border border-white/5"
-      >
-        <p className="text-white/90 text-sm md:text-base font-medium">
-          Je geeft nu ongeveer <span className="text-amber-gold">{totalHours} uur per week</span> uit aan regelen.
+      <StepResultCard>
+        <p className="text-sm font-medium leading-7 text-white md:text-base">
+          Je geeft nu ongeveer <AnimatedResultValue value={formattedTotalHours} /> uit aan regelen.
         </p>
-      </motion.div>
+      </StepResultCard>
 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />

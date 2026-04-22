@@ -8,12 +8,15 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, interactive, selected, children, onKeyDown, role, tabIndex, ...props }, ref) => {
+    const resolvedRole = role ?? (interactive ? 'button' : undefined);
+
     return (
       <div
         ref={ref}
-        role={interactive ? 'button' : role}
+        role={resolvedRole}
         tabIndex={interactive ? (tabIndex ?? 0) : tabIndex}
-        aria-pressed={interactive ? selected : undefined}
+        aria-pressed={interactive && resolvedRole === 'button' ? selected : undefined}
+        aria-checked={interactive && resolvedRole === 'radio' ? selected : undefined}
         onKeyDown={(event) => {
           onKeyDown?.(event);
           if (!event.defaultPrevented && interactive && (event.key === 'Enter' || event.key === ' ')) {

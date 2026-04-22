@@ -6,7 +6,7 @@ interface ProofCalloutProps {
   body: string;
 }
 
-export function ProofCallout({
+function ProofCalloutComponent({
   title = 'Wist je dat VloerGroep...',
   body,
 }: ProofCalloutProps) {
@@ -15,8 +15,12 @@ export function ProofCallout({
       <BrandMark className="mt-0.5 h-10 w-10 rounded-[14px]" />
       <div>
         <h4 className="mb-1 text-sm font-medium text-white">{title}</h4>
-        <p className="text-white/60 text-sm leading-6">{body}</p>
+        <p className="text-white/72 text-sm leading-6">{body}</p>
       </div>
     </div>
   );
 }
+
+ProofCalloutComponent.displayName = 'ProofCallout';
+
+export const ProofCallout = React.memo(ProofCalloutComponent);

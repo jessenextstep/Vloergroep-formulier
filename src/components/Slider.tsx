@@ -15,7 +15,7 @@ interface SliderProps {
   className?: string;
 }
 
-export function Slider({ 
+function SliderComponent({ 
   label, 
   description,
   icon, 
@@ -29,6 +29,7 @@ export function Slider({
   className 
 }: SliderProps) {
   const sliderId = React.useId();
+  const descriptionId = description ? `${sliderId}-description` : undefined;
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
@@ -43,7 +44,7 @@ export function Slider({
            {icon && <div className="rounded-xl bg-amber-gold/12 p-2.5 text-amber-gold transition-transform group-hover:scale-[1.04]">{icon}</div>}
            <div className="flex flex-col">
              <label htmlFor={sliderId} className="font-semibold text-white px-2 leading-tight pr-2">{label}</label>
-             {description && <span className="text-[12px] text-white/70 mt-1">{description}</span>}
+             {description && <span id={descriptionId} className="mt-1 text-[12px] text-white/76">{description}</span>}
            </div>
          </div>
          <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/12 bg-[#081212]/92 px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.45)] sm:text-lg">
@@ -64,8 +65,9 @@ export function Slider({
            step={step}
            value={value}
            onChange={e => onChange(parseFloat(e.target.value))}
-            className="w-full relative z-10"
+            className="relative z-10 w-full touch-pan-y"
            aria-label={label}
+           aria-describedby={descriptionId}
            aria-valuetext={formatValue(value)}
            style={{
              background: `linear-gradient(to right, var(--color-amber-gold) 0%, var(--color-amber-gold) ${percentage}%, transparent ${percentage}%, transparent 100%)`
@@ -95,3 +97,7 @@ export function Slider({
     </div>
   );
 }
+
+SliderComponent.displayName = 'Slider';
+
+export const Slider = React.memo(SliderComponent);

@@ -21,6 +21,7 @@ Deze repo bevat de interactieve groeiscan voor VloerGroep, inclusief een voorber
    `BREVO_LIST_IDS=12`
    `BREVO_DEMO_LIST_ID=34`
    `BREVO_INFO_LIST_ID=56`
+   `PUBLIC_SITE_URL=https://jouw-scan-domein.nl`
    `VLOERGROEP_DEMO_URL=https://vloergroep.nl`
    `VITE_VLOERGROEP_DEMO_URL=https://vloergroep.nl`
 3. Start de app:
@@ -51,6 +52,14 @@ Voor productie is `onboarding@resend.dev` niet toegestaan voor echte ontvangers.
 - Voorbeeld: `VloerGroep <demo@updates.vloergroep.nl>`
 
 Als `RESEND_FROM_EMAIL` ontbreekt of nog op `resend.dev` staat, blokkeert de backend verzending nu bewust met een duidelijke foutmelding.
+
+## Mail assets
+
+De e-mailtemplates sturen het VloerGroep-logo nu inline mee via CID in plaats van als base64-blob in de HTML. Dat is compacter en robuuster in echte mailclients.
+
+- Zet in Vercel bij voorkeur ook `PUBLIC_SITE_URL` op het domein van deze scan-app
+- Resend haalt het logo dan op vanaf `/email/vloergroep-logo-white.png` en embedt het inline in de verzonden mail
+- Lokaal op `localhost` valt de template automatisch terug op een tekstlogo, zodat je geen kapotte afbeelding ziet
 
 ## Brevo variabelen
 

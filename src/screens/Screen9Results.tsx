@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { QuizState, CalculationResults } from '../types';
 import { formatCurrency, formatNumber } from '../lib/utils';
 import { buildLeadProfile } from '../lib/leadProfile';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock3, TrendingUp, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 
 export default function Screen9Results({ state, results, onNext, onBack }: Props) {
   const [showDetails, setShowDetails] = useState(false);
-  const profile = buildLeadProfile(state, results, 'demo');
+  const profile = useMemo(() => buildLeadProfile(state, results, 'demo'), [results, state]);
   const companyReference = state.companyName || 'jouw bedrijf';
 
   return (
@@ -116,21 +116,51 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
         <span className="inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold mb-4">
           Volgende stap
         </span>
-        <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
-          Dit wordt pas echt waardevol als we het samen doorvertalen naar een VloerGroep demo
-        </h3>
-        <p className="max-w-3xl text-white/72 leading-7 mb-4">
-          Je scan laat zien dat er voor {companyReference} vooral winst zit in {profile.primaryAngle.toLowerCase()}. In een demo laten we concreet zien hoe VloerGroep dit in de praktijk voor {companyReference} kan opleveren.
-        </p>
-        <p className="text-white/60 leading-7">
-          We lopen samen door waar de snelste winst zit, hoe dit in jouw workflow past en welke eerste stap het meeste effect heeft op groei, tijdswinst en cashflow.
-        </p>
+        <div className="grid gap-5 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:items-center">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
+              Van scan naar een demo die echt past bij {companyReference}
+            </h3>
+            <p className="max-w-2xl text-white/78 leading-7">
+              Voor {companyReference} ligt de snelste winst nu in {profile.primaryAngle.toLowerCase()}. In de demo maken we dit meteen praktisch en laten we zien waar de eerste echte versnelling zit.
+            </p>
+          </div>
+
+          <div className="grid gap-3">
+            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
+              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
+                <TrendingUp size={14} />
+                Focus
+              </div>
+              <p className="text-sm font-medium text-white">{profile.primaryAngle}</p>
+            </div>
+
+            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
+              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
+                <Clock3 size={14} />
+                In De Demo
+              </div>
+              <p className="text-sm font-medium text-white">Waar tijd, cashflow en groei het snelst winst geven in jouw werkdag.</p>
+            </div>
+
+            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-4 py-3 backdrop-blur-xl">
+              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
+                <Wallet size={14} />
+                Uitkomst
+              </div>
+              <p className="text-sm font-medium text-white">Een heldere eerste stap die het meeste oplevert voor {companyReference}.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Details Toggle */}
       <div className="flex justify-center mb-12">
          <button 
+            type="button"
             onClick={() => setShowDetails(!showDetails)}
+            aria-expanded={showDetails}
+            aria-controls="results-details-panel"
             className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors py-2 px-4 rounded-full bg-white/5"
           >
             {showDetails ? 'Verberg details' : 'Hoe is dit berekend?'}
@@ -141,6 +171,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
       <AnimatePresence>
         {showDetails && (
           <motion.div 
+            id="results-details-panel"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}

@@ -6,7 +6,7 @@ interface StepIndicatorProps {
   totalSteps: number;
 }
 
-export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
+function StepIndicatorComponent({ currentStep, totalSteps }: StepIndicatorProps) {
   const progress = (Math.max(1, currentStep) / totalSteps) * 100;
 
   return (
@@ -21,10 +21,14 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
     >
       <motion.div
         className="h-full bg-amber-gold rounded-full"
-        initial={{ width: 0 }}
+        initial={false}
         animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       />
     </div>
   );
 }
+
+StepIndicatorComponent.displayName = 'StepIndicator';
+
+export const StepIndicator = React.memo(StepIndicatorComponent);

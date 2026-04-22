@@ -3,6 +3,7 @@ import { QuizState, MissedProjects } from '../types';
 import { BottomNav } from '../components/BottomNav';
 import { ProofCallout } from '../components/ProofCallout';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { AnimatedResultValue, StepResultCard } from '../components/StepResultCard';
 import { heroScreen6 } from '../lib/brandAssets';
 
 interface Props {
@@ -20,6 +21,12 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
     { label: '2 per jaar', value: 2 },
     { label: '3+ per jaar', value: 3 },
   ];
+  const missedProjectsLabel =
+    state.missedProjects === 0
+      ? 'geen grote klussen'
+      : state.missedProjects === 3
+        ? '3+ grote klussen'
+        : `${state.missedProjects} grote ${state.missedProjects === 1 ? 'klus' : 'klussen'}`;
 
   return (
     <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
@@ -38,16 +45,19 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
       </div>
 
       <div className="space-y-12 mb-12">
-        <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-3">
+        <fieldset className="space-y-5">
+          <legend id="missed-projects-label" className="sr-only">Aantal grote klussen dat je afwijst</legend>
+          <div role="radiogroup" aria-labelledby="missed-projects-label" className="grid grid-cols-2 gap-3">
             {missedOptions.map(opt => (
               <button
                 key={opt.value}
                 type="button"
+                role="radio"
+                aria-checked={state.missedProjects === opt.value}
                 className={`py-4 px-4 rounded-[20px] font-medium border transition-all ${
                   state.missedProjects === opt.value 
                     ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
-                    : 'bg-white/5 border-white/10 text-[#FBEFD5]/70 hover:bg-white/10'
+                    : 'bg-white/5 border-white/10 text-[#FBEFD5]/80 hover:bg-white/10'
                 }`}
                 onClick={() => updateState({ missedProjects: opt.value })}
               >
@@ -55,13 +65,19 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
       </div>
 
       <ProofCallout
         title="Wist je dat VloerGroep grotere klussen veiliger laat samenwerken?"
         body="Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zonder privé zorgen."
       />
+
+      <StepResultCard>
+        <p className="text-sm font-medium leading-7 text-white md:text-base">
+          Je geeft aan dat je nu <AnimatedResultValue value={missedProjectsLabel} /> per jaar laat liggen door capaciteit of samenwerking.
+        </p>
+      </StepResultCard>
 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} nextLabel="Bereken mijn scan" />

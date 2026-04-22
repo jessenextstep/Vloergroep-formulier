@@ -45,6 +45,7 @@ function leadApiDevPlugin() {
             internalEmail: process.env.LEAD_NOTIFICATION_EMAIL,
             demoUrl: process.env.VLOERGROEP_DEMO_URL,
             environment: process.env.NODE_ENV,
+            siteUrl: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
           });
 
           res.statusCode = result.status;

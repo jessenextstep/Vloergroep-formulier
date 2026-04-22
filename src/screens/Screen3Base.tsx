@@ -3,10 +3,10 @@ import { QuizState } from '../types';
 import { BottomNav } from '../components/BottomNav';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { Slider } from '../components/Slider';
+import { AnimatedResultValue, StepResultCard } from '../components/StepResultCard';
 import { heroScreen3 } from '../lib/brandAssets';
 import { formatCurrency } from '../lib/utils';
 import { getFteEstimate } from '../lib/calculations';
-import { motion } from 'framer-motion';
 import { Wallet, Clock, CalendarDays } from 'lucide-react';
 
 interface Props {
@@ -90,17 +90,16 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
         />
       </div>
 
-      <motion.div 
-        key={`${yearlyHours}-${yearlyRevenue}`}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-12 bg-amber-gold/5 border border-amber-gold/20 rounded-2xl p-5 text-center"
-      >
-        <p className="text-amber-gold/90 text-[15px] font-medium">
-          Dat komt neer op ongeveer <span className="text-amber-gold">{yearlyHours} uur</span> per jaar en <span className="text-amber-gold">{formatCurrency(yearlyRevenue)}</span> omzet
+      <StepResultCard>
+        <p className="text-[15px] font-medium leading-7 text-white md:text-base">
+          Dat komt neer op ongeveer{' '}
+          <AnimatedResultValue value={`${yearlyHours} uur`} />{' '}
+          per jaar en{' '}
+          <AnimatedResultValue value={formatCurrency(yearlyRevenue)} />{' '}
+          omzet
           {teamFactor > 1 ? ' voor je huidige teamomvang' : ''}.
         </p>
-      </motion.div>
+      </StepResultCard>
 
       <div className="mt-auto">
         <BottomNav onNext={onNext} onBack={onBack} />
