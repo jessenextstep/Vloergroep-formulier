@@ -302,7 +302,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center pt-2 md:pb-8 md:pt-5">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center pt-6 md:pb-8 md:pt-5">
       <AnimatePresence mode="wait">
         {!submitted ? (
           <motion.div

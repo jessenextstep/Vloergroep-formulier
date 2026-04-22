@@ -20,7 +20,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
   const companyReference = state.companyName || 'jouw bedrijf';
 
   return (
-    <div className="flex-1 flex flex-col items-center w-full max-w-5xl mx-auto py-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center pb-8 pt-12 md:py-8">
       
       {/* Header */}
       <div className="text-center mb-10 w-full">
