@@ -114,6 +114,17 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
   }, [formData, submitted]);
 
   const profile = buildLeadProfile(state, results, 'demo');
+  const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
+  const companyName = (formData.company || state.companyName || '').trim();
+  const growthFocus = profile.primaryAngle.toLowerCase();
+  const companyReference = companyName ? companyName : 'jouw bedrijf';
+  const heading =
+    firstName.length > 0
+      ? `${firstName}, laat je gegevens achter voor je gratis persoonlijke VloerGroep demo`
+      : 'Laat je gegevens achter voor je gratis persoonlijke VloerGroep demo';
+  const introText = companyName
+    ? `We gebruiken je scan voor een gratis persoonlijke demo voor ${companyName}. Daarin laten we zien waar volgens jouw antwoorden de meeste winst zit in ${growthFocus} en hoe we ${companyName} nog verder kunnen laten groeien.`
+    : `We gebruiken je scan voor een gratis persoonlijke demo. Daarin laten we zien waar volgens jouw antwoorden de meeste winst zit in ${growthFocus} en hoe we jouw bedrijf nog verder kunnen laten groeien.`;
 
   const validate = () => {
     const nextErrors: FormErrors = {};
@@ -255,10 +266,10 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 Laatste stap
               </span>
               <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl">
-                Laat je gegevens achter voor je scan
+                {heading}
               </h2>
               <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/78 lg:mx-0">
-                Je ontvangt je scan automatisch per mail. VloerGroep gebruikt je antwoorden om de juiste vervolgstap voor te bereiden.
+                {introText}
               </p>
             </div>
 
@@ -416,7 +427,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-amber-gold focus:ring-amber-gold"
                   />
                   <span className="text-sm leading-6 text-white/72">
-                    Ik geef toestemming dat VloerGroep contact met mij opneemt over mijn scan en het inplannen van een passende demo.
+                    Ik geef toestemming dat VloerGroep contact met mij opneemt over mijn scan en een gratis persoonlijke demo voor {companyReference}.
                   </span>
                 </label>
                 {errors.consent && (
@@ -439,7 +450,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
 
               <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={isSubmitting} className="w-full !px-8 !py-4 text-base shadow-xl shadow-amber-gold/20 sm:w-auto">
-                  {isSubmitting ? 'Bezig met versturen...' : 'Verstuur mijn gegevens'}
+                  {isSubmitting ? 'Bezig met versturen...' : 'Vraag mijn gratis demo aan'}
                 </Button>
               </div>
             </form>
@@ -459,9 +470,11 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 <span className="mb-4 inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
                   Aanvraag ontvangen
                 </span>
-                <h3 className="mb-4 text-3xl font-bold md:text-5xl">We gaan je demo voorbereiden</h3>
+                <h3 className="mb-4 text-3xl font-bold md:text-5xl">
+                  {firstName ? `${firstName}, je gratis demo-aanvraag is ontvangen` : 'Je gratis demo-aanvraag is ontvangen'}
+                </h3>
                 <p className="max-w-2xl text-lg leading-relaxed text-white/72">
-                  Je bevestiging is onderweg en VloerGroep heeft je leadprofiel direct ontvangen. De opvolging kan daardoor meteen focussen op {profile.primaryAngle.toLowerCase()}.
+                  Je bevestiging is onderweg en VloerGroep heeft je leadprofiel direct ontvangen. Daardoor kunnen we in de demo meteen laten zien wat meer voordeel voor {companyReference} oplevert en hoe {companyReference} verder kan groeien via {growthFocus}.
                 </p>
               </div>
 
