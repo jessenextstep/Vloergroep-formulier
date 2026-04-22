@@ -45,7 +45,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
   ];
 
   return (
-    <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col pt-1 md:pb-8 md:pt-5">
       <ScreenHeroImage
         src={heroScreen3}
         alt="Uurtarief en werkweek overzicht"
@@ -70,7 +70,8 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
           onChange={(v) => updateState({ hourlyRate: v })}
           min={30}
           max={150}
-          step={5}
+          step={1}
+          tickEvery={10}
           marks={hourlyRateMarks}
           formatValue={v => `€ ${v}`}
         />
@@ -83,7 +84,8 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
           onChange={(v) => updateState({ hoursPerWeek: v })}
           min={10}
           max={60}
-          step={2}
+          step={1}
+          tickEvery={5}
           marks={weeklyHoursMarks}
           formatValue={v => `${v} u`}
         />

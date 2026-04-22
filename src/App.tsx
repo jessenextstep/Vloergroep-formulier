@@ -103,9 +103,8 @@ function ScreenFallback() {
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-[320px] w-full items-center justify-center"
+      className="min-h-[320px] w-full opacity-0"
     >
-      <div className="h-12 w-12 animate-spin rounded-full border-2 border-amber-gold/20 border-t-amber-gold shadow-[0_0_32px_rgba(224,172,62,0.18)] motion-reduce:animate-none" />
       <span className="sr-only">Scherm laden...</span>
     </div>
   );
@@ -116,12 +115,13 @@ export default function App() {
   const [state, setState] = useState<QuizState>(() => loadStoredQuizState());
   const [sessionStartedAt] = useState(() => Date.now());
   const prefersReducedMotion = useReducedMotion();
-  const [useCompactMotion, setUseCompactMotion] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<1 | -1>(1);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)');
     const syncMotionPreference = () => {
-      setUseCompactMotion(mediaQuery.matches);
+      setIsMobileViewport(mediaQuery.matches);
     };
 
     syncMotionPreference();
@@ -135,12 +135,12 @@ export default function App() {
     return () => mediaQuery.removeListener(syncMotionPreference);
   }, []);
 
-  const shouldUseSimpleMotion = prefersReducedMotion || useCompactMotion;
+  const shouldUseSimpleMotion = prefersReducedMotion;
 
   // Auto-scroll to top when step changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: shouldUseSimpleMotion ? 'auto' : 'smooth' });
-  }, [step, shouldUseSimpleMotion]);
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion || isMobileViewport ? 'auto' : 'smooth' });
+  }, [isMobileViewport, prefersReducedMotion, step]);
 
   useEffect(() => {
     const persistTimer = window.setTimeout(() => {
@@ -174,11 +174,24 @@ export default function App() {
     return () => window.clearTimeout(preloadTimer);
   }, [step]);
 
+  useEffect(() => {
+    const preloadAllScreens = () => {
+      SCREEN_PRELOADERS.forEach((loader) => {
+        void loader();
+      });
+    };
+
+    const preloadTimer = window.setTimeout(preloadAllScreens, 260);
+    return () => window.clearTimeout(preloadTimer);
+  }, []);
+
   const handleNext = useCallback(() => {
+    setTransitionDirection(1);
     setStep((currentStep) => Math.min(LAST_APP_STEP, currentStep + 1));
   }, []);
 
   const handleBack = useCallback(() => {
+    setTransitionDirection(-1);
     setStep((currentStep) => Math.max(0, currentStep - 1));
   }, []);
 
@@ -187,23 +200,71 @@ export default function App() {
   }, []);
 
   const currentResults = useMemo(() => calculateResults(state), [state]);
+  const showProgressHeader = step > 0 && step <= TOTAL_STEPS;
+  const showIntroMobileHeader = step === 0;
+  const hasCompactStickyFooter = step === 0;
+  const hasStandardStickyFooter = (step > 0 && step <= TOTAL_STEPS) || step === 7;
+  const mainBottomPaddingClass = hasCompactStickyFooter
+    ? 'pb-[108px] md:pb-28'
+    : hasStandardStickyFooter
+      ? 'pb-[140px] md:pb-28'
+      : 'pb-10 md:pb-28';
 
-  const screenTransition = useMemo(
+  const screenVariants = useMemo(
     () =>
       shouldUseSimpleMotion
         ? {
             initial: { opacity: 0 },
             animate: { opacity: 1 },
             exit: { opacity: 0 },
-            transition: { duration: 0.18, ease: 'easeOut' as const },
           }
-        : {
-            initial: { opacity: 0, y: 12, scale: 0.996 },
-            animate: { opacity: 1, y: 0, scale: 1 },
-            exit: { opacity: 0, y: -6, scale: 0.996 },
-            transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const },
-          },
-    [shouldUseSimpleMotion],
+        : isMobileViewport
+          ? {
+              initial: (direction: 1 | -1) => ({
+                opacity: 0,
+                x: direction > 0 ? 34 : -34,
+                scale: 0.988,
+                filter: 'blur(6px)',
+              }),
+              animate: {
+                opacity: 1,
+                x: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+              },
+              exit: (direction: 1 | -1) => ({
+                opacity: 0,
+                x: direction > 0 ? -26 : 26,
+                scale: 0.992,
+                filter: 'blur(4px)',
+              }),
+            }
+          : {
+              initial: { opacity: 0, y: 12, scale: 0.996 },
+              animate: { opacity: 1, y: 0, scale: 1 },
+              exit: { opacity: 0, y: -6, scale: 0.996 },
+            },
+    [isMobileViewport, shouldUseSimpleMotion],
+  );
+
+  const screenTransition = useMemo(
+    () => ({
+      duration: shouldUseSimpleMotion ? 0.18 : isMobileViewport ? 0.32 : 0.24,
+      ease: [0.22, 1, 0.36, 1] as const,
+    }),
+    [isMobileViewport, shouldUseSimpleMotion],
+  );
+
+  const screenMotionProps = useMemo(
+    () => ({
+      variants: screenVariants,
+      initial: 'initial' as const,
+      animate: 'animate' as const,
+      exit: 'exit' as const,
+      transition: screenTransition,
+      custom: transitionDirection,
+    }),
+    [screenTransition, screenVariants, transitionDirection],
   );
 
   return (
@@ -211,8 +272,8 @@ export default function App() {
       <BrandWatermark />
       
       {/* Header / Progress */}
-      {step > 0 && step <= TOTAL_STEPS && (
-        <header className="flex justify-between items-center p-8 z-50">
+      {showProgressHeader && (
+        <header className="z-50 flex items-center justify-between px-6 pb-3 pt-6 sm:px-8 sm:pb-4 sm:pt-8">
           <div className="flex items-center gap-2">
             <BrandLogo className="h-8 sm:h-9" />
           </div>
@@ -227,61 +288,75 @@ export default function App() {
         </header>
       )}
 
+      {showIntroMobileHeader && (
+        <header className="z-50 flex items-center px-6 pb-3 pt-6 md:hidden">
+          <BrandLogo className="h-8 sm:h-9" />
+        </header>
+      )}
+
       {/* Main Content Area */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center max-w-5xl mx-auto w-full px-6 pt-6 md:pt-12 pb-[140px] md:pb-28">
+      <main className={`relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 pt-2 md:pt-8 ${mainBottomPaddingClass}`}>
         <Suspense fallback={<ScreenFallback />}>
           <AnimatePresence mode="wait" initial={false}>
             
             {step === 0 && (
-              <motion.div key="step-0" {...screenTransition} className="w-full">
+              <motion.div key="step-0" {...screenMotionProps} className="w-full will-change-transform">
                 <Screen1Hero onNext={handleNext} />
               </motion.div>
             )}
 
             {step === 1 && (
-              <motion.div key="step-1" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-1" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen2WhoAreYou state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 2 && (
-              <motion.div key="step-2" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-2" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen3Base state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 3 && (
-              <motion.div key="step-3" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-3" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen4TimeLeak state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 4 && (
-              <motion.div key="step-4" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-4" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen5Cashflow state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 5 && (
-              <motion.div key="step-5" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-5" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen7Collab state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 6 && (
-              <motion.div key="step-6" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-6" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen8Loading onNext={handleNext} />
               </motion.div>
             )}
 
             {step === 7 && (
-              <motion.div key="step-7" {...screenTransition} className="w-full max-w-4xl mx-auto">
-                <Screen9Results state={state} results={currentResults} onNext={handleNext} onBack={() => setStep(5)} />
+              <motion.div key="step-7" {...screenMotionProps} className="mx-auto w-full max-w-4xl will-change-transform">
+                <Screen9Results
+                  state={state}
+                  results={currentResults}
+                  onNext={handleNext}
+                  onBack={() => {
+                    setTransitionDirection(-1);
+                    setStep(5);
+                  }}
+                />
               </motion.div>
             )}
 
             {step === 8 && (
-              <motion.div key="step-8" {...screenTransition} className="w-full h-full flex flex-col">
+              <motion.div key="step-8" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
                 <Screen10Capture state={state} results={currentResults} sessionStartedAt={sessionStartedAt} />
               </motion.div>
             )}

@@ -11,13 +11,7 @@ interface Props {
 
 export default function Screen1Hero({ onNext }: Props) {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col pt-4 md:py-8">
-      <div className="mb-4 flex md:hidden">
-        <div className="rounded-[20px] border border-white/10 bg-[#061010]/88 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-          <BrandLogo className="h-6 w-auto" />
-        </div>
-      </div>
-
+    <div className="mx-auto flex max-w-3xl flex-col pt-0 md:py-8">
       <div className="relative mb-8">
         <ScreenHeroImage
           src={heroScreen1}
@@ -59,7 +53,7 @@ export default function Screen1Hero({ onNext }: Props) {
         </div>
       </div>
 
-      <div className="mb-32 flex w-full flex-col items-center md:mb-12">
+      <div className="hidden w-full flex-col items-center md:mb-12 md:flex">
         <Button onClick={onNext} className="w-full sm:w-auto sm:px-12 py-4 text-lg hidden md:inline-flex shadow-lg">
           Start de groeiscan <ArrowRight size={18} className="ml-2" />
         </Button>

@@ -29,7 +29,7 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
         : `${state.missedProjects} grote ${state.missedProjects === 1 ? 'klus' : 'klussen'}`;
 
   return (
-    <div className="flex-1 flex flex-col pt-4 md:py-8 max-w-2xl mx-auto w-full">
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col pt-1 md:pb-8 md:pt-5">
       <ScreenHeroImage
         src={heroScreen6}
         alt="Samenwerken aan grotere vloerprojecten"

@@ -4,7 +4,7 @@ import { formatCurrency, formatNumber } from '../lib/utils';
 import { buildLeadProfile } from '../lib/leadProfile';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -86,25 +86,25 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
       {/* Comparisons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-10">
         
-        <div className="flex items-center gap-4 p-5 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-md rounded-[20px] border border-white/[0.08] shadow-lg">
+        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent p-5 text-left shadow-lg">
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">1</div>
-          <div>
+          <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Tijdswinst per week</h4>
             <p className="text-xs text-[#FBEFD5]/50">{formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} uur uit regelen gehaald</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-5 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-md rounded-[20px] border border-white/[0.08] shadow-lg">
+        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent p-5 text-left shadow-lg">
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">2</div>
-          <div>
+          <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Focus op betere leads</h4>
             <p className="text-xs text-[#FBEFD5]/50">Alleen de juiste aanvragen</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-5 bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-md rounded-[20px] border border-white/[0.08] shadow-lg">
+        <div className="flex items-start gap-4 rounded-[20px] border border-white/[0.08] bg-white/[0.02] bg-gradient-to-br from-white/[0.05] to-transparent p-5 text-left shadow-lg">
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">3</div>
-          <div>
+          <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Samenwerking</h4>
             <p className="text-xs text-[#FBEFD5]/50">{state.missedProjects}x meepakken via teamwerk</p>
           </div>
@@ -123,14 +123,14 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           <p className="max-w-2xl text-white/80 leading-7">
             Deze scan laat het potentieel zien. In een persoonlijke VloerGroep demo maken we het concreet: waar zit voor jou de snelste winst in {profile.primaryAngle.toLowerCase()} en wat is slim om als eerste op te pakken.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white">
-              Persoonlijk voor {companyReference}
-            </div>
-            <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white">
-              Heldere eerste stap
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={onNext}
+            className="mt-5 inline-flex items-center gap-2 text-sm font-display font-bold tracking-[-0.02em] text-amber-gold transition-colors hover:text-[#f0bc50]"
+          >
+            Plan mijn VloerGroep demo
+            <ArrowRight size={16} />
+          </button>
         </div>
       </div>
 

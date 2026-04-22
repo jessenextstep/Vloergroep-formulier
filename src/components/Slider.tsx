@@ -10,6 +10,7 @@ interface SliderProps {
   min?: number;
   max?: number;
   step?: number;
+  tickEvery?: number;
   marks?: { value: number; label: string }[];
   formatValue?: (val: number) => string;
   className?: string;
@@ -24,6 +25,7 @@ function SliderComponent({
   min = 0, 
   max = 10, 
   step = 0.5,
+  tickEvery,
   marks,
   formatValue = v => `${v}`,
   className 
@@ -32,6 +34,20 @@ function SliderComponent({
   const descriptionId = description ? `${sliderId}-description` : undefined;
   const percentage = ((value - min) / (max - min)) * 100;
   const scaleTicks = React.useMemo(() => {
+    if (tickEvery && tickEvery > 0) {
+      const ticks = new Set<number>();
+
+      for (let current = min; current <= max; current += tickEvery) {
+        ticks.add(Number(current.toFixed(4)));
+      }
+
+      ticks.add(min);
+      ticks.add(max);
+      marks?.forEach((mark) => ticks.add(Number(mark.value.toFixed(4))));
+
+      return Array.from(ticks).sort((a, b) => a - b);
+    }
+
     const totalSteps = Math.round((max - min) / step);
 
     if (!Number.isFinite(totalSteps) || totalSteps <= 0) {
@@ -54,7 +70,7 @@ function SliderComponent({
     marks?.forEach((mark) => ticks.add(Number(mark.value.toFixed(4))));
 
     return Array.from(ticks).sort((a, b) => a - b);
-  }, [marks, max, min, step]);
+  }, [marks, max, min, step, tickEvery]);
 
   return (
     <div
