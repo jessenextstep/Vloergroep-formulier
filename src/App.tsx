@@ -222,27 +222,21 @@ export default function App() {
           ? {
               initial: (direction: 1 | -1) => ({
                 opacity: 0,
-                x: direction > 0 ? 34 : -34,
-                scale: 0.988,
-                filter: 'blur(6px)',
+                clipPath: direction > 0 ? 'inset(0 0 0 10%)' : 'inset(0 10% 0 0)',
               }),
               animate: {
                 opacity: 1,
-                x: 0,
-                scale: 1,
-                filter: 'blur(0px)',
+                clipPath: 'inset(0 0 0 0)',
               },
               exit: (direction: 1 | -1) => ({
                 opacity: 0,
-                x: direction > 0 ? -26 : 26,
-                scale: 0.992,
-                filter: 'blur(4px)',
+                clipPath: direction > 0 ? 'inset(0 10% 0 0)' : 'inset(0 0 0 10%)',
               }),
             }
           : {
-              initial: { opacity: 0, y: 12, scale: 0.996 },
-              animate: { opacity: 1, y: 0, scale: 1 },
-              exit: { opacity: 0, y: -6, scale: 0.996 },
+              initial: { opacity: 0, clipPath: 'inset(2% 0 0 0)' },
+              animate: { opacity: 1, clipPath: 'inset(0 0 0 0)' },
+              exit: { opacity: 0, clipPath: 'inset(0 0 2% 0)' },
             },
     [isMobileViewport, shouldUseSimpleMotion],
   );
@@ -300,49 +294,49 @@ export default function App() {
           <AnimatePresence mode="wait" initial={false}>
             
             {step === 0 && (
-              <motion.div key="step-0" {...screenMotionProps} className="w-full will-change-transform">
+              <motion.div key="step-0" {...screenMotionProps} className="w-full">
                 <Screen1Hero onNext={handleNext} />
               </motion.div>
             )}
 
             {step === 1 && (
-              <motion.div key="step-1" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-1" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen2WhoAreYou state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 2 && (
-              <motion.div key="step-2" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-2" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen3Base state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 3 && (
-              <motion.div key="step-3" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-3" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen4TimeLeak state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 4 && (
-              <motion.div key="step-4" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-4" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen5Cashflow state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 5 && (
-              <motion.div key="step-5" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-5" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen7Collab state={state} updateState={updateState} onNext={handleNext} onBack={handleBack} />
               </motion.div>
             )}
 
             {step === 6 && (
-              <motion.div key="step-6" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-6" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen8Loading onNext={handleNext} />
               </motion.div>
             )}
 
             {step === 7 && (
-              <motion.div key="step-7" {...screenMotionProps} className="mx-auto w-full max-w-4xl will-change-transform">
+              <motion.div key="step-7" {...screenMotionProps} className="mx-auto w-full max-w-4xl">
                 <Screen9Results
                   state={state}
                   results={currentResults}
@@ -356,7 +350,7 @@ export default function App() {
             )}
 
             {step === 8 && (
-              <motion.div key="step-8" {...screenMotionProps} className="flex h-full w-full flex-col will-change-transform">
+              <motion.div key="step-8" {...screenMotionProps} className="flex h-full w-full flex-col">
                 <Screen10Capture state={state} results={currentResults} sessionStartedAt={sessionStartedAt} />
               </motion.div>
             )}
