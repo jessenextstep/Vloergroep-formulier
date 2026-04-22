@@ -2,31 +2,13 @@ import React from 'react';
 import { Button } from '../components/Button';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { heroScreen1 } from '../lib/brandAssets';
-import { ArrowRight, BarChart3, CheckCircle2, Clock3, WalletCards } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface Props {
   onNext: () => void;
 }
 
 export default function Screen1Hero({ onNext }: Props) {
-  const highlights = [
-    {
-      title: 'Tijdlekken direct zichtbaar',
-      text: 'Zie waar planning, administratie en communicatie nu onnodig tijd kosten.',
-      icon: <Clock3 size={18} />,
-    },
-    {
-      title: 'Cashflow sneller vrij',
-      text: 'Ontdek hoeveel werkkapitaal vastzit en hoe snel VloerGroep dat kan versnellen.',
-      icon: <WalletCards size={18} />,
-    },
-    {
-      title: 'Grotere klussen beter pakken',
-      text: 'Bereken waar samenwerking en betere leads direct extra omzet kunnen opleveren.',
-      icon: <BarChart3 size={18} />,
-    },
-  ];
-
   return (
     <div className="mx-auto flex max-w-3xl flex-col pt-4 md:py-8">
       <ScreenHeroImage
@@ -40,28 +22,13 @@ export default function Screen1Hero({ onNext }: Props) {
           VloerGroep Groeiscan
         </span>
 
-        <h1 className="mb-4 text-4xl font-black leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">
+        <h1 className="mb-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
           Bereken hoeveel jouw bedrijf kan groeien met VloerGroep
         </h1>
 
         <p className="max-w-3xl text-base leading-relaxed text-white/78 md:text-xl">
           In ongeveer 2 minuten zie je waar tijd, cashflow en omzetkansen nu blijven liggen. Daarna krijg je direct jouw scan op basis van je antwoorden.
         </p>
-      </div>
-
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {highlights.map((item) => (
-          <div
-            key={item.title}
-            className="rounded-[24px] border border-white/8 bg-[#0b1515]/88 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-          >
-            <div className="mb-4 inline-flex rounded-2xl bg-amber-gold/12 p-3 text-amber-gold">
-              {item.icon}
-            </div>
-            <h2 className="mb-2 text-lg font-semibold text-white">{item.title}</h2>
-            <p className="text-sm leading-6 text-white/72">{item.text}</p>
-          </div>
-        ))}
       </div>
 
       <div className="mb-10 rounded-[24px] border border-white/8 bg-[#0b1515]/75 px-5 py-4">

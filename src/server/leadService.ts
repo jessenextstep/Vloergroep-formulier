@@ -44,6 +44,10 @@ const PAYMENT_DAYS = new Set([14, 30, 45, 60, 90]);
 const MISSED_PROJECTS = new Set([0, 1, 2, 3]);
 const LEAD_INTENTS = new Set(['demo', 'info']);
 
+function usesResendTestingDomain(fromAddress: string): boolean {
+  return /@resend\.dev>?$/i.test(fromAddress.trim());
+}
+
 function parseNumericEnvValue(value: string | number | undefined): number | null {
   if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
     return value;
@@ -300,8 +304,9 @@ export async function processLeadSubmission(
   const results = calculateResults(payload.quiz);
   const profile = buildLeadProfile(payload.quiz, results, payload.contact.intent);
   const resendApiKey = env.resendApiKey || process.env.RESEND_API_KEY;
+  const configuredResendFromEmail = env.resendFromEmail || process.env.RESEND_FROM_EMAIL;
   const resendFromEmail =
-    env.resendFromEmail || process.env.RESEND_FROM_EMAIL || 'VloerGroep <onboarding@resend.dev>';
+    configuredResendFromEmail || 'VloerGroep <onboarding@resend.dev>';
   const internalEmail =
     env.internalEmail || process.env.LEAD_NOTIFICATION_EMAIL || 'info@vloergroep.nl';
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
@@ -331,6 +336,28 @@ export async function processLeadSubmission(
         ok: true,
         deliveryMode: 'preview',
         message: 'Previewmodus: mails zijn opgebouwd, maar nog niet verzonden.',
+      },
+    };
+  }
+
+  if (environment === 'production' && !configuredResendFromEmail) {
+    return {
+      status: 503,
+      body: {
+        ok: false,
+        deliveryMode: 'preview',
+        message: 'RESEND_FROM_EMAIL ontbreekt in Vercel. Gebruik een afzender op een geverifieerd Resend-domein.',
+      },
+    };
+  }
+
+  if (environment === 'production' && usesResendTestingDomain(resendFromEmail)) {
+    return {
+      status: 503,
+      body: {
+        ok: false,
+        deliveryMode: 'preview',
+        message: 'RESEND_FROM_EMAIL staat nog op resend.dev. Verifieer eerst een domein in Resend en gebruik daarna een afzender op dat domein.',
       },
     };
   }
@@ -417,12 +444,19 @@ export async function processLeadSubmission(
     };
   } catch (error) {
     console.error('Lead submission failed', error);
+
+    const resendConfigurationMessage =
+      error instanceof Error &&
+      error.message.includes('You can only send testing emails to your own email address')
+        ? 'Resend gebruikt nog een testafzender. Zet in Vercel `RESEND_FROM_EMAIL` op een adres van een geverifieerd Resend-domein.'
+        : null;
+
     return {
       status: 502,
       body: {
         ok: false,
         deliveryMode: 'preview',
-        message: 'De aanvraag kon niet worden verzonden. Probeer het zo nog eens.',
+        message: resendConfigurationMessage || 'De aanvraag kon niet worden verzonden. Probeer het zo nog eens.',
       },
     };
   }

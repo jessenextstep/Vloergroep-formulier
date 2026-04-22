@@ -15,7 +15,7 @@ Deze repo bevat de interactieve groeiscan voor VloerGroep, inclusief een voorber
    `npm ci`
 2. Maak lokaal een `.env.local` aan als je de mailflow wilt testen:
    `RESEND_API_KEY=...`
-   `RESEND_FROM_EMAIL=VloerGroep <onboarding@resend.dev>`
+   `RESEND_FROM_EMAIL=VloerGroep <onboarding@resend.dev>` (alleen voor lokaal testen)
    `LEAD_NOTIFICATION_EMAIL=info@vloergroep.nl`
    `BREVO_API=...`
    `BREVO_LIST_IDS=12`
@@ -41,6 +41,16 @@ Bij een lead-aanvraag gebeurt automatisch het volgende:
    - de lead wordt optioneel aan gedeelde en/of intent-specifieke lijsten toegevoegd
 
 Zodra `RESEND_API_KEY` in Vercel staat, is de flow live. Zonder sleutel draait de app lokaal in previewmodus zodat de UX gewoon getest kan worden.
+
+## Resend in productie
+
+Voor productie is `onboarding@resend.dev` niet toegestaan voor echte ontvangers.
+
+- Verifieer eerst een domein of subdomein in Resend
+- Zet daarna in Vercel `RESEND_FROM_EMAIL` op een afzender van dat domein
+- Voorbeeld: `VloerGroep <demo@updates.vloergroep.nl>`
+
+Als `RESEND_FROM_EMAIL` ontbreekt of nog op `resend.dev` staat, blokkeert de backend verzending nu bewust met een duidelijke foutmelding.
 
 ## Brevo variabelen
 
