@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Building2, Mail, Phone, User } from 'lucide-react';
+import { ArrowRight, Building2, Mail, Phone, User } from 'lucide-react';
 
 import { Button } from '../components/Button';
 import { ScanSocialProof } from '../components/ScanSocialProof';
@@ -160,6 +160,7 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
   const heading = firstName ? `${firstName}, waar mogen we je scan naartoe sturen?` : 'Waar mogen we je scan naartoe sturen?';
   const intro = 'Vul hieronder je gegevens in en ontvang jouw persoonlijke scan direct per mail.';
+  const socialProofCount = (import.meta.env.VITE_SCAN_SOCIAL_PROOF_COUNT as string | undefined)?.trim() || '100+';
 
   const validate = useCallback(() => {
     const nextErrors: FormErrors = {};
@@ -450,19 +451,32 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
                     {serverMessage}
                   </p>
                 ) : null}
+
+                <div className="mt-6 hidden md:block">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    fullWidth
+                    className="!w-full !justify-center !py-4 text-[16px] shadow-lg shadow-amber-gold/20"
+                  >
+                    {isSubmitting ? 'Je scan wordt verstuurd...' : 'Ontvang mijn scan'}
+                    {!isSubmitting ? <ArrowRight size={18} className="ml-2" /> : null}
+                  </Button>
+                </div>
               </form>
             </div>
 
             <ScanSocialProof
-              className="mt-5"
-              title="Andere vakmannen gingen je al voor"
+              className="mt-6"
+              align="center"
+              title={`${socialProofCount} vakmannen ontvingen al hun persoonlijke bedrijfsscan`}
             />
 
-            <div className="h-28 w-full shrink-0" />
+            <div className="h-28 w-full shrink-0 md:hidden" />
 
             <nav
               aria-label="Gegevens versturen"
-              className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#050505]/92 p-3 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-2xl sm:p-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
+              className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#050505]/92 p-3 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-2xl sm:p-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)] md:hidden"
             >
               <div className="mx-auto flex w-full max-w-3xl items-center justify-end gap-4 px-2 sm:px-6">
                 <Button
@@ -471,7 +485,8 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
                   disabled={isSubmitting}
                   className="ml-auto !px-6 !py-3 text-[15px] shadow-lg shadow-amber-gold/20"
                 >
-                  {isSubmitting ? 'Je scan wordt verstuurd...' : 'Ontvang mijn scan per mail'}
+                  {isSubmitting ? 'Je scan wordt verstuurd...' : 'Ontvang mijn scan'}
+                  {!isSubmitting ? <ArrowRight size={18} className="ml-2" /> : null}
                 </Button>
               </div>
             </nav>
