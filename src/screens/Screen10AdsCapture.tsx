@@ -160,7 +160,6 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
   const heading = firstName ? `${firstName}, waar mogen we je scan naartoe sturen?` : 'Waar mogen we je scan naartoe sturen?';
   const intro = 'Vul hieronder je gegevens in en ontvang jouw persoonlijke scan direct per mail.';
-  const socialProofCount = (import.meta.env.VITE_SCAN_SOCIAL_PROOF_COUNT as string | undefined)?.trim() || '100+';
 
   const validate = useCallback(() => {
     const nextErrors: FormErrors = {};
@@ -469,7 +468,7 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
             <ScanSocialProof
               className="mt-6"
               align="center"
-              title={`${socialProofCount} vakmannen ontvingen al hun persoonlijke bedrijfsscan`}
+              title="{{count}} vakmannen ontvingen al hun persoonlijke bedrijfsscan"
             />
 
             <div className="h-28 w-full shrink-0 md:hidden" />

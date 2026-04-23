@@ -223,7 +223,8 @@ function buildCustomerStoryBlocks({
       body:
         `Je huidige betaaltermijn ligt op ${paymentLabel} en je gaf aan dat ${state.percentageVloergroep}% van je omzet via VloerGroep zou kunnen lopen.` +
         ` Met projectdepot en vooraf geborgde betalingen hoeft dat deel minder lang in openstaande posten te blijven hangen.` +
-        ` Daarom rekenen we voor ${companyLabel} met ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} sneller beschikbaar werkkapitaal.`,
+        ` Daarom rekenen we voor ${companyLabel} met ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} sneller beschikbaar werkkapitaal.` +
+        ` Dat betekent in de praktijk: geld sneller op je rekening, eerder opnieuw kunnen investeren, materiaal en materieel sneller weer kunnen bestellen en dus minder vaak op groei hoeven wachten.`,
     });
   }
 
