@@ -69,7 +69,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
   const formStatusId = useId();
   const submitAbortRef = useRef<AbortController | null>(null);
   const submitTimeoutRef = useRef<number | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [submissionStage, setSubmissionStage] = useState<'form' | 'sending' | 'done' | 'error'>('form');
   const [deliveryMode, setDeliveryMode] = useState<'live' | 'preview' | null>(null);
   const [serverMessage, setServerMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,7 +106,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
   }, [state.companyName, state.firstName]);
 
   useEffect(() => {
-    if (submitted) {
+    if (submissionStage !== 'form') {
       return;
     }
 
@@ -121,7 +121,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
     }, FORM_STORAGE_WRITE_DELAY_MS);
 
     return () => window.clearTimeout(persistTimer);
-  }, [formData, submitted]);
+  }, [formData, submissionStage]);
 
   useEffect(() => {
     return () => {
@@ -207,23 +207,16 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
     }
   }, [errors, serverMessage]);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const submitLead = useCallback(async () => {
     if (isSubmitting) {
-      return;
-    }
-
-    const validationErrors = validate();
-    const errorFields = Object.keys(validationErrors) as Array<keyof FormErrors>;
-
-    if (errorFields.length > 0) {
-      focusField(errorFields[0]);
       return;
     }
 
     setIsSubmitting(true);
     setServerMessage('');
     submitAbortRef.current?.abort();
+    setSubmissionStage('sending');
+    setSubmittedEmail(formData.email.trim());
 
     const payload: LeadSubmissionPayload = {
       contact: {
@@ -261,10 +254,9 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
         throw new Error(data.message || 'De scan kon niet worden verstuurd.');
       }
 
-      setSubmitted(true);
+      setSubmissionStage('done');
       setDeliveryMode(data.deliveryMode);
       setServerMessage(data.message || '');
-      setSubmittedEmail(formData.email.trim());
       window.localStorage.removeItem(CAPTURE_STORAGE_KEY);
       window.localStorage.removeItem(QUIZ_STORAGE_KEY);
       window.localStorage.removeItem(QUIZ_PROGRESS_STORAGE_KEY);
@@ -278,6 +270,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
             ? error.message
             : 'De scan kon niet worden verstuurd. Probeer het zo nog eens.',
       );
+      setSubmissionStage('error');
     } finally {
       if (submitTimeoutRef.current !== null) {
         window.clearTimeout(submitTimeoutRef.current);
@@ -286,12 +279,29 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
       submitAbortRef.current = null;
       setIsSubmitting(false);
     }
+  }, [formData, isSubmitting, sessionStartedAt, state]);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
+    const validationErrors = validate();
+    const errorFields = Object.keys(validationErrors) as Array<keyof FormErrors>;
+
+    if (errorFields.length > 0) {
+      focusField(errorFields[0]);
+      return;
+    }
+
+    void submitLead();
   };
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center pt-6 md:pb-8 md:pt-5">
       <AnimatePresence mode="wait">
-        {!submitted ? (
+        {submissionStage === 'form' ? (
           <motion.div
             key="ads-capture-form"
             initial={{ opacity: 0 }}
@@ -432,11 +442,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                   {serverMessage ? (
                     <p
                       id={formStatusId}
-                      className={`mt-4 rounded-[18px] border px-4 py-3 text-sm leading-6 ${
-                        submitted || deliveryMode === 'preview'
-                          ? 'border-amber-gold/22 bg-amber-gold/10 text-amber-gold'
-                          : 'border-red-400/30 bg-red-500/10 text-red-200'
-                      }`}
+                      className="mt-4 rounded-[18px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-200"
                     >
                       {serverMessage}
                     </p>
@@ -474,13 +480,21 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
 
             <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,31,31,0.52),rgba(16,16,16,0.30))] p-6 text-center shadow-[0_28px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl md:p-8">
               <span className="mb-4 inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                Scan verstuurd
+                {submissionStage === 'sending' ? 'Scan wordt verstuurd' : submissionStage === 'error' ? 'Versturen mislukt' : 'Scan verstuurd'}
               </span>
               <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl">
-                Je scan is onderweg
+                {submissionStage === 'sending'
+                  ? 'Even geduld, we ronden je scan af'
+                  : submissionStage === 'error'
+                    ? 'Het versturen ging niet goed'
+                    : 'Je scan is onderweg'}
               </h2>
               <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/78 md:text-lg">
-                We hebben jouw scan {submittedEmail ? <>verstuurd naar <span className="font-semibold text-white">{submittedEmail}</span></> : 'verstuurd'}. Kijk ook even in je ongewenste mail als je hem niet direct ziet.
+                {submissionStage === 'sending'
+                  ? <>We versturen jouw scan nu naar <span className="font-semibold text-white">{submittedEmail}</span>. Dit duurt meestal maar een paar seconden.</>
+                  : submissionStage === 'error'
+                    ? <>We konden jouw scan nog niet naar <span className="font-semibold text-white">{submittedEmail}</span> sturen. Probeer het hieronder opnieuw of pas je gegevens aan.</>
+                    : <>We hebben jouw scan {submittedEmail ? <>verstuurd naar <span className="font-semibold text-white">{submittedEmail}</span></> : 'verstuurd'}. Kijk ook even in je ongewenste mail als je hem niet direct ziet.</>}
               </p>
 
               <div className="mt-6 grid gap-3 text-left md:grid-cols-3">
@@ -498,10 +512,29 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                 ))}
               </div>
 
-              {deliveryMode === 'preview' && serverMessage ? (
+              {serverMessage ? (
                 <p className="mt-6 rounded-[18px] border border-amber-gold/22 bg-amber-gold/10 px-4 py-3 text-sm leading-6 text-amber-gold">
                   {serverMessage}
                 </p>
+              ) : null}
+
+              {submissionStage === 'error' ? (
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                  <Button type="button" onClick={() => void submitLead()} className="sm:min-w-[220px]">
+                    Probeer opnieuw
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setSubmissionStage('form');
+                      setServerMessage('');
+                    }}
+                    className="sm:min-w-[220px]"
+                  >
+                    Gegevens aanpassen
+                  </Button>
+                </div>
               ) : null}
 
               <p className="mt-6 text-sm leading-6 text-white/50">

@@ -3,7 +3,10 @@ import {
   LeadInsightProfile,
   buildLeadKpis,
   buildLeadSummary,
+  getPaymentDaysLabel,
+  getTeamSizeLabel,
 } from '../lib/leadProfile.js';
+import { formatCurrency, formatNumber } from '../lib/utils.js';
 
 function escapeHtml(value: string): string {
   return value
@@ -49,6 +52,18 @@ function renderBulletList(items: string[]): string {
       `,
     )
     .join('');
+}
+
+function getMissedProjectsLabel(value: QuizState['missedProjects']): string {
+  if (value === 0) {
+    return 'geen gemiste grotere klussen';
+  }
+
+  if (value === 3) {
+    return '3 of meer gemiste grotere klussen per jaar';
+  }
+
+  return `${value} gemiste grotere ${value === 1 ? 'klus' : 'klussen'} per jaar`;
 }
 
 function renderKpiRows(results: CalculationResults): string {
@@ -177,13 +192,21 @@ export function buildCustomerConfirmationEmail({
   const openingLine = firstName ? `Dankjewel ${firstName}.` : 'Dankjewel.';
   const isAdsScan = contact.intent === 'scan';
   const customerAngleCopy = isAdsScan
-    ? `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. Hieronder staat je scan kort samengevat, zodat je direct ziet waar voor jou de eerste winst te pakken is.`
+    ? `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. Dit is geen losse schatting, maar een berekening op basis van de antwoorden die je zelf voor ${companyLabel} hebt ingevuld.`
     : `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. In een demo laten we zien wat dit concreet betekent voor planning, cashflow en groei.`;
   const opportunities = profile.opportunities
     .slice(0, isAdsScan ? 3 : 2)
     .map((item) => shortenCopy(item, 165));
+  const methodologyItems = isAdsScan
+    ? [
+        `We rekenen voor ${companyLabel} met ${getTeamSizeLabel(state.teamSize).toLowerCase()}, ${state.hoursPerWeek} factureerbare uur per week, ${state.weeksPerYear} werkweken per jaar en een gemiddeld uurtarief van ${formatCurrency(state.hourlyRate)}.`,
+        `De tijdswinst is gebaseerd op de ${formatNumber(state.timeAdmin + state.timePlanning + state.timeComm + state.timePayment, 1)} uur per week die je nu kwijt bent aan administratie, planning, communicatie en betalingen. Bij teams tellen we daar een voorzichtige efficiëntiewinst bij op.`,
+        `De cashflow-inschatting komt voort uit je huidige betaaltermijn van ${getPaymentDaysLabel(state.paymentDays).toLowerCase()} en het aandeel van ${state.percentageVloergroep}% omzet dat je via VloerGroep zou laten lopen.`,
+        `De groeipotentie is gebaseerd op ${getMissedProjectsLabel(state.missedProjects)} plus een conservatieve verbetering in beter passende leads en samenwerking.`,
+      ]
+    : [];
   const closingLine = isAdsScan
-    ? 'Wil je dat Rico hier kort praktisch met je in meedenkt? Antwoord dan gewoon op deze mail.'
+    ? `Wil je dat Rico hier kort praktisch met je in meedenkt voor ${companyLabel}? Antwoord dan gewoon op deze mail.`
     : 'Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.';
   const customerHeading = isAdsScan ? 'Je scan staat klaar' : 'Bevestiging van je scan';
   const customerPreview = isAdsScan
@@ -232,6 +255,19 @@ export function buildCustomerConfirmationEmail({
           </table>
         </td>
       </tr>
+      ${
+        isAdsScan
+          ? `
+      <tr>
+        <td style="padding: 8px 34px 8px;">
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Hoe we deze cijfers voor ${escapeHtml(companyLabel)} hebben opgebouwd</div>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            ${renderBulletList(methodologyItems)}
+          </table>
+        </td>
+      </tr>`
+          : ''
+      }
       <tr>
         <td style="padding: 0 34px 8px;">
           <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Kort ingevuld</div>
@@ -263,6 +299,13 @@ export function buildCustomerConfirmationEmail({
     'Waar je nu winst laat liggen:',
     ...opportunities.map((item) => `- ${item}`),
     '',
+    ...(isAdsScan
+      ? [
+          `Hoe we deze cijfers voor ${companyLabel} hebben opgebouwd:`,
+          ...methodologyItems.map((item) => `- ${item}`),
+          '',
+        ]
+      : []),
     'Kort ingevuld:',
     ...summaryRows.map((row) => `- ${row.label}: ${row.value}`),
     '',
