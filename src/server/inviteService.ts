@@ -1,4 +1,4 @@
-interface InviteLookupResult {
+export interface InviteLookupResult {
   firstName: string;
   lastName: string;
   company: string;
@@ -6,7 +6,7 @@ interface InviteLookupResult {
   launchDate: string;
   launchTime: string;
   launchLocation: string;
-  rsvpUrl: string;
+  calendarUrl: string;
 }
 
 interface InviteServiceOptions {
@@ -14,12 +14,83 @@ interface InviteServiceOptions {
   launchDate?: string;
   launchTime?: string;
   launchLocation?: string;
-  rsvpUrl?: string;
+  calendarUrl?: string;
+  eventStartIso?: string;
+  eventEndIso?: string;
+  eventTitle?: string;
+  eventDescription?: string;
 }
 
 interface BrevoContactResponse {
   email?: string;
   attributes?: Record<string, unknown>;
+}
+
+function normalizeAbsoluteUrl(value?: string): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+  try {
+    return new URL(withProtocol).toString();
+  } catch {
+    return null;
+  }
+}
+
+function formatCalendarDate(value?: string): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+}
+
+function buildGoogleCalendarUrl(options: InviteServiceOptions): string {
+  if (options.calendarUrl) {
+    const normalized = normalizeAbsoluteUrl(options.calendarUrl);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  const start = formatCalendarDate(options.eventStartIso || process.env.INVITE_EVENT_START_ISO);
+  const end = formatCalendarDate(options.eventEndIso || process.env.INVITE_EVENT_END_ISO);
+
+  if (!start || !end) {
+    return '';
+  }
+
+  const title = options.eventTitle || process.env.INVITE_EVENT_TITLE || 'Officiele opening VloerGroep';
+  const details =
+    options.eventDescription ||
+    process.env.INVITE_EVENT_DESCRIPTION ||
+    'Persoonlijke uitnodiging voor de officiele opening van VloerGroep.';
+  const location = options.launchLocation || process.env.INVITE_LAUNCH_LOCATION || '';
+
+  const calendarUrl = new URL('https://calendar.google.com/calendar/render');
+  calendarUrl.searchParams.set('action', 'TEMPLATE');
+  calendarUrl.searchParams.set('text', title);
+  calendarUrl.searchParams.set('dates', `${start}/${end}`);
+  calendarUrl.searchParams.set('details', details);
+
+  if (location) {
+    calendarUrl.searchParams.set('location', location);
+  }
+
+  return calendarUrl.toString();
 }
 
 function normalizeBase64Input(value: string): string {
@@ -104,6 +175,9 @@ export async function getInviteByEncodedEmail(
     launchDate: options.launchDate || process.env.INVITE_LAUNCH_DATE || '',
     launchTime: options.launchTime || process.env.INVITE_LAUNCH_TIME || '',
     launchLocation: options.launchLocation || process.env.INVITE_LAUNCH_LOCATION || '',
-    rsvpUrl: options.rsvpUrl || process.env.INVITE_RSVP_URL || '',
+    calendarUrl: buildGoogleCalendarUrl({
+      ...options,
+      launchLocation: options.launchLocation || process.env.INVITE_LAUNCH_LOCATION || '',
+    }),
   };
 }
