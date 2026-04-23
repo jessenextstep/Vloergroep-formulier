@@ -2,9 +2,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-near-black: #061010;
-  --color-near-black-soft: #0b1717;
-  --color-near-black-elevated: #102020;
+  --color-near-black: #050505;
+  --color-near-black-soft: #0a0a0a;
+  --color-near-black-elevated: #121212;
   --color-amber-gold: #e0ac3e;
   --color-amber-gold-hover: #f0bc50;
   --color-amber-gold-dark: #c09030;
@@ -30,14 +30,14 @@
 html {
   color-scheme: dark;
   background:
-    radial-gradient(circle at top, rgba(224, 172, 62, 0.12), transparent 28%),
-    linear-gradient(180deg, #0b1717 0%, #061010 100%);
+    radial-gradient(circle at top, rgba(224, 172, 62, 0.1), transparent 28%),
+    linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
 }
 
 body {
   background:
-    radial-gradient(circle at top, rgba(224, 172, 62, 0.12), transparent 28%),
-    linear-gradient(180deg, #0b1717 0%, #061010 100%);
+    radial-gradient(circle at top, rgba(224, 172, 62, 0.1), transparent 28%),
+    linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
   color: var(--color-soft-sand);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -152,7 +152,7 @@ input[type="range"]::-moz-range-track {
 input:-webkit-autofill,
 textarea:-webkit-autofill {
   -webkit-text-fill-color: var(--color-soft-sand);
-  box-shadow: 0 0 0 1000px rgba(16, 32, 32, 0.92) inset;
+  box-shadow: 0 0 0 1000px rgba(24, 24, 24, 0.96) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 

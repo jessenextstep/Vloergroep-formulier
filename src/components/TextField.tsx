@@ -60,17 +60,31 @@ const TextFieldBase = React.forwardRef<HTMLInputElement, TextFieldProps>(
           {Icon ? (
             <div
               className={cn(
-                'pointer-events-none absolute left-4 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full transition-all duration-200',
+              'pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 transition-colors duration-200',
                 error
-                  ? 'bg-red-400/12 text-red-300'
+                  ? 'text-red-300'
                   : hasValue
-                    ? 'bg-amber-gold/14 text-amber-gold'
-                    : 'bg-white/[0.04] text-white/40 group-hover:text-white/58 group-focus-within:bg-white/[0.06] group-focus-within:text-amber-gold',
+                    ? 'text-amber-gold'
+                    : 'text-white/34 group-hover:text-white/50 group-focus-within:text-amber-gold',
               )}
               aria-hidden="true"
             >
               <Icon size={17} strokeWidth={2.1} />
             </div>
+          ) : null}
+
+          {Icon ? (
+            <span
+              aria-hidden="true"
+              className={cn(
+                'pointer-events-none absolute left-[3rem] top-1/2 z-10 h-5 w-px -translate-y-1/2 transition-colors duration-200',
+                error
+                  ? 'bg-red-300/35'
+                  : hasValue
+                    ? 'bg-amber-gold/20'
+                    : 'bg-white/8 group-hover:bg-white/12 group-focus-within:bg-amber-gold/20',
+              )}
+            />
           ) : null}
 
           <input
@@ -81,12 +95,12 @@ const TextFieldBase = React.forwardRef<HTMLInputElement, TextFieldProps>(
             aria-invalid={Boolean(error)}
             aria-describedby={describedBy}
             className={cn(
-              'block min-h-[58px] w-full rounded-[22px] border bg-[linear-gradient(180deg,rgba(58,58,58,0.72),rgba(45,45,45,0.56))] px-5 py-4 text-[16px] font-medium text-white shadow-[0_18px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-[border-color,box-shadow,background-color,color] duration-200 placeholder:text-white/40 hover:border-white/22 focus:border-amber-gold/55 focus:bg-[linear-gradient(180deg,rgba(70,70,70,0.78),rgba(52,52,52,0.62))] focus:shadow-[0_0_0_4px_rgba(224,172,62,0.12),0_18px_36px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.05)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/8 disabled:text-white/48 disabled:placeholder:text-white/24 md:text-[17px]',
+              'block min-h-[58px] w-full rounded-[18px] border bg-[rgba(28,28,28,0.56)] px-5 py-4 text-[16px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] transition-[border-color,box-shadow,background-color,color] duration-200 placeholder:text-white/34 hover:border-white/16 hover:bg-[rgba(31,31,31,0.62)] focus:border-amber-gold/44 focus:bg-[rgba(35,35,35,0.68)] focus:shadow-[0_0_0_4px_rgba(224,172,62,0.06),inset_0_1px_0_rgba(255,255,255,0.025)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[rgba(24,24,24,0.26)] disabled:text-white/48 disabled:placeholder:text-white/24 md:text-[17px]',
               Icon ? 'pl-[3.6rem] pr-5' : 'px-5',
               error &&
-                'border-red-400/55 bg-[linear-gradient(180deg,rgba(24,14,16,0.98),rgba(17,10,12,0.96))] hover:border-red-400/65 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(248,113,113,0.12),0_18px_36px_rgba(0,0,0,0.22)]',
-              !error && hasValue && 'border-white/18',
-              !error && !hasValue && 'border-white/14',
+                'border-red-400/55 bg-[rgba(58,34,38,0.42)] hover:border-red-400/65 hover:bg-[rgba(64,36,40,0.46)] focus:border-red-400 focus:bg-[rgba(70,38,42,0.5)] focus:shadow-[0_0_0_4px_rgba(248,113,113,0.10),inset_0_1px_0_rgba(255,255,255,0.03)]',
+              !error && hasValue && 'border-white/15 bg-[rgba(30,30,30,0.6)]',
+              !error && !hasValue && 'border-white/12',
               className,
               inputClassName,
             )}

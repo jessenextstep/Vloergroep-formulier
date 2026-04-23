@@ -75,19 +75,19 @@ function SliderComponent({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(61,61,61,0.62),rgba(45,45,45,0.42))] p-5 sm:p-6 backdrop-blur-2xl shadow-[0_18px_40px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.035)] transition-all duration-300 hover:border-amber-gold/24 hover:shadow-[0_20px_48px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.045)] focus-within:border-amber-gold/38 focus-within:shadow-[0_0_0_4px_rgba(224,172,62,0.07),0_20px_48px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.045)]",
+        "group relative overflow-hidden rounded-[24px] border border-white/9 bg-[linear-gradient(180deg,rgba(38,38,38,0.44),rgba(18,18,18,0.22))] p-5 sm:p-6 backdrop-blur-2xl shadow-[0_14px_34px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.02)] transition-all duration-300 hover:border-white/12 hover:shadow-[0_16px_38px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.025)] focus-within:border-amber-gold/24 focus-within:shadow-[0_0_0_4px_rgba(224,172,62,0.05),0_16px_38px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.025)]",
         className,
       )}
     >
        <div className="mb-2 flex items-start justify-between gap-4">
          <div className="flex min-w-0 flex-1 items-start gap-3 text-left">
-           {icon && <div className="rounded-xl bg-amber-gold/12 p-2.5 text-amber-gold transition-all duration-200 group-hover:scale-[1.04] group-focus-within:bg-amber-gold/16">{icon}</div>}
+           {icon && <div className="rounded-xl bg-amber-gold/8 p-2.5 text-amber-gold transition-all duration-200 group-hover:bg-amber-gold/10 group-focus-within:bg-amber-gold/12">{icon}</div>}
            <div className="flex min-w-0 flex-1 flex-col items-start text-left">
              <label htmlFor={sliderId} className="block w-full text-left font-semibold leading-tight text-white">{label}</label>
              {description && <span id={descriptionId} className="mt-1 block w-full text-left text-[12px] leading-5 text-white/80">{description}</span>}
            </div>
          </div>
-         <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/12 bg-[rgba(45,45,45,0.88)] px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_2px_10px_rgba(0,0,0,0.35)] transition-colors duration-200 group-focus-within:border-amber-gold/26 sm:text-lg">
+         <div className="flex min-w-[72px] flex-shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/8 bg-[rgba(20,20,20,0.9)] px-4 py-1.5 text-center font-display text-base font-bold text-amber-gold shadow-[inset_0_1px_6px_rgba(0,0,0,0.24)] transition-colors duration-200 group-focus-within:border-amber-gold/18 sm:text-lg">
            {formatValue(value)}
          </div>
        </div>
@@ -95,7 +95,7 @@ function SliderComponent({
        <div className="relative px-1 pb-7 pt-4 sm:pb-8">
          
          {/* Custom Track Background for better depth */}
-         <div className="pointer-events-none absolute left-1 right-1 top-[22px] h-2 rounded-full bg-[rgba(24,24,24,0.9)] shadow-[inset_0_1px_4px_rgba(255,255,255,0.03),inset_0_2px_6px_rgba(0,0,0,0.5)]" />
+         <div className="pointer-events-none absolute left-1 right-1 top-[22px] h-2 rounded-full bg-[rgba(10,10,10,0.96)] shadow-[inset_0_1px_3px_rgba(255,255,255,0.015),inset_0_2px_5px_rgba(0,0,0,0.38)]" />
          
          <input 
            id={sliderId}

@@ -4,6 +4,7 @@ import type { IncomingMessage } from 'node:http';
 import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 import { processLeadSubmission } from './src/server/leadService';
+import { getInviteByEncodedEmail } from './src/server/inviteService';
 
 async function readJsonBody(req: IncomingMessage) {
   const chunks: Uint8Array[] = [];
@@ -20,6 +21,58 @@ function leadApiDevPlugin() {
     name: 'lead-api-dev-plugin',
     configureServer(server: import('vite').ViteDevServer) {
       server.middlewares.use(async (req, res, next) => {
+        if (req.url?.startsWith('/api/invite')) {
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-store');
+
+          if (req.method !== 'GET') {
+            res.statusCode = 405;
+            res.end(JSON.stringify({
+              ok: false,
+              message: 'Method not allowed.',
+            }));
+            return;
+          }
+
+          try {
+            const requestUrl = new URL(req.url, 'http://localhost:3000');
+            const encodedInvite = requestUrl.searchParams.get('e')?.trim() ?? '';
+
+            if (!encodedInvite) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({
+                ok: false,
+                message: 'Missing invite parameter.',
+              }));
+              return;
+            }
+
+            const invite = await getInviteByEncodedEmail(encodedInvite, {
+              apiKey: process.env.BREVO_API,
+              launchDate: process.env.INVITE_LAUNCH_DATE,
+              launchTime: process.env.INVITE_LAUNCH_TIME,
+              launchLocation: process.env.INVITE_LAUNCH_LOCATION,
+              rsvpUrl: process.env.INVITE_RSVP_URL,
+            });
+
+            res.statusCode = 200;
+            res.end(JSON.stringify({
+              ok: true,
+              invite,
+            }));
+            return;
+          } catch (error) {
+            console.error('Invite API dev middleware failed', error);
+            const message = error instanceof Error ? error.message : 'Invite API kon lokaal niet worden verwerkt.';
+            res.statusCode = message === 'Invitation contact not found.' ? 404 : 500;
+            res.end(JSON.stringify({
+              ok: false,
+              message,
+            }));
+            return;
+          }
+        }
+
         if (!req.url?.startsWith('/api/lead')) {
           return next();
         }

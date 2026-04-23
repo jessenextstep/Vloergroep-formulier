@@ -20,7 +20,7 @@ function BottomNavComponent({
   return (
     <nav
       aria-label="Stapnavigatie"
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#061010]/88 p-3 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-2xl sm:p-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#050505]/92 p-3 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-2xl sm:p-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
     >
       <div className="w-full max-w-3xl mx-auto flex items-center justify-between px-2 sm:px-6">
         {onBack ? (

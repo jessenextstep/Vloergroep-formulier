@@ -240,7 +240,7 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-[#061010] text-[#FBEFD5] flex flex-col font-sans selection:bg-amber-gold/30 relative isolate overflow-x-clip">
+    <div className="min-h-screen w-full bg-[#050505] text-[#FBEFD5] flex flex-col font-sans selection:bg-amber-gold/30 relative isolate overflow-x-clip">
       <BrandWatermark />
       
       {/* Header / Progress */}

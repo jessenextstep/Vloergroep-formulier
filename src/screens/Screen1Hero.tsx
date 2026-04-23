@@ -17,7 +17,7 @@ export default function Screen1Hero({ onNext }: Props) {
           src={heroScreen1}
           alt="VloerGroep introductie"
         />
-        <div className="pointer-events-none absolute left-4 top-4 hidden rounded-[20px] border border-white/10 bg-[#061010]/88 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl md:block">
+        <div className="pointer-events-none absolute left-4 top-4 hidden rounded-[20px] border border-white/10 bg-[#090909]/88 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl md:block">
           <BrandLogo className="h-6 w-auto sm:h-7" />
         </div>
       </div>
@@ -36,7 +36,7 @@ export default function Screen1Hero({ onNext }: Props) {
         </p>
       </div>
 
-      <div className="mb-10 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(58,58,58,0.44),rgba(45,45,45,0.24))] px-5 py-4 backdrop-blur-xl">
+      <div className="mb-10 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(38,38,38,0.4),rgba(18,18,18,0.18))] px-5 py-4 backdrop-blur-xl">
         <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
@@ -59,7 +59,7 @@ export default function Screen1Hero({ onNext }: Props) {
         </Button>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-5 pb-[max(env(safe-area-inset-bottom),1rem)] bg-[#061010]/95 backdrop-blur-xl border-t border-white/5 flex justify-center md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-5 pb-[max(env(safe-area-inset-bottom),1rem)] bg-[#050505]/94 backdrop-blur-xl border-t border-white/5 flex justify-center md:hidden">
         <div className="w-full max-w-2xl mx-auto flex">
           <Button onClick={onNext} className="w-full !py-4 text-[18px] shadow-lg active:scale-95 group overflow-hidden relative">
             <span className="relative z-10 flex items-center justify-center gap-2">

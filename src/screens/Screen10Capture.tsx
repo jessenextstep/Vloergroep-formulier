@@ -330,7 +330,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
               noValidate
               aria-busy={isSubmitting}
               aria-describedby={serverMessage && !submitted ? formStatusId : undefined}
-              className="space-y-6 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.46),rgba(45,45,45,0.24))] p-6 shadow-lg backdrop-blur-md md:p-8"
+              className="space-y-6 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(38,38,38,0.4),rgba(18,18,18,0.18))] p-6 shadow-lg backdrop-blur-md md:p-8"
             >
               <fieldset disabled={isSubmitting} className="space-y-6 disabled:opacity-100">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -418,7 +418,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 />
               </div>
 
-              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(58,58,58,0.52),rgba(45,45,45,0.28))] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(38,38,38,0.42),rgba(18,18,18,0.2))] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.025)]">
                 <label className="flex cursor-pointer items-start gap-3" htmlFor="capture-consent">
                   <input
                     id="capture-consent"
@@ -427,7 +427,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     checked={formData.consent}
                     onChange={handleInputChange}
                     required
-                    className="mt-0.5 h-5 w-5 rounded-md border-white/35 bg-transparent text-amber-gold shadow-[0_0_0_1px_rgba(255,255,255,0.02)] focus:ring-2 focus:ring-amber-gold/70 focus:ring-offset-2 focus:ring-offset-[#0d1717]"
+                    className="mt-0.5 h-5 w-5 rounded-md border-white/35 bg-transparent text-amber-gold shadow-[0_0_0_1px_rgba(255,255,255,0.02)] focus:ring-2 focus:ring-amber-gold/70 focus:ring-offset-2 focus:ring-offset-[#0b0b0b]"
                   />
                   <span className="text-sm leading-6 text-white/80">
                     Ik geef toestemming dat VloerGroep contact met mij opneemt over mijn scan en een gratis persoonlijke demo voor {companyReference}.
@@ -471,7 +471,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
             aria-live="polite"
             className="w-full"
           >
-            <div className="rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(58,58,58,0.46),rgba(45,45,45,0.24))] p-6 shadow-lg backdrop-blur-md md:p-10">
+            <div className="rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(38,38,38,0.4),rgba(18,18,18,0.18))] p-6 shadow-lg backdrop-blur-md md:p-10">
               <ScreenHeroImage
                 src={heroScreenThanks}
                 alt="VloerGroep bedanktscherm"
@@ -503,7 +503,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
               </div>
 
               {successNote ? (
-                <div className="mb-8 rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(58,58,58,0.42),rgba(45,45,45,0.22))] p-4 text-center text-sm leading-6 text-white/62">
+                <div className="mb-8 rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(38,38,38,0.36),rgba(18,18,18,0.18))] p-4 text-center text-sm leading-6 text-white/62">
                   {successNote}
                 </div>
               ) : null}
