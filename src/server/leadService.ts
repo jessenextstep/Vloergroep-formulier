@@ -2,6 +2,7 @@ import { calculateResults } from '../lib/calculations.js';
 import { buildLeadProfile } from '../lib/leadProfile.js';
 import {
   LeadCaptureFormData,
+  LeadSource,
   LeadSubmissionPayload,
   LeadSubmissionResponse,
   QuizState,
@@ -24,6 +25,7 @@ interface LeadEnvironment {
   brevoListIds?: string | number[];
   brevoDemoListId?: string | number;
   brevoInfoListId?: string | number;
+  brevoAdsScanListId?: string | number;
 }
 
 interface LeadHandlerResult {
@@ -50,7 +52,8 @@ interface ResendEmailPayload {
 const TEAM_SIZES = new Set(['alone', '1-2', 'small-team', 'large-team']);
 const PAYMENT_DAYS = new Set([14, 30, 45, 60, 90]);
 const MISSED_PROJECTS = new Set([0, 1, 2, 3]);
-const LEAD_INTENTS = new Set(['demo', 'info']);
+const LEAD_INTENTS = new Set(['demo', 'info', 'scan']);
+const LEAD_SOURCES = new Set<LeadSource>(['groeiscan', 'ads-scan']);
 
 function usesResendTestingDomain(fromAddress: string): boolean {
   return /@resend\.dev>?$/i.test(fromAddress.trim());
@@ -93,7 +96,7 @@ function extractEmailAddress(value?: string): string | null {
 
 function buildResendFromEmail(value?: string): string {
   const emailAddress = extractEmailAddress(value);
-  return emailAddress ? `VloerGroep <${emailAddress}>` : 'VloerGroep <onboarding@resend.dev>';
+  return emailAddress ? `Rico van VloerGroep <${emailAddress}>` : 'Rico van VloerGroep <onboarding@resend.dev>';
 }
 
 function resolveSiteUrl(env: LeadEnvironment): string | undefined {
@@ -151,7 +154,9 @@ function resolveBrevoListIds(
   const intentSpecificListId =
     intent === 'demo'
       ? parseNumericEnvValue(env.brevoDemoListId || process.env.BREVO_DEMO_LIST_ID)
-      : parseNumericEnvValue(env.brevoInfoListId || process.env.BREVO_INFO_LIST_ID);
+      : intent === 'info'
+        ? parseNumericEnvValue(env.brevoInfoListId || process.env.BREVO_INFO_LIST_ID)
+        : parseNumericEnvValue(env.brevoAdsScanListId || process.env.BREVO_ADS_SCAN_LIST_ID) ?? 13;
 
   return [
     ...new Set([
@@ -252,12 +257,17 @@ function validatePayload(rawPayload: unknown):
 
   const sessionStartedAt = readNumber(rawMeta.sessionStartedAt);
   const submittedAt = readNumber(rawMeta.submittedAt);
+  const source = LEAD_SOURCES.has(rawMeta.source as LeadSource)
+    ? (rawMeta.source as LeadSource)
+    : 'groeiscan';
 
   if (!quiz) {
     return { ok: false, message: 'Scanantwoorden zijn ongeldig.' };
   }
 
-  if (!contact.name || !contact.company || !contact.email || !contact.phone) {
+  const requiresPhone = contact.intent !== 'scan';
+
+  if (!contact.name || !contact.company || !contact.email || (requiresPhone && !contact.phone)) {
     return { ok: false, message: 'Niet alle verplichte contactvelden zijn ingevuld.' };
   }
 
@@ -265,7 +275,7 @@ function validatePayload(rawPayload: unknown):
     return { ok: false, message: 'E-mailadres is ongeldig.' };
   }
 
-  if (!/^[+()0-9.\-/\s]{8,}$/.test(contact.phone)) {
+  if (contact.phone && !/^[+()0-9.\-/\s]{8,}$/.test(contact.phone)) {
     return { ok: false, message: 'Telefoonnummer is ongeldig.' };
   }
 
@@ -283,7 +293,7 @@ function validatePayload(rawPayload: unknown):
       contact,
       quiz,
       meta: {
-        source: 'groeiscan',
+        source,
         sessionStartedAt,
         submittedAt,
         pathname: readString(rawMeta.pathname, 160),
@@ -415,8 +425,9 @@ export async function processLeadSubmission(
   });
 
   const submissionFingerprint = `${payload.contact.email}:${payload.meta.submittedAt}`;
-  const intentTag = payload.contact.intent === 'demo' ? 'demo' : 'info';
+  const intentTag = payload.contact.intent;
   const temperatureTag = profile.temperature.toLowerCase();
+  const categoryTag = payload.meta.source === 'ads-scan' ? 'ads_scan' : 'lead_scan';
   let brevoSynced = false;
   let brevoErrorMessage: string | null = null;
 
@@ -510,7 +521,8 @@ export async function processLeadSubmission(
           text: customerMail.text,
           reply_to: internalEmail,
           tags: [
-            { name: 'category', value: 'lead_scan' },
+            { name: 'category', value: categoryTag },
+            { name: 'source', value: payload.meta.source },
             { name: 'intent', value: intentTag },
           ],
         },
@@ -526,7 +538,8 @@ export async function processLeadSubmission(
           text: internalMail.text,
           reply_to: payload.contact.email,
           tags: [
-            { name: 'category', value: 'lead_scan' },
+            { name: 'category', value: categoryTag },
+            { name: 'source', value: payload.meta.source },
             { name: 'intent', value: intentTag },
             { name: 'temperature', value: temperatureTag },
           ],

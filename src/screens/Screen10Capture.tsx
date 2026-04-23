@@ -250,7 +250,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
         source: 'groeiscan',
         sessionStartedAt,
         submittedAt: Date.now(),
-        pathname: window.location.pathname,
+        pathname: `${window.location.pathname}${window.location.search}`,
         userAgent: navigator.userAgent,
       },
     };

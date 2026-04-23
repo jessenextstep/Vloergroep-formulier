@@ -3,6 +3,14 @@
     {
       "source": "/uitnodiging",
       "destination": "/"
+    },
+    {
+      "source": "/ads-scan",
+      "destination": "/"
+    },
+    {
+      "source": "/vakman-scan",
+      "destination": "/"
     }
   ]
 }

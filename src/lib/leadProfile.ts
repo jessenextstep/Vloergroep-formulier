@@ -48,6 +48,7 @@ const paymentLabels: Record<PaymentDays, string> = {
 const intentLabels: Record<LeadIntent, string> = {
   demo: 'Demo plannen',
   info: 'Eerst meer uitleg',
+  scan: 'Scan per mail',
 };
 
 export function getTeamSizeLabel(teamSize: TeamSize): string {
@@ -158,7 +159,7 @@ export function buildLeadProfile(
   score += state.paymentDays >= 45 ? 14 : state.paymentDays >= 30 ? 8 : 4;
   score += state.percentageVloergroep >= 60 ? 10 : state.percentageVloergroep >= 40 ? 6 : 3;
   score += state.teamSize === 'large-team' ? 8 : state.teamSize === 'small-team' ? 6 : state.teamSize === '1-2' ? 4 : 2;
-  score += intent === 'demo' ? 8 : 0;
+  score += intent === 'demo' ? 8 : intent === 'scan' ? 3 : 0;
   score = clamp(Math.round(score), 24, 98);
 
   const temperature: LeadInsightProfile['temperature'] =
@@ -230,7 +231,9 @@ export function buildLeadProfile(
       : 'Gebruik de eerste follow-up om de berekening te vertalen naar een concrete werkdag, niet alleen naar losse cijfers.',
     intent === 'demo'
       ? 'De prospect vroeg al om een demo. Zet de afspraak zo kort mogelijk op de bal en laat in 15 minuten de belangrijkste flow zien.'
-      : 'Start met de samenvatting per mail en bied daarna een vrijblijvende walkthrough aan als zachte vervolgstap.',
+      : intent === 'scan'
+        ? 'Deze lead komt uit koud verkeer en heeft eerst waarde gevraagd. Start met een korte, concrete opvolgmail rond de grootste winsthoek en bied daarna pas een walkthrough aan.'
+        : 'Start met de samenvatting per mail en bied daarna een vrijblijvende walkthrough aan als zachte vervolgstap.',
     state.missedProjects > 0
       ? 'Laat in het gesprek expliciet zien hoe projectdepot en samenwerking risico wegnemen bij grotere klussen.'
       : 'Laat zien hoe VloerGroep de bestaande operatie strakker maakt, ook zonder meteen groter te hoeven worden.',
@@ -239,7 +242,9 @@ export function buildLeadProfile(
   const nextStep =
     intent === 'demo'
       ? 'Binnen 1 werkdag opvolgen met een korte demo-uitnodiging en de drie belangrijkste pijnpunten uit de scan.'
-      : 'Samenvatting mailen, daarna opvolgen met een consultatief gesprek over tijdswinst en cashflow.';
+      : intent === 'scan'
+        ? 'Stuur direct de scan per mail, zet deze lead in nurture, en volg daarna kort op met de sterkste winsthoek uit de berekening.'
+        : 'Samenvatting mailen, daarna opvolgen met een consultatief gesprek over tijdswinst en cashflow.';
 
   return {
     score,

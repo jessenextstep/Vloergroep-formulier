@@ -175,18 +175,34 @@ export function buildCustomerConfirmationEmail({
   const companyLabel = contact.company || 'jouw bedrijf';
   const firstName = state.firstName || contact.name.split(' ')[0] || '';
   const openingLine = firstName ? `Dankjewel ${firstName}.` : 'Dankjewel.';
-  const customerAngleCopy = `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. In een demo laten we zien wat dit concreet betekent voor planning, cashflow en groei.`;
+  const isAdsScan = contact.intent === 'scan';
+  const customerAngleCopy = isAdsScan
+    ? `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. Hieronder staat je scan kort samengevat, zodat je direct ziet waar voor jou de eerste winst te pakken is.`
+    : `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. In een demo laten we zien wat dit concreet betekent voor planning, cashflow en groei.`;
+  const opportunities = profile.opportunities
+    .slice(0, isAdsScan ? 3 : 2)
+    .map((item) => shortenCopy(item, 165));
+  const closingLine = isAdsScan
+    ? 'Wil je dat Rico hier kort praktisch met je in meedenkt? Antwoord dan gewoon op deze mail.'
+    : 'Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.';
+  const customerHeading = isAdsScan ? 'Je scan staat klaar' : 'Bevestiging van je scan';
+  const customerPreview = isAdsScan
+    ? 'Je persoonlijke scan staat klaar met tijdwinst, cashflow en groeikansen.'
+    : 'Je aanvraag is ontvangen. Hieronder staat je korte overzicht.';
+  const subject = isAdsScan
+    ? `Je VloerGroep scan voor ${companyLabel}`
+    : `Bevestiging van je scan voor ${companyLabel}`;
 
   const html = wrapEmail(
     `
       <tr>
         <td style="padding: 34px 34px 18px;">
-          ${renderLeadBadge('VloerGroep scan')}
+          ${renderLeadBadge(isAdsScan ? 'Persoonlijke scan' : 'VloerGroep scan')}
           <div style="font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.03em; margin: 10px 0 14px;">
-            Bevestiging van je scan
+            ${customerHeading}
           </div>
           <div style="color: #c8d0cd; font-size: 16px; line-height: 1.7;">
-            ${escapeHtml(openingLine)} Je aanvraag is goed ontvangen. Hieronder zie je kort waar voor ${escapeHtml(companyLabel)} nu de meeste winst zit.
+            ${escapeHtml(openingLine)} ${isAdsScan ? 'Je antwoorden zijn verwerkt.' : 'Je aanvraag is goed ontvangen.'} Hieronder zie je kort waar voor ${escapeHtml(companyLabel)} nu de meeste winst zit.
           </div>
         </td>
       </tr>
@@ -210,6 +226,14 @@ export function buildCustomerConfirmationEmail({
       </tr>
       <tr>
         <td style="padding: 0 34px 8px;">
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Waar je nu winst laat liggen</div>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            ${renderBulletList(opportunities)}
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 0 34px 8px;">
           <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Kort ingevuld</div>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
             ${renderSummaryRows(summaryRows)}
@@ -219,31 +243,34 @@ export function buildCustomerConfirmationEmail({
       <tr>
         <td style="padding: 18px 34px 34px;">
           <div style="color: #8d9d99; font-size: 12px; line-height: 1.6;">
-            Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.
+            ${escapeHtml(closingLine)}
           </div>
         </td>
       </tr>
     `,
-    'Je aanvraag is ontvangen. Hieronder staat je korte overzicht.',
+    customerPreview,
     logoSrc,
   );
 
   const text = [
-    `Bevestiging van je scan voor ${companyLabel}.`,
+    `${customerHeading} voor ${companyLabel}.`,
     '',
     customerAngleCopy,
     '',
     'Belangrijkste cijfers:',
     ...buildLeadKpis(results).map((kpi) => `- ${kpi.label}: ${kpi.value}`),
     '',
+    'Waar je nu winst laat liggen:',
+    ...opportunities.map((item) => `- ${item}`),
+    '',
     'Kort ingevuld:',
     ...summaryRows.map((row) => `- ${row.label}: ${row.value}`),
     '',
-    'Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.',
+    closingLine,
   ].join('\n');
 
   return {
-    subject: `Bevestiging van je scan voor ${companyLabel}`,
+    subject,
     html,
     text,
   };
@@ -274,6 +301,19 @@ export function buildInternalLeadEmail({
     ].includes(row.label),
   );
   const adminLeadCopy = `Start op ${profile.primaryAngle.toLowerCase()}. Daar zit nu de meeste urgentie.`;
+  const isAdsScan = contact.intent === 'scan';
+  const contactDetails = [contact.email, contact.phone].filter(Boolean).join(' · ');
+  const leadTypeBadge = isAdsScan
+    ? 'Ads-scan'
+    : contact.intent === 'demo'
+      ? 'Demo-aanvraag'
+      : 'Info-aanvraag';
+  const internalSubject = isAdsScan
+    ? `Nieuwe ads-scan van ${contact.company || contact.name}`
+    : `Nieuwe scan van ${contact.company || contact.name}`;
+  const internalPreview = isAdsScan
+    ? 'Nieuwe scan uit koud verkeer. Resultaten zijn al per mail verzonden.'
+    : 'Nieuwe scan met contactgegevens, kansen en opvolging.';
 
   const html = wrapEmail(
     `
@@ -281,12 +321,12 @@ export function buildInternalLeadEmail({
         <td style="padding: 34px 34px 18px;">
           ${renderLeadBadge(`Leadscore ${profile.score}/100`)}
           ${renderLeadBadge(profile.temperature, 'muted')}
-          ${renderLeadBadge(contact.intent === 'demo' ? 'Demo-aanvraag' : 'Info-aanvraag', 'muted')}
+          ${renderLeadBadge(leadTypeBadge, 'muted')}
           <div style="font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.03em; margin: 10px 0 14px;">
-            Nieuwe scan van ${escapeHtml(contact.company || contact.name)}
+            ${escapeHtml(internalSubject)}
           </div>
           <div style="color: #c8d0cd; font-size: 16px; line-height: 1.7;">
-            ${escapeHtml(contact.name)} vulde de scan in voor ${escapeHtml(contact.company)}. Hieronder staat de kortste route naar opvolging.
+            ${escapeHtml(contact.name)} vulde de scan in voor ${escapeHtml(contact.company)}.${isAdsScan ? ' De uitslag is al per mail verzonden; dit is een koude lead die bewust zijn gegevens heeft achtergelaten voor de scan.' : ' Hieronder staat de kortste route naar opvolging.'}
           </div>
         </td>
       </tr>
@@ -295,7 +335,7 @@ export function buildInternalLeadEmail({
           ${renderPanel(
             'Contact',
             `${contact.name} · ${contact.company}`,
-            `${contact.email} · ${contact.phone}`,
+            contactDetails,
           )}
         </td>
       </tr>
@@ -325,7 +365,7 @@ export function buildInternalLeadEmail({
               { label: 'Naam', value: contact.name },
               { label: 'Bedrijf', value: contact.company },
               { label: 'E-mail', value: contact.email },
-              { label: 'Telefoon', value: contact.phone },
+              ...(contact.phone ? [{ label: 'Telefoon', value: contact.phone }] : []),
               ...summaryRows,
             ])}
           </table>
@@ -359,18 +399,18 @@ export function buildInternalLeadEmail({
         </td>
       </tr>
     `,
-    'Nieuwe scan met contactgegevens, kansen en opvolging.',
+    internalPreview,
     logoSrc,
   );
 
   const text = [
-    `Nieuwe scan: ${contact.company || contact.name}`,
+    internalSubject,
     `Leadscore: ${profile.score}/100 (${profile.temperature})`,
     '',
     `Naam: ${contact.name}`,
     `Bedrijf: ${contact.company}`,
     `E-mail: ${contact.email}`,
-    `Telefoon: ${contact.phone}`,
+    ...(contact.phone ? [`Telefoon: ${contact.phone}`] : []),
     '',
     `Beste openingshoek: ${profile.primaryAngle}`,
     adminLeadCopy,
@@ -390,7 +430,7 @@ export function buildInternalLeadEmail({
   ].join('\n');
 
   return {
-    subject: `Nieuwe scan van ${contact.company || contact.name}`,
+    subject: internalSubject,
     html,
     text,
   };

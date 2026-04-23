@@ -2,7 +2,8 @@ export type TeamSize = '' | 'alone' | '1-2' | 'small-team' | 'large-team';
 export type PaymentDays = 14 | 30 | 45 | 60 | 90;
 export type MissedProjects = 0 | 1 | 2 | 3;
 export type LeadScenario = 'conservative' | 'realistic' | 'ambitious';
-export type LeadIntent = 'demo' | 'info';
+export type LeadIntent = 'demo' | 'info' | 'scan';
+export type LeadSource = 'groeiscan' | 'ads-scan';
 
 export interface QuizState {
   teamSize: TeamSize;
@@ -100,7 +101,7 @@ export interface LeadSubmissionPayload {
   contact: LeadCaptureFormData;
   quiz: QuizState;
   meta: {
-    source: 'groeiscan';
+    source: LeadSource;
     sessionStartedAt: number;
     submittedAt: number;
     pathname?: string;
