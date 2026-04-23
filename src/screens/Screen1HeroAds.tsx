@@ -55,16 +55,21 @@ export default function Screen1HeroAds({ onNext }: Props) {
         </div>
       </div>
 
-      <div className="hidden w-full flex-col items-center md:mb-6 md:flex">
+      <div className="hidden w-full flex-col items-center md:mb-10 md:flex">
         <Button onClick={onNext} className="hidden w-full py-4 text-lg shadow-lg sm:w-auto sm:px-12 md:inline-flex">
           Start mijn persoonlijke scan <ArrowRight size={18} className="ml-2" />
         </Button>
-        <p className="mt-3 text-sm text-white/46">
-          Kost ongeveer 2 minuten en zit je nergens aan vast.
-        </p>
+        <div className="mt-4 flex flex-col items-center gap-2.5">
+          <p className="text-sm text-white/46">
+            Kost ongeveer 2 minuten en zit je nergens aan vast.
+          </p>
+          <ScanSocialProof align="center" />
+        </div>
       </div>
 
-      <ScanSocialProof className="mb-12 px-1" />
+      <div className="mb-12 flex justify-center md:hidden">
+        <ScanSocialProof align="center" />
+      </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-white/5 bg-[#050505]/94 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-xl md:hidden">
         <div className="mx-auto flex w-full max-w-2xl">

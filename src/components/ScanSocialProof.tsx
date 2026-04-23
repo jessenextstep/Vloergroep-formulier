@@ -11,6 +11,7 @@ import { cn } from '../lib/utils';
 interface ScanSocialProofProps {
   className?: string;
   title?: string;
+  align?: 'left' | 'center';
 }
 
 const vakmanPhotos = [vakman1, vakman2, vakman3, vakman4, vakman5, vakman7];
@@ -18,16 +19,18 @@ const socialProofCount = (import.meta.env.VITE_SCAN_SOCIAL_PROOF_COUNT as string
 
 export function ScanSocialProof({
   className,
-  title = `Al door ${socialProofCount} vakmannen ingevuld`,
+  title = `${socialProofCount} vakmannen deden deze scan al`,
+  align = 'left',
 }: ScanSocialProofProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 text-left',
+        'flex items-center gap-2.5 text-left',
+        align === 'center' && 'justify-center text-center',
         className,
       )}
     >
-      <div className="flex shrink-0 items-center pl-1">
+      <div className={cn('flex shrink-0 items-center pl-0.5', align === 'center' && 'justify-center')}>
         {vakmanPhotos.map((photo, index) => (
           <img
             key={photo}
@@ -35,15 +38,15 @@ export function ScanSocialProof({
             alt=""
             aria-hidden="true"
             className={cn(
-              'h-9 w-9 rounded-full border border-white/12 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]',
-              index > 0 && '-ml-2.5',
+              'h-8 w-8 rounded-full border border-white/10 object-cover ring-[1.5px] ring-[#080805] shadow-[0_8px_18px_rgba(0,0,0,0.2)]',
+              index > 0 && '-ml-2',
             )}
           />
         ))}
       </div>
 
       <div className="min-w-0">
-        <div className="text-sm font-medium tracking-[-0.02em] text-white/72 md:text-[14px]">
+        <div className="text-[13px] font-medium tracking-[-0.02em] text-white/64 md:text-[13px]">
           {title}
         </div>
       </div>
