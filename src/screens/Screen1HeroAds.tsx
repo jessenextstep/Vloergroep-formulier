@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 import { BrandLogo } from '../components/BrandLogo';
 import { Button } from '../components/Button';
+import { ScanSocialProof } from '../components/ScanSocialProof';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { heroScreen1 } from '../lib/brandAssets';
 
@@ -29,46 +30,47 @@ export default function Screen1HeroAds({ onNext }: Props) {
         </span>
 
         <h1 className="mb-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
-          Bereken wat VloerGroep jouw vloerbedrijf kan opleveren aan omzet, winst en tijd
+          Zie in 2 minuten wat VloerGroep jouw bedrijf extra kan opleveren
         </h1>
 
         <p className="max-w-3xl text-base leading-relaxed text-white/78 md:text-xl">
-          Beantwoord 5 korte vragen over jouw bedrijf en manier van werken. Daarna rekenen we uit wat het gebruik van VloerGroep voor jou kan betekenen in extra omzet, meer winst, minder regelwerk en meer groeiruimte.
+          Beantwoord 5 korte vragen en ontdek hoeveel extra omzet, tijd en cashflow VloerGroep voor jouw bedrijf kan vrijspelen.
         </p>
       </div>
 
-      <div className="mb-10 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(38,38,38,0.4),rgba(18,18,18,0.18))] px-5 py-4 backdrop-blur-xl">
-        <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-2">
+      <div className="mb-8 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(38,38,38,0.4),rgba(18,18,18,0.18))] px-5 py-4 backdrop-blur-xl">
+        <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Inzicht in mogelijke extra omzet met VloerGroep
+            Extra omzetpotentie
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Inzicht in hoeveel tijd je kunt besparen
+            Minder regelwerk
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Inzicht in hoeveel sneller cashflow kan vrijkomen
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Persoonlijke uitslag direct per mail
+            Uitslag direct per mail
           </div>
         </div>
       </div>
 
-      <div className="hidden w-full flex-col items-center md:mb-12 md:flex">
+      <div className="hidden w-full flex-col items-center md:mb-6 md:flex">
         <Button onClick={onNext} className="hidden w-full py-4 text-lg shadow-lg sm:w-auto sm:px-12 md:inline-flex">
-          Start de VloerGroep scan <ArrowRight size={18} className="ml-2" />
+          Bereken mijn VloerGroep voordeel <ArrowRight size={18} className="ml-2" />
         </Button>
+        <p className="mt-3 text-sm text-white/46">
+          Kost ongeveer 2 minuten en zit je nergens aan vast.
+        </p>
       </div>
+
+      <ScanSocialProof className="mb-12" />
 
       <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-white/5 bg-[#050505]/94 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-xl md:hidden">
         <div className="mx-auto flex w-full max-w-2xl">
           <Button onClick={onNext} className="group relative w-full overflow-hidden !py-4 text-[18px] shadow-lg active:scale-95">
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Start de VloerGroep scan
+              Bereken mijn voordeel
               <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

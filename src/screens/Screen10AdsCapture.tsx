@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Building2, Mail, Phone, ShieldCheck, User } from 'lucide-react';
 
 import { Button } from '../components/Button';
+import { ScanSocialProof } from '../components/ScanSocialProof';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { TextField } from '../components/TextField';
 import { heroScreenThanks } from '../lib/brandAssets';
@@ -478,6 +479,12 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                 ) : null}
               </form>
             </div>
+
+            <ScanSocialProof
+              className="mt-5"
+              title="Andere vakmannen gingen je al voor"
+              caption="Nog één stap en jouw persoonlijke scan ligt ook in je inbox."
+            />
 
             <div className="h-28 w-full shrink-0" />
 
