@@ -42,35 +42,35 @@ export default function Screen1HeroAds({ onNext }: Props) {
         <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Extra omzetpotentie
+            Zie hoeveel extra omzet VloerGroep kan vrijspelen
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Minder regelwerk
+            Zie hoeveel sneller geld beschikbaar kan komen
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            Uitslag direct per mail
+            Zie hoeveel uren regelwerk je kunt terugwinnen
           </div>
         </div>
       </div>
 
       <div className="hidden w-full flex-col items-center md:mb-6 md:flex">
         <Button onClick={onNext} className="hidden w-full py-4 text-lg shadow-lg sm:w-auto sm:px-12 md:inline-flex">
-          Bereken mijn VloerGroep voordeel <ArrowRight size={18} className="ml-2" />
+          Start mijn persoonlijke scan <ArrowRight size={18} className="ml-2" />
         </Button>
         <p className="mt-3 text-sm text-white/46">
           Kost ongeveer 2 minuten en zit je nergens aan vast.
         </p>
       </div>
 
-      <ScanSocialProof className="mb-12" />
+      <ScanSocialProof className="mb-12 px-1" />
 
       <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-white/5 bg-[#050505]/94 p-4 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-xl md:hidden">
         <div className="mx-auto flex w-full max-w-2xl">
           <Button onClick={onNext} className="group relative w-full overflow-hidden !py-4 text-[18px] shadow-lg active:scale-95">
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Bereken mijn voordeel
+              Start mijn scan
               <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

@@ -483,7 +483,6 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
             <ScanSocialProof
               className="mt-5"
               title="Andere vakmannen gingen je al voor"
-              caption="Nog één stap en jouw persoonlijke scan ligt ook in je inbox."
             />
 
             <div className="h-28 w-full shrink-0" />
