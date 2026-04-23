@@ -9,9 +9,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-import { BrandLogo } from './components/BrandLogo';
 import { brandWatermarkIcon } from './lib/brandAssets';
-import { clamp } from './lib/utils';
+import inviteLetterLogo from './Afbeeldingen/Logo voor op witte achtergronden PNG.png';
 import inviteVideo from './Afbeeldingen/Openingsvideo.mp4';
 
 interface InviteData {
@@ -60,9 +59,12 @@ const CONFETTI_PIECES = Array.from({ length: 18 }, (_, index) => ({
     index % 3 === 0
       ? 'bg-amber-gold'
       : index % 3 === 1
-        ? 'bg-white'
+      ? 'bg-white'
         : 'bg-[#FBEFD5]',
 }));
+
+const REVEAL_START_AT_SECONDS = 5;
+const REVEAL_TRANSITION_MS = 1680;
 
 export default function InvitePage() {
   const encodedInvite = useMemo(() => readInviteParam(), []);
@@ -78,7 +80,6 @@ export default function InvitePage() {
     encodedInvite ? { status: 'loading' } : { status: 'error', message: 'De uitnodigingslink is onvolledig.' },
   );
   const [phase, setPhase] = useState<ExperiencePhase>(prefersReducedMotion ? 'letter' : 'video');
-  const [videoProgress, setVideoProgress] = useState(0);
   const [videoVisible, setVideoVisible] = useState(!prefersReducedMotion);
   const [rsvpState, setRsvpState] = useState<RsvpState>('idle');
   const [rsvpMessage, setRsvpMessage] = useState('');
@@ -167,7 +168,7 @@ export default function InvitePage() {
     const timer = window.setTimeout(() => {
       setPhase((currentPhase) => (currentPhase === 'reveal' ? 'letter' : currentPhase));
       setVideoVisible(false);
-    }, 1520);
+    }, REVEAL_TRANSITION_MS);
 
     return () => window.clearTimeout(timer);
   }, [phase]);
@@ -177,18 +178,7 @@ export default function InvitePage() {
   const greetingName = invite?.firstName || inviteName || 'gast';
   const showPaper = phase === 'letter' || phase === 'accepted' || prefersReducedMotion;
   const showThankYou = phase === 'accepted' && !!invite;
-  const revealGlowOpacity = prefersReducedMotion
-    ? 0.14
-    : phase === 'video'
-      ? clamp(videoProgress * 0.24, 0.04, 0.2)
-      : phase === 'reveal'
-        ? 1
-        : 0.18;
-  const revealWashOpacity = prefersReducedMotion
-    ? 0
-    : phase === 'reveal'
-      ? 0.96
-      : 0;
+  const revealDuration = REVEAL_TRANSITION_MS / 1000;
 
   const handleVideoTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) => {
     if (prefersReducedMotion || revealTriggeredRef.current) {
@@ -200,10 +190,7 @@ export default function InvitePage() {
       return;
     }
 
-    const progress = clamp(video.currentTime / video.duration, 0, 1);
-    setVideoProgress(progress);
-
-    if (progress >= 0.52) {
+    if (video.currentTime >= REVEAL_START_AT_SECONDS) {
       revealTriggeredRef.current = true;
       setPhase('reveal');
     }
@@ -211,6 +198,16 @@ export default function InvitePage() {
 
   const handleVideoEnd = () => {
     if (prefersReducedMotion) {
+      return;
+    }
+
+    if (!revealTriggeredRef.current) {
+      revealTriggeredRef.current = true;
+      setPhase((currentPhase) => (currentPhase === 'accepted' ? currentPhase : 'reveal'));
+      return;
+    }
+
+    if (phase === 'reveal') {
       return;
     }
 
@@ -261,32 +258,52 @@ export default function InvitePage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#101010] text-[#FBEFD5]">
+    <div className="relative min-h-screen overflow-hidden bg-[#080805] text-[#FBEFD5]">
       <div
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#131313_0%,#111111_42%,#101010_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#0c0b08_0%,#090907_42%,#080805_100%)]"
         aria-hidden="true"
       />
 
       <motion.div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        animate={{
-          opacity: revealGlowOpacity,
-        }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        className="pointer-events-none absolute inset-[-18%] z-[24]"
+        animate={
+          prefersReducedMotion
+            ? { opacity: 0.14, scale: 1.16 }
+            : phase === 'reveal'
+              ? { opacity: [0.05, 0.56, 1], scale: [0.72, 1.06, 1.38] }
+              : phase === 'letter'
+                ? { opacity: 0.16, scale: 1.26 }
+                : { opacity: 0, scale: 0.52 }
+        }
+        transition={
+          phase === 'reveal'
+            ? { duration: revealDuration, ease: [0.16, 1, 0.3, 1], times: [0, 0.6, 1] }
+            : { duration: 1.05, ease: [0.22, 1, 0.36, 1] }
+        }
         style={{
           background:
-            'radial-gradient(circle at center, rgba(255,248,236,0.92) 0%, rgba(238,220,181,0.42) 22%, rgba(224,172,62,0.20) 38%, rgba(224,172,62,0.08) 58%, transparent 76%)',
+            'radial-gradient(circle at center, rgba(255,250,240,0.98) 0%, rgba(245,232,205,0.68) 20%, rgba(234,206,147,0.34) 38%, rgba(224,172,62,0.16) 54%, rgba(224,172,62,0.04) 72%, transparent 84%)',
         }}
       />
       <motion.div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-[25]"
-        animate={{ opacity: revealWashOpacity }}
-        transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+        animate={
+          prefersReducedMotion
+            ? { opacity: 0, scale: 1 }
+            : phase === 'reveal'
+              ? { opacity: [0, 0.44, 1], scale: [1, 1.02, 1.05] }
+              : { opacity: 0, scale: 1 }
+        }
+        transition={
+          phase === 'reveal'
+            ? { duration: revealDuration, ease: [0.18, 1, 0.28, 1], times: [0, 0.7, 1] }
+            : { duration: 0.92, ease: [0.22, 1, 0.36, 1] }
+        }
         style={{
           background:
-            'radial-gradient(circle at center, rgba(255,251,245,0.98) 0%, rgba(248,238,214,0.94) 28%, rgba(236,214,167,0.52) 50%, rgba(224,172,62,0.12) 72%, transparent 88%)',
+            'radial-gradient(circle at center, rgba(255,252,248,1) 0%, rgba(249,241,225,0.99) 34%, rgba(241,223,187,0.7) 58%, rgba(224,172,62,0.2) 76%, transparent 92%)',
         }}
       />
 
@@ -294,15 +311,25 @@ export default function InvitePage() {
         {videoVisible && !showThankYou && (
           <motion.div
             key="invite-video"
-            className="absolute inset-0 z-20 flex items-center justify-center px-5"
+            className="absolute inset-0 z-20 flex items-center justify-center"
             initial={{ opacity: 1 }}
-            animate={{ opacity: phase === 'video' ? 1 : 0 }}
+            animate={
+              phase === 'video'
+                ? { opacity: 1, scale: 1 }
+                : phase === 'reveal'
+                  ? { opacity: [1, 1, 0], scale: [1, 1.01, 1.03] }
+                  : { opacity: 0, scale: 1.03 }
+            }
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+            transition={
+              phase === 'reveal'
+                ? { duration: revealDuration, ease: [0.16, 1, 0.3, 1], times: [0, 0.62, 1] }
+                : { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
+            }
           >
             <video
               ref={videoRef}
-              className="mx-auto block w-full max-w-[640px] object-contain shadow-[0_36px_110px_rgba(0,0,0,0.46)] lg:max-w-[860px]"
+              className="mx-auto block max-h-[84vh] w-[min(97vw,860px)] max-w-none object-contain sm:w-[min(95vw,980px)] lg:w-[min(89vw,1340px)] xl:w-[min(84vw,1500px)]"
               autoPlay
               muted
               playsInline
@@ -351,7 +378,7 @@ export default function InvitePage() {
 
               <div className="relative w-full overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.52)] backdrop-blur-2xl sm:p-7">
                 <div className="pointer-events-none absolute inset-x-8 top-0 h-32 bg-[radial-gradient(circle,rgba(224,172,62,0.18),transparent_72%)] blur-2xl" />
-                <div className="relative rounded-[28px] border border-white/12 bg-[#101010] p-7 text-center sm:p-10">
+                <div className="relative rounded-[28px] border border-white/12 bg-[#0f0d0a] p-7 text-center sm:p-10">
                   <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-amber-gold/26 bg-amber-gold/10 text-amber-gold">
                     <CheckCheck size={28} strokeWidth={2.2} />
                   </div>
@@ -432,16 +459,25 @@ export default function InvitePage() {
               initial={false}
               animate={{
                 opacity: showPaper ? 1 : 0,
-                y: showPaper ? 0 : 240,
-                scale: showPaper ? 1 : 0.985,
+                y: showPaper ? 0 : 340,
+                scale: showPaper ? 1 : 0.992,
               }}
-              transition={{ duration: 1.35, ease: [0.18, 1, 0.24, 1] }}
+              transition={{ duration: 1.75, ease: [0.14, 1, 0.22, 1] }}
               className="mx-auto w-full max-w-3xl"
             >
               <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-4 shadow-[0_26px_90px_rgba(0,0,0,0.54)] backdrop-blur-2xl sm:p-6">
                 <div className="pointer-events-none absolute inset-x-10 top-0 h-28 bg-[radial-gradient(circle,rgba(224,172,62,0.16),transparent_72%)] blur-2xl" />
+                <div className="pointer-events-none absolute inset-x-5 bottom-3 top-6 rounded-[30px] bg-[#ebe2d1] opacity-70 shadow-[0_18px_40px_rgba(0,0,0,0.12)]" />
 
-                <div className="relative overflow-hidden rounded-[28px] border border-[#d8d1c4] bg-[#f5f1e8] p-6 text-[#151515] shadow-[0_10px_24px_rgba(0,0,0,0.14)] sm:p-10">
+                <div className="relative overflow-hidden rounded-[28px] border border-[#d8d1c4] bg-[linear-gradient(180deg,#f7f3ea_0%,#f2ece0_100%)] p-6 text-[#151515] shadow-[0_20px_44px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-10">
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    aria-hidden="true"
+                    style={{
+                      background:
+                        'radial-gradient(circle at top, rgba(255,255,255,0.72), transparent 24%), linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.06) 18%, rgba(0,0,0,0.015) 100%)',
+                    }}
+                  />
                   <div
                     className="pointer-events-none absolute inset-0 opacity-45"
                     aria-hidden="true"
@@ -450,23 +486,51 @@ export default function InvitePage() {
                         'repeating-linear-gradient(180deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 1px, rgba(245,241,232,0) 2px, rgba(245,241,232,0) 12px)',
                     }}
                   />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.04),transparent)]" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-[linear-gradient(0deg,rgba(0,0,0,0.05),transparent)]" />
+                  <div className="pointer-events-none absolute inset-y-8 left-0 w-8 bg-[linear-gradient(90deg,rgba(0,0,0,0.045),transparent)]" />
+                  <div className="pointer-events-none absolute inset-y-8 right-0 w-8 bg-[linear-gradient(270deg,rgba(0,0,0,0.04),transparent)]" />
+                  <div
+                    className="pointer-events-none absolute right-0 top-0 h-20 w-20 opacity-65"
+                    aria-hidden="true"
+                    style={{
+                      clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
+                      background:
+                        'linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.48) 42%, rgba(0,0,0,0.08) 100%)',
+                    }}
+                  />
                   <img
                     src={brandWatermarkIcon}
                     alt=""
                     aria-hidden="true"
-                    className="pointer-events-none absolute bottom-[-2rem] right-[-1.5rem] w-48 opacity-[0.05] sm:w-56"
+                    className="pointer-events-none absolute bottom-[-1.5rem] right-[-1rem] w-52 opacity-[0.045] sm:w-60"
                   />
 
                   <div className="relative z-10">
                     <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="inline-flex w-fit rounded-[22px] bg-[#0a0a0a] px-5 py-4 shadow-[0_16px_36px_rgba(0,0,0,0.22)]">
-                        <BrandLogo className="h-8 sm:h-9" />
+                      <div className="space-y-4">
+                        <img
+                          src={inviteLetterLogo}
+                          alt="VloerGroep"
+                          className="h-10 w-auto object-contain sm:h-11"
+                        />
+                        <div className="h-px w-28 bg-[#d1c6b2]" />
                       </div>
 
                       <div className="text-left sm:text-right">
                         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9f7a1c]">
                           Persoonlijke uitnodiging
                         </div>
+                        <div className="text-sm leading-6 text-[#4a453d]">
+                          Aldebaranweg 14-N
+                        </div>
+                        <div className="text-sm leading-6 text-[#4a453d]">
+                          8938 BD Leeuwarden
+                        </div>
+                        <div className="mt-2 text-sm leading-6 text-[#4a453d]">
+                          Telefoon: 06 – 57 57 38 62
+                        </div>
+                        <div className="my-3 h-px w-full bg-[#ddd4c5] sm:ml-auto sm:max-w-[220px]" />
                         <div className="text-sm leading-7 text-[#4a453d]">
                           Ter attentie van <span className="font-semibold text-[#151515]">{inviteName || 'genodigde'}</span>
                         </div>
@@ -519,6 +583,8 @@ export default function InvitePage() {
                           Officiële uitnodiging
                         </h1>
 
+                        <div className="mt-5 h-px w-full max-w-[180px] bg-[#ddd4c5]" />
+
                         <p className="mt-3 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
                           Beste {greetingName},
                         </p>
@@ -540,29 +606,33 @@ export default function InvitePage() {
                           <div className="grid gap-4 sm:grid-cols-3">
                             <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
                               <div className="text-sm font-semibold text-[#151515]">
-                                Als eerste inzicht
+                                Vooruitblik als eerste
                               </div>
                               <p className="mt-2 text-sm leading-6 text-[#4a453d]">
-                                Ontdek als een van de eersten hoe VloerGroep vakmanschap, kwaliteit en samenwerking wil versterken.
+                                Krijg als een van de eersten zicht op hoe VloerGroep vakmanschap, kwaliteit en samenwerking concreet wil versterken.
                               </p>
                             </div>
                             <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
                               <div className="text-sm font-semibold text-[#151515]">
-                                Ontmoeting en netwerk
+                                Waardevolle ontmoetingen
                               </div>
                               <p className="mt-2 text-sm leading-6 text-[#4a453d]">
-                                Maak in een rustige setting kennis met de mensen achter het initiatief en andere partijen uit de markt.
+                                Ontmoet in een rustige setting de mensen achter het initiatief en andere serieuze partijen uit de branche.
                               </p>
                             </div>
                             <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
                               <div className="text-sm font-semibold text-[#151515]">
-                                Richting voor morgen
+                                Kansen voor de vakman
                               </div>
                               <p className="mt-2 text-sm leading-6 text-[#4a453d]">
-                                Krijg gevoel bij wat deze ontwikkeling op termijn kan betekenen voor opdrachten, structuur en professionele groei.
+                                Krijg gevoel bij wat deze ontwikkeling kan betekenen voor duidelijkere opdrachten, meer structuur en professionele groei.
                               </p>
                             </div>
                           </div>
+
+                          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#595248]">
+                            Voor vakmensen draait deze avond om vroeg inzicht, sterke contacten en een eerste indruk van de kansen die VloerGroep op termijn kan ontsluiten.
+                          </p>
                         </div>
 
                         <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/65 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-7">
