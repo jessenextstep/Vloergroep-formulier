@@ -297,7 +297,7 @@ export default function AdsScanApp() {
 
             {step === 7 && (
               <motion.div key="ads-step-7" {...screenMotionProps} className="flex h-full w-full flex-col">
-                <Screen10AdsCapture state={state} results={currentResults} sessionStartedAt={sessionStartedAt} />
+                <Screen10AdsCapture state={state} sessionStartedAt={sessionStartedAt} />
               </motion.div>
             )}
           </AnimatePresence>

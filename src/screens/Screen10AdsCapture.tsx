@@ -1,16 +1,13 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Building2, Mail, Phone, ShieldCheck, User } from 'lucide-react';
+import { Building2, Mail, Phone, User } from 'lucide-react';
 
 import { Button } from '../components/Button';
 import { ScanSocialProof } from '../components/ScanSocialProof';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { TextField } from '../components/TextField';
 import { heroScreenThanks } from '../lib/brandAssets';
-import { buildLeadProfile } from '../lib/leadProfile';
-import { formatCurrency, formatNumber } from '../lib/utils';
 import {
-  CalculationResults,
   LeadCaptureFormData,
   LeadSubmissionPayload,
   LeadSubmissionResponse,
@@ -19,7 +16,6 @@ import {
 
 interface Props {
   state: QuizState;
-  results: CalculationResults;
   sessionStartedAt: number;
 }
 
@@ -66,7 +62,7 @@ async function parseLeadSubmissionResponse(response: Response): Promise<LeadSubm
   }
 }
 
-export default function Screen10AdsCapture({ state, results, sessionStartedAt }: Props) {
+export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
   const formStatusId = useId();
   const formId = useId();
   const submitAbortRef = useRef<AbortController | null>(null);
@@ -161,20 +157,9 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
     return () => window.clearTimeout(focusTimer);
   }, [formData.company, formData.email, formData.name, submissionStage]);
 
-  const profile = useMemo(() => buildLeadProfile(state, results, 'scan'), [results, state]);
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
-  const companyName = (formData.company || state.companyName || '').trim();
-  const companyReference = companyName || 'jouw bedrijf';
-  const heading = firstName ? `${firstName}, jouw scan staat klaar` : 'Jouw scan staat klaar';
-  const hoursSavedLabel = `${formatNumber(results.timeSaved.hoursPerWeekSaved, results.timeSaved.hoursPerWeekSaved % 1 === 0 ? 0 : 1)} uur`;
-  const weeksLabel = `${formatNumber(results.totals.totalExtraCapacityWeeks, 1)} weken`;
-  const intro = `Laat hieronder weten waar we de scan voor ${companyReference} mogen bezorgen. Dan sturen we direct jouw persoonlijke uitkomst met wat VloerGroep voor jouw bedrijf kan betekenen.`;
-  const teaserItems = [
-    `Tot ${formatCurrency(results.totals.totalExtraRevenue)} extra omzet per jaar`,
-    `${hoursSavedLabel} minder regelwerk per week`,
-    `${formatCurrency(results.cashflow.fasterCashflow)} sneller vrij in cashflow`,
-    `Ongeveer ${weeksLabel} extra groeiruimte per jaar`,
-  ];
+  const heading = firstName ? `${firstName}, waar mogen we je scan naartoe sturen?` : 'Waar mogen we je scan naartoe sturen?';
+  const intro = 'Vul hieronder je gegevens in en ontvang jouw persoonlijke scan direct per mail.';
 
   const validate = useCallback(() => {
     const nextErrors: FormErrors = {};
@@ -342,24 +327,12 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
               <span className="mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold">
                 Jouw uitslag staat klaar
               </span>
-              <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl">
+              <h2 className="mb-3 text-3xl font-bold tracking-tight text-white md:text-5xl">
                 {heading}
               </h2>
-              <p className="max-w-2xl text-base leading-relaxed text-white/76 md:text-lg">
+              <p className="max-w-xl text-base leading-relaxed text-white/72 md:text-lg">
                 {intro}
               </p>
-            </div>
-
-            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {teaserItems.map((item) => (
-                <div
-                  key={item}
-                  className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,31,31,0.44),rgba(16,16,16,0.28))] px-4 py-4 text-sm leading-6 text-white/78 backdrop-blur-xl"
-                >
-                  <ShieldCheck size={17} className="mt-1 shrink-0 text-amber-gold" />
-                  <span>{item}</span>
-                </div>
-              ))}
             </div>
 
             <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(29,29,29,0.62),rgba(15,15,15,0.42))] p-5 shadow-[0_24px_64px_rgba(0,0,0,0.32)] backdrop-blur-xl md:p-6">
@@ -400,13 +373,12 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                   />
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.78fr)]">
+                <div className="mt-4">
                   <TextField
                     ref={emailInputRef}
                     id="ads-capture-email"
                     name="email"
                     label="E-mailadres"
-                    helperText="Hier sturen we direct jouw scan naartoe."
                     icon={Mail}
                     type="email"
                     placeholder="naam@bedrijf.nl"
@@ -418,13 +390,14 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                     maxLength={160}
                     error={errors.email}
                   />
+                </div>
 
+                <div className="mt-4">
                   <TextField
                     id="ads-capture-phone"
                     name="phone"
                     label="Telefoonnummer"
                     labelHint="Optioneel"
-                    helperText="Alleen als je wilt dat we kort met je meedenken."
                     icon={Phone}
                     type="tel"
                     placeholder="06 12 34 56 78"
@@ -462,7 +435,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                     className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent text-amber-gold accent-amber-gold"
                   />
                   <span>
-                    Ja, VloerGroep mag mijn scan mailen en contact opnemen als daar een relevante vervolgstap uit komt.
+                    Ja, VloerGroep mag mijn scan mailen en contact opnemen als dat relevant is.
                   </span>
                 </label>
                 {errors.consent ? (
@@ -491,10 +464,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
               aria-label="Gegevens versturen"
               className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#050505]/92 p-3 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-2xl sm:p-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
             >
-              <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-2 sm:px-6">
-                <p className="hidden text-sm leading-6 text-white/54 md:block">
-                  Je scan wordt direct na verzenden naar je inbox gestuurd.
-                </p>
+              <div className="mx-auto flex w-full max-w-3xl items-center justify-end gap-4 px-2 sm:px-6">
                 <Button
                   type="submit"
                   form={formId}

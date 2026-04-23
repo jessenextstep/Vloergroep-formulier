@@ -8,6 +8,13 @@ import {
 } from '../lib/leadProfile.js';
 import { formatCurrency, formatNumber } from '../lib/utils.js';
 
+interface StoryBlock {
+  eyebrow: string;
+  title: string;
+  metric: string;
+  body: string;
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -48,6 +55,29 @@ function renderBulletList(items: string[]): string {
         <tr>
           <td style="padding: 0 0 12px; vertical-align: top; color: #d6a440; font-size: 18px; line-height: 1;">•</td>
           <td style="padding: 0 0 12px 10px; color: #d7ddd8; font-size: 14px; line-height: 1.6;">${escapeHtml(item)}</td>
+        </tr>
+      `,
+    )
+    .join('');
+}
+
+function renderStoryBlocks(items: StoryBlock[]): string {
+  return items
+    .map(
+      (item, index) => `
+        <tr>
+          <td style="padding: ${index === 0 ? '0' : '14px 0 0'};">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; background: #0f1b1b;">
+              <tr>
+                <td style="padding: 22px 24px;">
+                  <div style="color: #d6a440; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">${escapeHtml(item.eyebrow)}</div>
+                  <div style="color: #f6f1e6; font-size: 20px; line-height: 1.35; font-weight: 700; margin-bottom: 8px;">${escapeHtml(item.title)}</div>
+                  <div style="color: #f6cd72; font-size: 18px; line-height: 1.25; font-weight: 700; margin-bottom: 10px;">${escapeHtml(item.metric)}</div>
+                  <div style="color: #d7ddd8; font-size: 14px; line-height: 1.68;">${escapeHtml(item.body)}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
         </tr>
       `,
     )
@@ -118,6 +148,86 @@ function renderPanel(
       </tr>
     </table>
   `;
+}
+
+function buildCustomerStoryBlocks({
+  companyLabel,
+  state,
+  results,
+}: {
+  companyLabel: string;
+  state: QuizState;
+  results: CalculationResults;
+}): StoryBlock[] {
+  const paymentLabel = getPaymentDaysLabel(state.paymentDays).toLowerCase();
+  const ownerHoursSaved = formatNumber(
+    results.timeSaved.ownerHoursSaved,
+    results.timeSaved.ownerHoursSaved % 1 === 0 ? 0 : 1,
+  );
+  const teamHoursSaved = formatNumber(
+    results.timeSaved.teamEfficiencySaved,
+    results.timeSaved.teamEfficiencySaved % 1 === 0 ? 0 : 1,
+  );
+  const totalHoursSaved = formatNumber(
+    results.timeSaved.hoursPerWeekSaved,
+    results.timeSaved.hoursPerWeekSaved % 1 === 0 ? 0 : 1,
+  );
+  const monetizableHoursYear = formatNumber(results.timeSaved.monetizableHoursYear, 0);
+  const extraProjectsYear = formatNumber(results.growthLeads.extraProjectsYear, 1);
+  const extraHoursYear = formatNumber(results.growthLeads.extraHoursYear, 0);
+  const blocks: StoryBlock[] = [];
+
+  if (results.timeSaved.extraRevenueTime > 0) {
+    blocks.push({
+      eyebrow: '1. Minder regelwerk',
+      title: 'Tijd terug in de werkweek',
+      metric: `${formatCurrency(results.timeSaved.extraRevenueTime)} omzetpotentie per jaar`,
+      body:
+        `In je scan gaf je aan dat administratie, planning, communicatie en betalingen samen ongeveer ${ownerHoursSaved} uur per week kosten.` +
+        (results.timeSaved.teamEfficiencySaved > 0
+          ? ` Omdat je met een team werkt, rekenen we daarnaast op ${teamHoursSaved} uur extra efficiëntiewinst op de vloer door minder bellen, wachten en losse afstemming.`
+          : '') +
+        ` Doordat VloerGroep dit in één flow samenbrengt, komt voor ${companyLabel} ongeveer ${totalHoursSaved} uur per week vrij. Tegen ${formatCurrency(state.hourlyRate)} en ${state.weeksPerYear} werkweken onderbouwt dat circa ${formatCurrency(results.timeSaved.extraRevenueTime)} extra omzetpotentie uit ${monetizableHoursYear} inzetbare uren.`,
+    });
+  }
+
+  if (results.growthLeads.extraRevenueLeads > 0) {
+    blocks.push({
+      eyebrow: '2. Betere matching',
+      title: 'Meer omzet uit beter passende klussen',
+      metric: `${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzet via leads`,
+      body:
+        `VloerGroep stuurt niet zomaar meer aanvragen door, maar vooral beter passende klussen op basis van capaciteit en type werk.` +
+        ` In deze scan rekenen we daarom bewust conservatief met ongeveer ${extraProjectsYear} extra passende opdrachten per jaar voor een bedrijf van jullie grootte.` +
+        ` Omgerekend naar ${extraHoursYear} extra factureerbare uren tegen ${formatCurrency(state.hourlyRate)} komt dat uit op circa ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzetpotentie.`,
+    });
+  }
+
+  if (results.growthCollaboration.extraRevenueTeam > 0 && state.missedProjects > 0) {
+    blocks.push({
+      eyebrow: '3. Netwerkeffect',
+      title: 'Grotere klussen niet meer laten lopen',
+      metric: `${formatCurrency(results.growthCollaboration.extraRevenueTeam)} via samenwerking`,
+      body:
+        `Je gaf aan dat er ${getMissedProjectsLabel(state.missedProjects)} blijven liggen doordat ze te groot zijn of niet in de planning passen.` +
+        ` Juist daar werkt het netwerkeffect van VloerGroep: capaciteit bijschakelen, werk verdelen en projecten samen afronden.` +
+        ` Voor ${companyLabel} telt dat in deze scan mee voor ongeveer ${formatCurrency(results.growthCollaboration.extraRevenueTeam)} extra omzetpotentie die nu buiten bereik blijft.`,
+    });
+  }
+
+  if (results.cashflow.fasterCashflow > 0) {
+    blocks.push({
+      eyebrow: '4. Betaling & depot',
+      title: 'Sneller geld beschikbaar in je bedrijf',
+      metric: `${formatCurrency(results.cashflow.fasterCashflow)} sneller vrij werkkapitaal`,
+      body:
+        `Je huidige betaaltermijn ligt op ${paymentLabel} en je gaf aan dat ${state.percentageVloergroep}% van je omzet via VloerGroep zou kunnen lopen.` +
+        ` Met projectdepot en vooraf geborgde betalingen hoeft dat deel minder lang in openstaande posten te blijven hangen.` +
+        ` Daarom rekenen we voor ${companyLabel} met ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} sneller beschikbaar werkkapitaal.`,
+    });
+  }
+
+  return blocks;
 }
 
 function renderEmailHeader(logoSrc?: string | null) {
@@ -191,30 +301,18 @@ export function buildCustomerConfirmationEmail({
   const firstName = state.firstName || contact.name.split(' ')[0] || '';
   const openingLine = firstName ? `Dankjewel ${firstName}.` : 'Dankjewel.';
   const isAdsScan = contact.intent === 'scan';
-  const paymentLabel = getPaymentDaysLabel(state.paymentDays).toLowerCase();
-  const hoursSavedPerWeek = formatNumber(
-    results.timeSaved.hoursPerWeekSaved,
-    results.timeSaved.hoursPerWeekSaved % 1 === 0 ? 0 : 1,
-  );
-  const monetizableHoursYear = formatNumber(results.timeSaved.monetizableHoursYear, 0);
-  const capacityWeeks = formatNumber(results.totals.totalExtraCapacityWeeks, 1);
   const customerAngleCopy = isAdsScan
-    ? `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. Dit is geen losse schatting, maar een berekening op basis van jouw antwoorden en de manier waarop VloerGroep planning, communicatie, betalingen en samenwerking centraliseert.`
+    ? `Voor ${companyLabel} zit op dit moment de grootste versneller in ${profile.primaryAngle.toLowerCase()}. De cijfers hieronder zijn niet op gevoel ingevuld, maar opgebouwd uit jouw antwoorden en uit de manier waarop VloerGroep tijd, opdrachten, samenwerking en betalingen strakker organiseert.`
     : `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. In een demo laten we zien wat dit concreet betekent voor planning, cashflow en groei.`;
-  const opportunities = profile.opportunities
-    .slice(0, isAdsScan ? 3 : 2)
-    .map((item) => shortenCopy(item, 165));
-  const methodologyItems = isAdsScan
-    ? [
-        `Met VloerGroep komen offertes, planning, communicatie en betalingen op één plek. Op basis van jouw antwoorden rekenen we daardoor voor ${companyLabel} met ongeveer ${hoursSavedPerWeek} uur minder regelwerk per week. Dat komt neer op circa ${monetizableHoursYear} uur per jaar die weer inzetbaar worden.`,
-        `Als we die teruggewonnen uren omrekenen tegen jouw gemiddelde uurtarief van ${formatCurrency(state.hourlyRate)}, ontstaat alleen uit tijdswinst al ongeveer ${formatCurrency(results.timeSaved.extraRevenueTime)} extra omzetpotentie. Dat is ook de basis onder de vrijgespeelde ${capacityWeeks} weken extra capaciteit.`,
-        `Omdat VloerGroep beter passende leads aanlevert en samenwerking rond grotere opdrachten makkelijker maakt, tellen we daar nog ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzet uit betere leads${results.growthCollaboration.extraRevenueTeam > 0 ? ` en ${formatCurrency(results.growthCollaboration.extraRevenueTeam)} uit grotere klussen die je via samenwerking wél kunt aannemen` : ''} bij op.`,
-        `Met het projectdepot en vooraf geborgde betalingen hoeft ${state.percentageVloergroep}% van je omzet minder lang vast te staan. Bij jouw huidige betaaltermijn van ${paymentLabel} betekent dat ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} sneller beschikbaar werkkapitaal.`,
-        `Alles samen brengt de scan voor ${companyLabel} daarmee op ${formatCurrency(results.totals.totalExtraRevenue)} extra omzetpotentie per jaar, gebaseerd op ${getTeamSizeLabel(state.teamSize).toLowerCase()}, ${state.hoursPerWeek} factureerbare uur per week, ${state.weeksPerYear} werkweken en ${getMissedProjectsLabel(state.missedProjects)}.`,
-      ]
+  const storyBlocks = isAdsScan
+    ? buildCustomerStoryBlocks({
+        companyLabel,
+        state,
+        results,
+      })
     : [];
   const closingLine = isAdsScan
-    ? `Wil je dat Rico hier kort praktisch met je in meedenkt voor ${companyLabel}? Antwoord dan gewoon op deze mail.`
+    ? `Wil je dat Rico deze berekening kort naast jullie huidige werkwijze legt voor ${companyLabel}? Antwoord dan gewoon op deze mail. Dan kijken we samen waar de snelste winst voor jullie zit.`
     : 'Antwoord op deze mail als je alvast een voorkeursmoment wilt doorgeven.';
   const customerHeading = isAdsScan ? 'Je scan staat klaar' : 'Bevestiging van je scan';
   const customerPreview = isAdsScan
@@ -255,22 +353,14 @@ export function buildCustomerConfirmationEmail({
           </table>
         </td>
       </tr>
-      <tr>
-        <td style="padding: 0 34px 8px;">
-          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Waar je nu winst laat liggen</div>
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-            ${renderBulletList(opportunities)}
-          </table>
-        </td>
-      </tr>
       ${
         isAdsScan
           ? `
       <tr>
-        <td style="padding: 8px 34px 8px;">
-          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Hoe VloerGroep deze uitkomst voor ${escapeHtml(companyLabel)} veroorzaakt</div>
+        <td style="padding: 0 34px 18px;">
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Zo bouwt VloerGroep deze uitkomst voor ${escapeHtml(companyLabel)} op</div>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-            ${renderBulletList(methodologyItems)}
+            ${renderStoryBlocks(storyBlocks)}
           </table>
         </td>
       </tr>`
@@ -304,13 +394,10 @@ export function buildCustomerConfirmationEmail({
     'Belangrijkste cijfers:',
     ...buildLeadKpis(results).map((kpi) => `- ${kpi.label}: ${kpi.value}`),
     '',
-    'Waar je nu winst laat liggen:',
-    ...opportunities.map((item) => `- ${item}`),
-    '',
     ...(isAdsScan
       ? [
-          `Hoe VloerGroep deze uitkomst voor ${companyLabel} veroorzaakt:`,
-          ...methodologyItems.map((item) => `- ${item}`),
+          `Zo bouwt VloerGroep deze uitkomst voor ${companyLabel} op:`,
+          ...storyBlocks.map((item) => `- ${item.title}: ${item.metric}. ${item.body}`),
           '',
         ]
       : []),
