@@ -242,10 +242,12 @@ export default function InvitePage() {
   };
 
   const handleAcceptInvite = async () => {
-    if (!encodedInvite || rsvpState === 'submitting') {
+    if (!encodedInvite || rsvpState === 'submitting' || !invite) {
       return;
     }
 
+    setAcceptedInvite(invite);
+    setPhase('accepted');
     setRsvpState('submitting');
     setRsvpMessage('');
 
@@ -256,7 +258,7 @@ export default function InvitePage() {
           'content-type': 'application/json',
           accept: 'application/json',
         },
-        body: JSON.stringify({ e: encodedInvite }),
+        body: JSON.stringify({ e: encodedInvite, invite }),
       });
 
       const data = (await response.json()) as
@@ -425,15 +427,37 @@ export default function InvitePage() {
                   />
 
                   <h1 className="mb-4 font-display text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl">
-                    Dank u, {greetingName}
+                    {rsvpState === 'submitting' ? `Een ogenblik, ${greetingName}` : `Dank u, ${greetingName}`}
                   </h1>
 
                   <p className="mx-auto max-w-2xl text-base leading-8 text-[#FBEFD5]/78 sm:text-lg">
-                    Uw aanwezigheid is bevestigd. We zien u graag op{' '}
-                    <span className="font-semibold text-white">{invite?.launchDate || '-'}</span> om{' '}
-                    <span className="font-semibold text-white">{invite?.launchTime || '-'}</span>{' '}
-                    in <span className="font-semibold text-white">{invite?.launchLocation || '-'}</span>.
+                    {rsvpState === 'submitting'
+                      ? (
+                        <>
+                          Uw bevestiging wordt op dit moment afgerond. U hoeft niets meer te doen.
+                        </>
+                      )
+                      : (
+                        <>
+                          Uw aanwezigheid is bevestigd. We zien u graag op{' '}
+                          <span className="font-semibold text-white">{invite?.launchDate || '-'}</span> om{' '}
+                          <span className="font-semibold text-white">{invite?.launchTime || '-'}</span>{' '}
+                          in <span className="font-semibold text-white">{invite?.launchLocation || '-'}</span>.
+                        </>
+                      )}
                   </p>
+
+                  {rsvpState === 'submitting' ? (
+                    <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-gold/16 bg-amber-gold/8 px-4 py-3 text-sm leading-6 text-[#FBEFD5]/84">
+                      We verwerken nu uw bevestiging, sturen de e-mails uit en zetten deze direct door naar de gastenlijst.
+                    </div>
+                  ) : null}
+
+                  {rsvpState === 'error' && rsvpMessage ? (
+                    <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#d3b2b6] bg-[#4a2026]/40 px-4 py-3 text-sm leading-6 text-[#f3d7dc]">
+                      {rsvpMessage}
+                    </div>
+                  ) : null}
 
                   <div className="mx-auto mt-8 grid max-w-2xl gap-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5 text-left sm:grid-cols-3 sm:p-6">
                     <div className="flex items-start gap-3">
@@ -472,7 +496,7 @@ export default function InvitePage() {
                   </div>
 
                   <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    {invite?.calendarUrl ? (
+                    {invite?.calendarUrl && rsvpState !== 'submitting' ? (
                       <a
                         href={invite.calendarUrl}
                         className="inline-flex min-h-[50px] items-center justify-center rounded-full bg-amber-gold px-7 py-3 font-display text-sm font-bold tracking-[-0.02em] text-[#050505] transition-transform duration-200 hover:scale-[1.02]"
@@ -488,9 +512,11 @@ export default function InvitePage() {
                     </a>
                   </div>
 
-                  <p className="mt-6 text-sm leading-7 text-[#FBEFD5]/64">
-                    Er is ook een bevestiging naar <span className="text-white/84">{invite?.email || '-'}</span> verstuurd.
-                  </p>
+                  {rsvpState !== 'submitting' ? (
+                    <p className="mt-6 text-sm leading-7 text-[#FBEFD5]/64">
+                      Er is ook een bevestiging naar <span className="text-white/84">{invite?.email || '-'}</span> verstuurd.
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </motion.section>

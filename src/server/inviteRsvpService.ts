@@ -1,5 +1,6 @@
 import { buildEmailInviteThanksHeroUrl, buildEmailLogoUrl } from './emailBranding.js';
 import {
+  decodeInviteEmail,
   getInviteByEncodedEmail,
   type InviteLookupResult,
 } from './inviteService.js';
@@ -26,6 +27,7 @@ interface InviteRsvpEnvironment {
 
 interface InviteRsvpRequest {
   e?: string;
+  invite?: Partial<InviteLookupResult>;
 }
 
 interface InviteRsvpResponse {
@@ -229,6 +231,33 @@ function getRecipientName(invite: InviteLookupResult): string {
   return [invite.firstName, invite.lastName].filter(Boolean).join(' ').trim() || invite.email;
 }
 
+function sanitizeInviteSnapshot(
+  snapshot: Partial<InviteLookupResult> | undefined,
+  decodedEmail: string,
+): InviteLookupResult | null {
+  if (!snapshot) {
+    return null;
+  }
+
+  const snapshotEmail = typeof snapshot.email === 'string' ? snapshot.email.trim().toLowerCase() : '';
+  if (snapshotEmail && snapshotEmail !== decodedEmail) {
+    return null;
+  }
+
+  const readValue = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
+
+  return {
+    firstName: readValue(snapshot.firstName),
+    lastName: readValue(snapshot.lastName),
+    company: readValue(snapshot.company),
+    email: decodedEmail,
+    launchDate: readValue(snapshot.launchDate),
+    launchTime: readValue(snapshot.launchTime),
+    launchLocation: readValue(snapshot.launchLocation),
+    calendarUrl: readValue(snapshot.calendarUrl),
+  };
+}
+
 export async function processInviteRsvp(
   payload: InviteRsvpRequest,
   env: InviteRsvpEnvironment = {},
@@ -251,17 +280,20 @@ export async function processInviteRsvp(
       throw new Error('Missing BREVO_API environment variable.');
     }
 
-    const invite = await getInviteByEncodedEmail(encodedInvite, {
-      apiKey,
-      launchDate: env.launchDate,
-      launchTime: env.launchTime,
-      launchLocation: env.launchLocation,
-      calendarUrl: env.calendarUrl,
-      eventStartIso: env.eventStartIso,
-      eventEndIso: env.eventEndIso,
-      eventTitle: env.eventTitle,
-      eventDescription: env.eventDescription,
-    });
+    const decodedEmail = decodeInviteEmail(encodedInvite);
+    const invite =
+      sanitizeInviteSnapshot(payload.invite, decodedEmail) ||
+      (await getInviteByEncodedEmail(encodedInvite, {
+        apiKey,
+        launchDate: env.launchDate,
+        launchTime: env.launchTime,
+        launchLocation: env.launchLocation,
+        calendarUrl: env.calendarUrl,
+        eventStartIso: env.eventStartIso,
+        eventEndIso: env.eventEndIso,
+        eventTitle: env.eventTitle,
+        eventDescription: env.eventDescription,
+      }));
 
     const sender = buildSenderEmail(env.senderEmail);
     const adminEmail = getAdminEmail(env, sender);
