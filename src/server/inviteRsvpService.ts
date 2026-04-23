@@ -126,7 +126,10 @@ function getAdminEmail(env: InviteRsvpEnvironment): string {
   const adminEmail =
     extractEmailAddress(env.adminEmail) ||
     extractEmailAddress(process.env.INVITE_ADMIN_EMAIL) ||
-    extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL);
+    extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL) ||
+    extractEmailAddress(env.senderEmail) ||
+    extractEmailAddress(process.env.BREVO_FROM_EMAIL) ||
+    extractEmailAddress(process.env.RESEND_FROM_EMAIL);
 
   if (!adminEmail) {
     throw new Error('Missing admin confirmation email.');
