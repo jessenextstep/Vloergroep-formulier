@@ -7,6 +7,7 @@ import { ScreenHeroImage } from '../components/ScreenHeroImage';
 import { TextField } from '../components/TextField';
 import { heroScreenThanks } from '../lib/brandAssets';
 import { buildLeadProfile } from '../lib/leadProfile';
+import { formatCurrency, formatNumber } from '../lib/utils';
 import {
   CalculationResults,
   LeadCaptureFormData,
@@ -136,11 +137,14 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
   const companyName = (formData.company || state.companyName || '').trim();
   const companyReference = companyName || 'jouw bedrijf';
   const heading = firstName ? `${firstName}, jouw scan staat klaar` : 'Jouw scan staat klaar';
-  const intro = `We hebben je antwoorden verwerkt. Laat hieronder weten waar we de scan voor ${companyReference} mogen bezorgen.`;
+  const hoursSavedLabel = `${formatNumber(results.timeSaved.hoursPerWeekSaved, results.timeSaved.hoursPerWeekSaved % 1 === 0 ? 0 : 1)} uur`;
+  const weeksLabel = `${formatNumber(results.totals.totalExtraCapacityWeeks, 1)} weken`;
+  const intro = `Laat hieronder weten waar we de scan voor ${companyReference} mogen bezorgen. Dan sturen we direct jouw persoonlijke uitkomst met wat VloerGroep voor jouw bedrijf kan betekenen.`;
   const teaserItems = [
-    `Waar voor ${companyReference} nu de snelste winst zit in ${profile.primaryAngle.toLowerCase()}`,
-    'Wat tijdswinst, cashflow en groeipotentie concreet betekenen voor je bedrijf',
-    'Welke eerste stap het meest logisch is zonder direct alles om te gooien',
+    `Je potentiële extra omzet: ${formatCurrency(results.totals.totalExtraRevenue)} per jaar`,
+    `Je mogelijke tijdswinst: ${hoursSavedLabel} minder regelwerk per week`,
+    `Je cashflowkans: ${formatCurrency(results.cashflow.fasterCashflow)} sneller vrij`,
+    `Je groeiruimte: circa ${weeksLabel} extra capaciteit per jaar`,
   ];
 
   const validate = useCallback(() => {
@@ -311,7 +315,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
 
                 <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,31,31,0.54),rgba(16,16,16,0.34))] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-xl">
                   <div className="mb-4 inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                    Wat je per mail ontvangt
+                    Wat je direct ontvangt
                   </div>
                   <ul className="space-y-3">
                     {teaserItems.map((item) => (
@@ -417,7 +421,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                         className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent text-amber-gold accent-amber-gold"
                       />
                       <span>
-                        Ja, Rico van VloerGroep mag mijn scan mailen en contact opnemen als daar een relevante vervolgstap uit komt.
+                        Ja, VloerGroep mag mijn scan mailen en contact opnemen als daar een relevante vervolgstap uit komt.
                       </span>
                     </label>
                     {errors.consent ? (
@@ -444,7 +448,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
                       disabled={isSubmitting}
                       className="w-full !py-4 text-base shadow-lg shadow-amber-gold/25"
                     >
-                      {isSubmitting ? 'Je scan wordt verstuurd...' : 'Stuur mijn scan'}
+                      {isSubmitting ? 'Je scan wordt verstuurd...' : 'Ontvang mijn scan per mail'}
                     </Button>
                     <p className="text-center text-xs leading-5 text-white/46">
                       Direct na verzenden ontvang je je scan in je inbox.
@@ -501,7 +505,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
               ) : null}
 
               <p className="mt-6 text-sm leading-6 text-white/50">
-                Rico van VloerGroep kijkt alleen mee als daar echt een logische vervolgstap uit komt.
+                VloerGroep kijkt alleen mee als daar echt een logische vervolgstap uit komt.
               </p>
             </div>
           </motion.div>

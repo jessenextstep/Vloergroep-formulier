@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, CheckCircle2, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 import { BrandLogo } from '../components/BrandLogo';
 import { Button } from '../components/Button';
@@ -29,34 +29,38 @@ export default function Screen1HeroAds({ onNext }: Props) {
         </span>
 
         <h1 className="mb-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
-          Ontdek waar jouw vloerbedrijf nu tijd, cashflow en omzet laat liggen
+          Bereken wat VloerGroep jouw vloerbedrijf kan opleveren aan omzet, winst en tijd
         </h1>
 
         <p className="max-w-3xl text-base leading-relaxed text-white/78 md:text-xl">
-          Beantwoord 5 korte vragen en ontvang jouw persoonlijke scan direct per mail. Kort, concreet en gemaakt voor vakmannen die slimmer willen groeien.
+          Beantwoord 5 korte vragen over jouw bedrijf en manier van werken. Daarna rekenen we uit wat het gebruik van VloerGroep voor jou kan betekenen in extra omzet, meer winst, minder regelwerk en meer groeiruimte.
         </p>
       </div>
 
       <div className="mb-10 rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(38,38,38,0.4),rgba(18,18,18,0.18))] px-5 py-4 backdrop-blur-xl">
-        <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 text-sm text-white/75 sm:grid-cols-2">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
-            In 2 minuten ingevuld
+            Inzicht in mogelijke extra omzet met VloerGroep
           </div>
           <div className="flex items-center gap-2">
-            <Mail size={16} className="shrink-0 text-amber-gold" />
-            Uitslag direct per mail
+            <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
+            Inzicht in hoeveel tijd je kunt besparen
           </div>
           <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="shrink-0 text-amber-gold" />
-            Geen verplicht gesprek
+            <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
+            Inzicht in hoeveel sneller cashflow kan vrijkomen
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={16} className="shrink-0 text-amber-gold" />
+            Persoonlijke uitslag direct per mail
           </div>
         </div>
       </div>
 
       <div className="hidden w-full flex-col items-center md:mb-12 md:flex">
         <Button onClick={onNext} className="hidden w-full py-4 text-lg shadow-lg sm:w-auto sm:px-12 md:inline-flex">
-          Start mijn scan <ArrowRight size={18} className="ml-2" />
+          Start de VloerGroep scan <ArrowRight size={18} className="ml-2" />
         </Button>
       </div>
 
@@ -64,7 +68,7 @@ export default function Screen1HeroAds({ onNext }: Props) {
         <div className="mx-auto flex w-full max-w-2xl">
           <Button onClick={onNext} className="group relative w-full overflow-hidden !py-4 text-[18px] shadow-lg active:scale-95">
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Start mijn scan
+              Start de VloerGroep scan
               <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
