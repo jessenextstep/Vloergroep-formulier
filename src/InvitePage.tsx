@@ -320,38 +320,41 @@ export default function InvitePage() {
 
       <AnimatePresence>
         {videoVisible && !showThankYou && (
-          <motion.div
-            key="invite-video"
-            className="absolute left-1/2 top-1/2 z-20 w-full -translate-x-1/2 -translate-y-1/2"
-            initial={{ opacity: 1 }}
-            animate={
-              phase === 'video'
-                ? { opacity: 1, scale: 1 }
-                : phase === 'reveal'
-                  ? { opacity: [1, 1, 0], scale: [1, 1.01, 1.03] }
-                  : { opacity: 0, scale: 1.03 }
-            }
-            exit={{ opacity: 0 }}
-            transition={
-              phase === 'reveal'
-                ? { duration: revealDuration, ease: [0.16, 1, 0.3, 1], times: [0, 0.62, 1] }
-                : { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
-            }
-          >
-            <video
-              ref={videoRef}
-              className="mx-auto block max-h-[66vh] w-[min(82vw,680px)] max-w-none object-contain sm:max-h-[68vh] sm:w-[min(78vw,780px)] lg:max-h-[70vh] lg:w-[min(68vw,940px)] xl:w-[min(62vw,1040px)]"
-              autoPlay
-              muted
-              playsInline
-              preload="auto"
-              onTimeUpdate={handleVideoTimeUpdate}
-              onEnded={handleVideoEnd}
-              onError={handleVideoEnd}
+          <div className="pointer-events-none fixed inset-0 z-20 grid place-items-center overflow-hidden">
+            <motion.div
+              key="invite-video"
+              className="flex w-full items-center justify-center"
+              initial={{ opacity: 1, scale: 1 }}
+              animate={
+                phase === 'video'
+                  ? { opacity: 1, scale: 1 }
+                  : phase === 'reveal'
+                    ? { opacity: [1, 1, 0], scale: [1, 1.01, 1.03] }
+                    : { opacity: 0, scale: 1.03 }
+              }
+              exit={{ opacity: 0 }}
+              transition={
+                phase === 'reveal'
+                  ? { duration: revealDuration, ease: [0.16, 1, 0.3, 1], times: [0, 0.62, 1] }
+                  : { duration: 0.72, ease: [0.22, 1, 0.36, 1] }
+              }
+              style={{ transformOrigin: 'center center' }}
             >
-              <source src={inviteVideo} type="video/mp4" />
-            </video>
-          </motion.div>
+              <video
+                ref={videoRef}
+                className="block max-h-[66vh] w-[min(82vw,680px)] max-w-none object-contain sm:max-h-[68vh] sm:w-[min(78vw,780px)] lg:max-h-[70vh] lg:w-[min(68vw,940px)] xl:w-[min(62vw,1040px)]"
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                onTimeUpdate={handleVideoTimeUpdate}
+                onEnded={handleVideoEnd}
+                onError={handleVideoEnd}
+              >
+                <source src={inviteVideo} type="video/mp4" />
+              </video>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
