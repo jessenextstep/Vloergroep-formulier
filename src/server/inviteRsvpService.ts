@@ -12,6 +12,7 @@ interface InviteRsvpEnvironment {
   brevoApiKey?: string;
   senderEmail?: string;
   adminEmail?: string;
+  guestListId?: string | number;
   siteUrl?: string;
   launchDate?: string;
   launchTime?: string;
@@ -117,7 +118,7 @@ function buildSenderEmail(value?: string): { name: string; email: string } {
   }
 
   return {
-    name: 'VloerGroep',
+    name: 'Rico van VloerGroep',
     email: emailAddress,
   };
 }
@@ -171,6 +172,57 @@ async function sendBrevoTransactionalEmail(
   if (!response.ok) {
     throw new Error(await parseBrevoError(response));
   }
+}
+
+async function sendBrevoPost(
+  apiKey: string,
+  path: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const response = await fetch(`https://api.brevo.com/v3${path}`, {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseBrevoError(response));
+  }
+}
+
+function parsePositiveInteger(value: string | number | undefined): number | null {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+    return value;
+  }
+
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value.trim(), 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+async function addInviteGuestToBrevoList(
+  apiKey: string,
+  email: string,
+  env: InviteRsvpEnvironment,
+): Promise<void> {
+  const guestListId =
+    parsePositiveInteger(env.guestListId) ||
+    parsePositiveInteger(process.env.BREVO_GASTENLIJST_LIST_ID);
+
+  if (!guestListId) {
+    return;
+  }
+
+  await sendBrevoPost(apiKey, `/contacts/lists/${guestListId}/contacts/add`, {
+    emails: [email],
+  });
 }
 
 function getRecipientName(invite: InviteLookupResult): string {
@@ -254,6 +306,7 @@ export async function processInviteRsvp(
         },
         tags: ['invite-confirmation', 'admin'],
       }),
+      addInviteGuestToBrevoList(apiKey, invite.email, env),
     ]);
 
     return {

@@ -58,6 +58,107 @@ function formatCalendarDate(value?: string): string | null {
   return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 }
 
+function parseLaunchDateParts(value?: string): { year: number; month: number; day: number } | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  let match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    return {
+      year: Number(match[1]),
+      month: Number(match[2]),
+      day: Number(match[3]),
+    };
+  }
+
+  match = trimmed.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+  if (match) {
+    return {
+      day: Number(match[1]),
+      month: Number(match[2]),
+      year: Number(match[3]),
+    };
+  }
+
+  const fallback = new Date(trimmed);
+  if (Number.isNaN(fallback.getTime())) {
+    return null;
+  }
+
+  return {
+    year: fallback.getUTCFullYear(),
+    month: fallback.getUTCMonth() + 1,
+    day: fallback.getUTCDate(),
+  };
+}
+
+function parseLaunchTimeParts(value?: string): { start: string; end: string } | null {
+  if (!value) {
+    return null;
+  }
+
+  const matches = [...value.matchAll(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/g)];
+  if (!matches.length) {
+    return null;
+  }
+
+  const toMinutes = (hour: number, minute: number) => hour * 60 + minute;
+  const toCalendarTime = (totalMinutes: number) => {
+    const normalized = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
+    const hours = String(Math.floor(normalized / 60)).padStart(2, '0');
+    const minutes = String(normalized % 60).padStart(2, '0');
+    return `${hours}${minutes}00`;
+  };
+
+  const startMinutes = toMinutes(Number(matches[0][1]), Number(matches[0][2]));
+  const endMinutes =
+    matches.length > 1
+      ? toMinutes(Number(matches[1][1]), Number(matches[1][2]))
+      : startMinutes + 180;
+
+  return {
+    start: toCalendarTime(startMinutes),
+    end: toCalendarTime(endMinutes),
+  };
+}
+
+function buildCalendarFromLaunchFields(options: InviteServiceOptions): string {
+  const launchDate = options.launchDate || process.env.INVITE_LAUNCH_DATE;
+  const launchTime = options.launchTime || process.env.INVITE_LAUNCH_TIME;
+  const dateParts = parseLaunchDateParts(launchDate);
+  const timeParts = parseLaunchTimeParts(launchTime);
+
+  if (!dateParts || !timeParts) {
+    return '';
+  }
+
+  const datePrefix = `${String(dateParts.year).padStart(4, '0')}${String(dateParts.month).padStart(2, '0')}${String(dateParts.day).padStart(2, '0')}`;
+  const title = options.eventTitle || process.env.INVITE_EVENT_TITLE || 'Officiele opening VloerGroep';
+  const details =
+    options.eventDescription ||
+    process.env.INVITE_EVENT_DESCRIPTION ||
+    'Persoonlijke uitnodiging voor de officiele opening van VloerGroep.';
+  const location = options.launchLocation || process.env.INVITE_LAUNCH_LOCATION || '';
+
+  const calendarUrl = new URL('https://calendar.google.com/calendar/render');
+  calendarUrl.searchParams.set('action', 'TEMPLATE');
+  calendarUrl.searchParams.set('text', title);
+  calendarUrl.searchParams.set('dates', `${datePrefix}T${timeParts.start}/${datePrefix}T${timeParts.end}`);
+  calendarUrl.searchParams.set('details', details);
+
+  if (location) {
+    calendarUrl.searchParams.set('location', location);
+  }
+
+  return calendarUrl.toString();
+}
+
 function buildGoogleCalendarUrl(options: InviteServiceOptions): string {
   if (options.calendarUrl) {
     const normalized = normalizeAbsoluteUrl(options.calendarUrl);
@@ -70,7 +171,7 @@ function buildGoogleCalendarUrl(options: InviteServiceOptions): string {
   const end = formatCalendarDate(options.eventEndIso || process.env.INVITE_EVENT_END_ISO);
 
   if (!start || !end) {
-    return '';
+    return buildCalendarFromLaunchFields(options);
   }
 
   const title = options.eventTitle || process.env.INVITE_EVENT_TITLE || 'Officiele opening VloerGroep';

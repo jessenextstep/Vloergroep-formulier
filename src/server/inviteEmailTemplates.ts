@@ -72,7 +72,7 @@ export function buildInviteAcceptedCustomerEmail({ invite, logoUrl }: InviteEmai
         <tr>
           <td style="border-radius:999px;background-color:#E0AC3E;">
             <a href="${invite.calendarUrl}" style="display:inline-block;padding:14px 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#050505;text-decoration:none;border-radius:999px;">
-              Zet in uw agenda
+              Importeer in uw agenda
             </a>
           </td>
         </tr>
@@ -121,7 +121,7 @@ export function buildInviteAcceptedCustomerEmail({ invite, logoUrl }: InviteEmai
     `Datum: ${invite.launchDate || '-'}`,
     `Tijd: ${invite.launchTime || '-'}`,
     `Locatie: ${invite.launchLocation || '-'}`,
-    invite.calendarUrl ? `Agenda: ${invite.calendarUrl}` : '',
+    invite.calendarUrl ? `Importeer in agenda: ${invite.calendarUrl}` : '',
     '',
     'We zien u graag op deze bijzondere avond.',
     '',

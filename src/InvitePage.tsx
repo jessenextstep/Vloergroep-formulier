@@ -436,7 +436,7 @@ export default function InvitePage() {
                         href={invite.calendarUrl}
                         className="inline-flex min-h-[50px] items-center justify-center rounded-full bg-amber-gold px-7 py-3 font-display text-sm font-bold tracking-[-0.02em] text-[#050505] transition-transform duration-200 hover:scale-[1.02]"
                       >
-                        Zet in uw agenda
+                        Importeer in agenda
                       </a>
                     ) : null}
                     <a
