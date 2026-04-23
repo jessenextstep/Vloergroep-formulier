@@ -191,18 +191,26 @@ export function buildCustomerConfirmationEmail({
   const firstName = state.firstName || contact.name.split(' ')[0] || '';
   const openingLine = firstName ? `Dankjewel ${firstName}.` : 'Dankjewel.';
   const isAdsScan = contact.intent === 'scan';
+  const paymentLabel = getPaymentDaysLabel(state.paymentDays).toLowerCase();
+  const hoursSavedPerWeek = formatNumber(
+    results.timeSaved.hoursPerWeekSaved,
+    results.timeSaved.hoursPerWeekSaved % 1 === 0 ? 0 : 1,
+  );
+  const monetizableHoursYear = formatNumber(results.timeSaved.monetizableHoursYear, 0);
+  const capacityWeeks = formatNumber(results.totals.totalExtraCapacityWeeks, 1);
   const customerAngleCopy = isAdsScan
-    ? `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. Dit is geen losse schatting, maar een berekening op basis van de antwoorden die je zelf voor ${companyLabel} hebt ingevuld.`
+    ? `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. Dit is geen losse schatting, maar een berekening op basis van jouw antwoorden en de manier waarop VloerGroep planning, communicatie, betalingen en samenwerking centraliseert.`
     : `Voor ${companyLabel} ligt de snelste winst nu in ${profile.primaryAngle.toLowerCase()}. In een demo laten we zien wat dit concreet betekent voor planning, cashflow en groei.`;
   const opportunities = profile.opportunities
     .slice(0, isAdsScan ? 3 : 2)
     .map((item) => shortenCopy(item, 165));
   const methodologyItems = isAdsScan
     ? [
-        `We rekenen voor ${companyLabel} met ${getTeamSizeLabel(state.teamSize).toLowerCase()}, ${state.hoursPerWeek} factureerbare uur per week, ${state.weeksPerYear} werkweken per jaar en een gemiddeld uurtarief van ${formatCurrency(state.hourlyRate)}.`,
-        `De tijdswinst is gebaseerd op de ${formatNumber(state.timeAdmin + state.timePlanning + state.timeComm + state.timePayment, 1)} uur per week die je nu kwijt bent aan administratie, planning, communicatie en betalingen. Bij teams tellen we daar een voorzichtige efficiëntiewinst bij op.`,
-        `De cashflow-inschatting komt voort uit je huidige betaaltermijn van ${getPaymentDaysLabel(state.paymentDays).toLowerCase()} en het aandeel van ${state.percentageVloergroep}% omzet dat je via VloerGroep zou laten lopen.`,
-        `De groeipotentie is gebaseerd op ${getMissedProjectsLabel(state.missedProjects)} plus een conservatieve verbetering in beter passende leads en samenwerking.`,
+        `Met VloerGroep komen offertes, planning, communicatie en betalingen op één plek. Op basis van jouw antwoorden rekenen we daardoor voor ${companyLabel} met ongeveer ${hoursSavedPerWeek} uur minder regelwerk per week. Dat komt neer op circa ${monetizableHoursYear} uur per jaar die weer inzetbaar worden.`,
+        `Als we die teruggewonnen uren omrekenen tegen jouw gemiddelde uurtarief van ${formatCurrency(state.hourlyRate)}, ontstaat alleen uit tijdswinst al ongeveer ${formatCurrency(results.timeSaved.extraRevenueTime)} extra omzetpotentie. Dat is ook de basis onder de vrijgespeelde ${capacityWeeks} weken extra capaciteit.`,
+        `Omdat VloerGroep beter passende leads aanlevert en samenwerking rond grotere opdrachten makkelijker maakt, tellen we daar nog ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzet uit betere leads${results.growthCollaboration.extraRevenueTeam > 0 ? ` en ${formatCurrency(results.growthCollaboration.extraRevenueTeam)} uit grotere klussen die je via samenwerking wél kunt aannemen` : ''} bij op.`,
+        `Met het projectdepot en vooraf geborgde betalingen hoeft ${state.percentageVloergroep}% van je omzet minder lang vast te staan. Bij jouw huidige betaaltermijn van ${paymentLabel} betekent dat ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} sneller beschikbaar werkkapitaal.`,
+        `Alles samen brengt de scan voor ${companyLabel} daarmee op ${formatCurrency(results.totals.totalExtraRevenue)} extra omzetpotentie per jaar, gebaseerd op ${getTeamSizeLabel(state.teamSize).toLowerCase()}, ${state.hoursPerWeek} factureerbare uur per week, ${state.weeksPerYear} werkweken en ${getMissedProjectsLabel(state.missedProjects)}.`,
       ]
     : [];
   const closingLine = isAdsScan
@@ -260,7 +268,7 @@ export function buildCustomerConfirmationEmail({
           ? `
       <tr>
         <td style="padding: 8px 34px 8px;">
-          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Hoe we deze cijfers voor ${escapeHtml(companyLabel)} hebben opgebouwd</div>
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Hoe VloerGroep deze uitkomst voor ${escapeHtml(companyLabel)} veroorzaakt</div>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
             ${renderBulletList(methodologyItems)}
           </table>
@@ -301,7 +309,7 @@ export function buildCustomerConfirmationEmail({
     '',
     ...(isAdsScan
       ? [
-          `Hoe we deze cijfers voor ${companyLabel} hebben opgebouwd:`,
+          `Hoe VloerGroep deze uitkomst voor ${companyLabel} veroorzaakt:`,
           ...methodologyItems.map((item) => `- ${item}`),
           '',
         ]
