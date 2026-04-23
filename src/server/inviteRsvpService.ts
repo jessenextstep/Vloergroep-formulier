@@ -1,4 +1,4 @@
-import { buildEmailLogoUrl } from './emailBranding.js';
+import { buildEmailInviteThanksHeroUrl, buildEmailLogoUrl } from './emailBranding.js';
 import {
   getInviteByEncodedEmail,
   type InviteLookupResult,
@@ -267,8 +267,9 @@ export async function processInviteRsvp(
     const adminEmail = getAdminEmail(env, sender);
     const siteUrl = resolveSiteUrl(env);
     const logoUrl = buildEmailLogoUrl(siteUrl);
-    const customerEmail = buildInviteAcceptedCustomerEmail({ invite, logoUrl });
-    const adminNotificationEmail = buildInviteAcceptedAdminEmail({ invite, logoUrl });
+    const heroImageUrl = buildEmailInviteThanksHeroUrl(siteUrl);
+    const customerEmail = buildInviteAcceptedCustomerEmail({ invite, logoUrl, heroImageUrl });
+    const adminNotificationEmail = buildInviteAcceptedAdminEmail({ invite, logoUrl, heroImageUrl });
     const recipientName = getRecipientName(invite);
 
     await Promise.all([

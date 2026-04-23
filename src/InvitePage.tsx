@@ -2,14 +2,15 @@ import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   CalendarDays,
-  CheckCheck,
   Clock3,
   Mail,
   MapPin,
   Sparkles,
 } from 'lucide-react';
 
+import { ScreenHeroImage } from './components/ScreenHeroImage';
 import { brandWatermarkIcon } from './lib/brandAssets';
+import { heroScreenThanks } from './lib/brandAssets';
 import inviteLetterLogo from './Afbeeldingen/Logo voor op witte achtergronden PNG.png';
 import inviteVideo from './Afbeeldingen/Openingsvideo.mp4';
 
@@ -417,9 +418,11 @@ export default function InvitePage() {
               <div className="relative w-full overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.52)] backdrop-blur-2xl sm:p-7">
                 <div className="pointer-events-none absolute inset-x-8 top-0 h-32 bg-[radial-gradient(circle,rgba(224,172,62,0.18),transparent_72%)] blur-2xl" />
                 <div className="relative rounded-[28px] border border-white/12 bg-[#0f0d0a] p-7 text-center sm:p-10">
-                  <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-amber-gold/26 bg-amber-gold/10 text-amber-gold">
-                    <CheckCheck size={28} strokeWidth={2.2} />
-                  </div>
+                  <ScreenHeroImage
+                    src={heroScreenThanks}
+                    alt="VloerGroep bedanktscherm"
+                    className="mb-8"
+                  />
 
                   <h1 className="mb-4 font-display text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl">
                     Dank u, {greetingName}
@@ -637,6 +640,20 @@ export default function InvitePage() {
 
                         <p className="mt-5 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
                           U behoort tot de eerste kring die wij willen meenemen in de start van VloerGroep. Niet alleen om erbij te zijn, maar ook om mee te voelen welke richting vanaf hier de meeste waarde krijgt.
+                        </p>
+
+                        <p className="mt-5 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
+                          Wilt u erbij zijn?
+                          {' '}
+                          <button
+                            type="button"
+                            onClick={handleAcceptInvite}
+                            disabled={rsvpState === 'submitting'}
+                            className="inline font-semibold text-[#151515] underline decoration-[#c4932d] decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#9f7a1c] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Reserveer mijn plaats
+                          </button>
+                          .
                         </p>
 
                         <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/62 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)] sm:p-6">

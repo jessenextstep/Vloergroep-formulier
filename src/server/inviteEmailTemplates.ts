@@ -3,6 +3,7 @@ import type { InviteLookupResult } from './inviteService.js';
 interface InviteEmailContext {
   invite: InviteLookupResult;
   logoUrl?: string | null;
+  heroImageUrl?: string | null;
 }
 
 function getRecipientName(invite: InviteLookupResult): string {
@@ -15,12 +16,14 @@ function getGreetingName(invite: InviteLookupResult): string {
 
 function renderEmailShell({
   logoUrl,
+  heroImageUrl,
   eyebrow,
   title,
   intro,
   body,
 }: {
   logoUrl?: string | null;
+  heroImageUrl?: string | null;
   eyebrow: string;
   title: string;
   intro?: string;
@@ -32,6 +35,14 @@ function renderEmailShell({
 
   const introMarkup = intro
     ? `<p style="margin:0 0 18px 0;font-size:16px;line-height:1.85;color:#FBEFD5;">${intro}</p>`
+    : '';
+
+  const heroMarkup = heroImageUrl
+    ? `
+      <div style="margin:0 0 24px 0;border-radius:28px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background-color:#101010;">
+        <img src="${heroImageUrl}" alt="" width="616" style="display:block;width:100%;height:auto;border:0;" />
+      </div>
+    `
     : '';
 
   return `<!DOCTYPE html>
@@ -48,6 +59,7 @@ function renderEmailShell({
             </tr>
             <tr>
               <td style="padding:34px 32px 30px 32px;background:radial-gradient(circle at top, rgba(224,172,62,0.10), transparent 34%), linear-gradient(180deg,#050505 0%,#0b0b0b 100%);font-family:Arial,Helvetica,sans-serif;color:#FBEFD5;">
+                ${heroMarkup}
                 <div style="margin:0 0 12px 0;font-size:11px;line-height:1.3;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E0AC3E;">${eyebrow}</div>
                 <h1 style="margin:0 0 18px 0;font-size:34px;line-height:1.08;font-weight:700;letter-spacing:-0.03em;color:#ffffff;">${title}</h1>
                 ${introMarkup}
@@ -62,7 +74,7 @@ function renderEmailShell({
 </html>`;
 }
 
-export function buildInviteAcceptedCustomerEmail({ invite, logoUrl }: InviteEmailContext) {
+export function buildInviteAcceptedCustomerEmail({ invite, logoUrl, heroImageUrl }: InviteEmailContext) {
   const greetingName = getGreetingName(invite);
   const title = `${greetingName}, uw aanwezigheid is bevestigd`;
   const intro = `Wat fijn dat u erbij bent. Wij kijken ernaar uit u te verwelkomen tijdens de officiele opening van VloerGroep.`;
@@ -82,6 +94,7 @@ export function buildInviteAcceptedCustomerEmail({ invite, logoUrl }: InviteEmai
 
   const html = renderEmailShell({
     logoUrl,
+    heroImageUrl,
     eyebrow: 'Bevestiging',
     title,
     intro,
@@ -139,13 +152,14 @@ export function buildInviteAcceptedCustomerEmail({ invite, logoUrl }: InviteEmai
   };
 }
 
-export function buildInviteAcceptedAdminEmail({ invite, logoUrl }: InviteEmailContext) {
+export function buildInviteAcceptedAdminEmail({ invite, logoUrl, heroImageUrl }: InviteEmailContext) {
   const recipientName = getRecipientName(invite);
   const title = `Nieuwe bevestiging voor de opening`;
   const intro = `Er is zojuist een aanwezigheid bevestigd via de persoonlijke uitnodigingspagina van VloerGroep.`;
 
   const html = renderEmailShell({
     logoUrl,
+    heroImageUrl,
     eyebrow: 'Nieuwe RSVP',
     title,
     intro,
