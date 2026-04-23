@@ -167,7 +167,7 @@ export default function InvitePage() {
     const timer = window.setTimeout(() => {
       setPhase((currentPhase) => (currentPhase === 'reveal' ? 'letter' : currentPhase));
       setVideoVisible(false);
-    }, 1120);
+    }, 1520);
 
     return () => window.clearTimeout(timer);
   }, [phase]);
@@ -175,15 +175,20 @@ export default function InvitePage() {
   const invite = inviteState.status === 'ready' ? inviteState.invite : acceptedInvite;
   const inviteName = getInviteName(invite);
   const greetingName = invite?.firstName || inviteName || 'gast';
-  const showPaper = phase === 'reveal' || phase === 'letter' || phase === 'accepted' || prefersReducedMotion;
+  const showPaper = phase === 'letter' || phase === 'accepted' || prefersReducedMotion;
   const showThankYou = phase === 'accepted' && !!invite;
   const revealGlowOpacity = prefersReducedMotion
-    ? 0.16
+    ? 0.14
     : phase === 'video'
-      ? clamp(videoProgress * 0.18, 0.02, 0.12)
+      ? clamp(videoProgress * 0.24, 0.04, 0.2)
       : phase === 'reveal'
-        ? 0.95
-        : 0.22;
+        ? 1
+        : 0.18;
+  const revealWashOpacity = prefersReducedMotion
+    ? 0
+    : phase === 'reveal'
+      ? 0.96
+      : 0;
 
   const handleVideoTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) => {
     if (prefersReducedMotion || revealTriggeredRef.current) {
@@ -198,7 +203,7 @@ export default function InvitePage() {
     const progress = clamp(video.currentTime / video.duration, 0, 1);
     setVideoProgress(progress);
 
-    if (progress >= 0.64) {
+    if (progress >= 0.52) {
       revealTriggeredRef.current = true;
       setPhase('reveal');
     }
@@ -256,9 +261,9 @@ export default function InvitePage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#050505] text-[#FBEFD5]">
+    <div className="relative min-h-screen overflow-hidden bg-[#101010] text-[#FBEFD5]">
       <div
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#040404_0%,#070707_40%,#050505_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#131313_0%,#111111_42%,#101010_100%)]"
         aria-hidden="true"
       />
 
@@ -271,7 +276,17 @@ export default function InvitePage() {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         style={{
           background:
-            'radial-gradient(circle at center, rgba(255,248,236,0.82) 0%, rgba(236,214,167,0.34) 20%, rgba(224,172,62,0.18) 36%, rgba(224,172,62,0.08) 54%, transparent 72%)',
+            'radial-gradient(circle at center, rgba(255,248,236,0.92) 0%, rgba(238,220,181,0.42) 22%, rgba(224,172,62,0.20) 38%, rgba(224,172,62,0.08) 58%, transparent 76%)',
+        }}
+      />
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[25]"
+        animate={{ opacity: revealWashOpacity }}
+        transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          background:
+            'radial-gradient(circle at center, rgba(255,251,245,0.98) 0%, rgba(248,238,214,0.94) 28%, rgba(236,214,167,0.52) 50%, rgba(224,172,62,0.12) 72%, transparent 88%)',
         }}
       />
 
@@ -283,23 +298,21 @@ export default function InvitePage() {
             initial={{ opacity: 1 }}
             animate={{ opacity: phase === 'video' ? 1 : 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="relative mx-auto w-full max-w-[520px]">
-              <video
-                ref={videoRef}
-                className="mx-auto aspect-video w-full rounded-[26px] object-cover shadow-[0_32px_90px_rgba(0,0,0,0.55)]"
-                autoPlay
-                muted
-                playsInline
-                preload="auto"
-                onTimeUpdate={handleVideoTimeUpdate}
-                onEnded={handleVideoEnd}
-                onError={handleVideoEnd}
-              >
-                <source src={inviteVideo} type="video/mp4" />
-              </video>
-            </div>
+            <video
+              ref={videoRef}
+              className="mx-auto block w-full max-w-[640px] object-contain shadow-[0_36px_110px_rgba(0,0,0,0.46)] lg:max-w-[860px]"
+              autoPlay
+              muted
+              playsInline
+              preload="auto"
+              onTimeUpdate={handleVideoTimeUpdate}
+              onEnded={handleVideoEnd}
+              onError={handleVideoEnd}
+            >
+              <source src={inviteVideo} type="video/mp4" />
+            </video>
           </motion.div>
         )}
       </AnimatePresence>
@@ -419,10 +432,10 @@ export default function InvitePage() {
               initial={false}
               animate={{
                 opacity: showPaper ? 1 : 0,
-                y: showPaper ? 0 : 140,
-                scale: showPaper ? 1 : 0.98,
+                y: showPaper ? 0 : 240,
+                scale: showPaper ? 1 : 0.985,
               }}
-              transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 1.35, ease: [0.18, 1, 0.24, 1] }}
               className="mx-auto w-full max-w-3xl"
             >
               <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-4 shadow-[0_26px_90px_rgba(0,0,0,0.54)] backdrop-blur-2xl sm:p-6">
@@ -518,6 +531,39 @@ export default function InvitePage() {
                           Graag verwelkomen wij <span className="font-semibold text-[#151515]">{invite.company || invite.email}</span> op een avond waarin ontmoeting,
                           kwaliteit en een nieuwe stap voorwaarts centraal staan.
                         </p>
+
+                        <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/62 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)] sm:p-6">
+                          <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9f7a1c]">
+                            Wat deze avond u brengt
+                          </div>
+
+                          <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
+                              <div className="text-sm font-semibold text-[#151515]">
+                                Als eerste inzicht
+                              </div>
+                              <p className="mt-2 text-sm leading-6 text-[#4a453d]">
+                                Ontdek als een van de eersten hoe VloerGroep vakmanschap, kwaliteit en samenwerking wil versterken.
+                              </p>
+                            </div>
+                            <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
+                              <div className="text-sm font-semibold text-[#151515]">
+                                Ontmoeting en netwerk
+                              </div>
+                              <p className="mt-2 text-sm leading-6 text-[#4a453d]">
+                                Maak in een rustige setting kennis met de mensen achter het initiatief en andere partijen uit de markt.
+                              </p>
+                            </div>
+                            <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
+                              <div className="text-sm font-semibold text-[#151515]">
+                                Richting voor morgen
+                              </div>
+                              <p className="mt-2 text-sm leading-6 text-[#4a453d]">
+                                Krijg gevoel bij wat deze ontwikkeling op termijn kan betekenen voor opdrachten, structuur en professionele groei.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
 
                         <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/65 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-7">
                           <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9f7a1c]">
