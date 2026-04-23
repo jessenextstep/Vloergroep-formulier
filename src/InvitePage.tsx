@@ -179,6 +179,7 @@ export default function InvitePage() {
   const showPaper = phase === 'letter' || phase === 'accepted' || prefersReducedMotion;
   const showThankYou = phase === 'accepted' && !!invite;
   const revealDuration = REVEAL_TRANSITION_MS / 1000;
+  const showGlobalGlow = phase === 'reveal' || phase === 'letter';
 
   const handleVideoTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) => {
     if (prefersReducedMotion || revealTriggeredRef.current) {
@@ -264,54 +265,64 @@ export default function InvitePage() {
         aria-hidden="true"
       />
 
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-[-18%] z-[24]"
-        animate={
-          prefersReducedMotion
-            ? { opacity: 0.14, scale: 1.16 }
-            : phase === 'reveal'
-              ? { opacity: [0.05, 0.56, 1], scale: [0.72, 1.06, 1.38] }
-              : phase === 'letter'
-                ? { opacity: 0.16, scale: 1.26 }
-                : { opacity: 0, scale: 0.52 }
-        }
-        transition={
-          phase === 'reveal'
-            ? { duration: revealDuration, ease: [0.16, 1, 0.3, 1], times: [0, 0.6, 1] }
-            : { duration: 1.05, ease: [0.22, 1, 0.36, 1] }
-        }
-        style={{
-          background:
-            'radial-gradient(circle at center, rgba(255,250,240,0.98) 0%, rgba(245,232,205,0.68) 20%, rgba(234,206,147,0.34) 38%, rgba(224,172,62,0.16) 54%, rgba(224,172,62,0.04) 72%, transparent 84%)',
-        }}
-      />
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[25]"
-        animate={
-          prefersReducedMotion
-            ? { opacity: 0, scale: 1 }
-            : phase === 'reveal'
-              ? { opacity: [0, 0.44, 1], scale: [1, 1.02, 1.05] }
-              : { opacity: 0, scale: 1 }
-        }
-        transition={
-          phase === 'reveal'
-            ? { duration: revealDuration, ease: [0.18, 1, 0.28, 1], times: [0, 0.7, 1] }
-            : { duration: 0.92, ease: [0.22, 1, 0.36, 1] }
-        }
-        style={{
-          background:
-            'radial-gradient(circle at center, rgba(255,252,248,1) 0%, rgba(249,241,225,0.99) 34%, rgba(241,223,187,0.7) 58%, rgba(224,172,62,0.2) 76%, transparent 92%)',
-        }}
-      />
+      <AnimatePresence>
+        {showGlobalGlow && (
+          <>
+            <motion.div
+              key="invite-glow-core"
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-[-18%] z-[24]"
+              initial={{ opacity: 0, scale: 0.52 }}
+              animate={
+                prefersReducedMotion
+                  ? { opacity: 0.14, scale: 1.16 }
+                  : phase === 'reveal'
+                    ? { opacity: [0.05, 0.56, 1], scale: [0.72, 1.06, 1.38] }
+                    : { opacity: 0.16, scale: 1.26 }
+              }
+              exit={{ opacity: 0, scale: 1.18 }}
+              transition={
+                phase === 'reveal'
+                  ? { duration: revealDuration, ease: [0.16, 1, 0.3, 1], times: [0, 0.6, 1] }
+                  : { duration: 1.05, ease: [0.22, 1, 0.36, 1] }
+              }
+              style={{
+                background:
+                  'radial-gradient(circle at center, rgba(255,250,240,0.98) 0%, rgba(245,232,205,0.68) 20%, rgba(234,206,147,0.34) 38%, rgba(224,172,62,0.16) 54%, rgba(224,172,62,0.04) 72%, transparent 84%)',
+              }}
+            />
+            <motion.div
+              key="invite-glow-wash"
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-[25]"
+              initial={{ opacity: 0, scale: 1 }}
+              animate={
+                prefersReducedMotion
+                  ? { opacity: 0, scale: 1 }
+                  : phase === 'reveal'
+                    ? { opacity: [0, 0.44, 1], scale: [1, 1.02, 1.05] }
+                    : { opacity: 0, scale: 1 }
+              }
+              exit={{ opacity: 0 }}
+              transition={
+                phase === 'reveal'
+                  ? { duration: revealDuration, ease: [0.18, 1, 0.28, 1], times: [0, 0.7, 1] }
+                  : { duration: 0.92, ease: [0.22, 1, 0.36, 1] }
+              }
+              style={{
+                background:
+                  'radial-gradient(circle at center, rgba(255,252,248,1) 0%, rgba(249,241,225,0.99) 34%, rgba(241,223,187,0.7) 58%, rgba(224,172,62,0.2) 76%, transparent 92%)',
+              }}
+            />
+          </>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {videoVisible && !showThankYou && (
           <motion.div
             key="invite-video"
-            className="absolute inset-0 z-20 flex items-center justify-center"
+            className="absolute left-1/2 top-1/2 z-20 w-full -translate-x-1/2 -translate-y-1/2"
             initial={{ opacity: 1 }}
             animate={
               phase === 'video'
@@ -329,7 +340,7 @@ export default function InvitePage() {
           >
             <video
               ref={videoRef}
-              className="mx-auto block max-h-[72vh] w-[min(88vw,720px)] max-w-none object-contain sm:w-[min(84vw,820px)] lg:w-[min(74vw,1040px)] xl:w-[min(68vw,1160px)]"
+              className="mx-auto block max-h-[66vh] w-[min(82vw,680px)] max-w-none object-contain sm:max-h-[68vh] sm:w-[min(78vw,780px)] lg:max-h-[70vh] lg:w-[min(68vw,940px)] xl:w-[min(62vw,1040px)]"
               autoPlay
               muted
               playsInline
@@ -465,12 +476,11 @@ export default function InvitePage() {
               transition={{ duration: 1.75, ease: [0.14, 1, 0.22, 1] }}
               className="mx-auto w-full max-w-4xl px-1 sm:px-4"
             >
-              <div className="relative px-2 py-5 sm:px-6 sm:py-7">
-                <div className="pointer-events-none absolute inset-x-8 top-5 h-32 bg-[radial-gradient(circle,rgba(224,172,62,0.18),transparent_72%)] blur-2xl" />
-                <div className="pointer-events-none absolute inset-x-4 bottom-0 top-7 rounded-[18px] bg-[#ddd4c5] opacity-80 shadow-[0_18px_46px_rgba(0,0,0,0.16)]" />
-                <div className="pointer-events-none absolute inset-x-2 bottom-3 top-3 rounded-[16px] border border-[#f0e6d5]/80 bg-[#f1e8d8] opacity-90" />
+              <div className="relative py-6">
+                <div className="pointer-events-none absolute inset-x-10 top-8 h-24 bg-[radial-gradient(circle,rgba(224,172,62,0.12),transparent_72%)] blur-2xl" />
+                <div className="pointer-events-none absolute left-1/2 top-[1.25rem] h-[97%] w-[96%] -translate-x-1/2 rotate-[-1deg] rounded-[8px] border border-[#ded4c2] bg-[#efe6d6] shadow-[0_18px_36px_rgba(0,0,0,0.14)]" />
 
-                <div className="relative overflow-hidden rounded-[12px] border border-[#d8d1c4] bg-[linear-gradient(180deg,#f7f3ea_0%,#f2ece0_100%)] p-6 text-[#151515] shadow-[0_28px_56px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-10">
+                <div className="relative overflow-hidden rounded-[6px] border border-[#d8d1c4] bg-[linear-gradient(180deg,#f7f3ea_0%,#f2ece0_100%)] p-6 text-[#151515] shadow-[0_30px_52px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-10">
                   <div
                     className="pointer-events-none absolute inset-0"
                     aria-hidden="true"
@@ -595,7 +605,11 @@ export default function InvitePage() {
                         </p>
 
                         <p className="mt-5 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
-                          Voor <span className="font-semibold text-[#151515]">{invite.company || invite.email}</span> houden wij hiervoor graag persoonlijk een plaats vrij. U behoort tot de eerste kring die wij willen meenemen in de start van VloerGroep en in de route die wij vanaf hier verder vormgeven.
+                          Voor <span className="font-semibold text-[#151515]">{invite.company || invite.email}</span> houden wij hiervoor graag persoonlijk een plaats vrij.
+                        </p>
+
+                        <p className="mt-5 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
+                          U behoort tot de eerste kring die wij willen meenemen in de start van VloerGroep. Niet alleen om erbij te zijn, maar ook om mee te voelen welke richting vanaf hier de meeste waarde krijgt.
                         </p>
 
                         <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/62 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)] sm:p-6">
@@ -607,19 +621,19 @@ export default function InvitePage() {
                             <li className="flex gap-3">
                               <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#c4932d]" />
                               <span>
-                                <span className="font-semibold text-[#151515]">Als eerste aan tafel.</span> U ziet als een van de eersten waar VloerGroep naartoe beweegt.
+                                <span className="font-semibold text-[#151515]">Als eerste aan tafel.</span> U ziet de opening van VloerGroep van dichtbij.
                               </span>
                             </li>
                             <li className="flex gap-3">
                               <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#c4932d]" />
                               <span>
-                                <span className="font-semibold text-[#151515]">Uw blik telt mee.</span> De inzichten van vakmensen helpen ons de route vanaf de start scherper te maken.
+                                <span className="font-semibold text-[#151515]">Uw blik telt mee.</span> De eerste reacties uit de markt helpen de route vanaf de start scherper te maken.
                               </span>
                             </li>
                             <li className="flex gap-3">
                               <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#c4932d]" />
                               <span>
-                                <span className="font-semibold text-[#151515]">De juiste mensen in een ruimte.</span> Een verzorgde avond om de eerste kring rond VloerGroep te ontmoeten.
+                                <span className="font-semibold text-[#151515]">Een bijzondere eerste kring.</span> Een verzorgde avond met de mensen die vanaf het begin onderdeel zijn van dit moment.
                               </span>
                             </li>
                           </ul>
