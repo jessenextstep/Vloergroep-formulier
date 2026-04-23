@@ -108,6 +108,30 @@ export default function InvitePage() {
   }, [prefersReducedMotion]);
 
   useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const shouldLockScroll = phase === 'video' || phase === 'reveal';
+    const { documentElement, body } = document;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+
+    if (shouldLockScroll) {
+      documentElement.style.overflow = 'hidden';
+      body.style.overflow = 'hidden';
+      body.style.overscrollBehavior = 'none';
+    }
+
+    return () => {
+      documentElement.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
+  }, [phase]);
+
+  useEffect(() => {
     if (!encodedInvite) {
       return;
     }
@@ -323,7 +347,7 @@ export default function InvitePage() {
           <div className="pointer-events-none fixed inset-0 z-20 grid place-items-center overflow-hidden">
             <motion.div
               key="invite-video"
-              className="flex w-full items-center justify-center"
+              className="flex w-screen items-center justify-center overflow-hidden"
               initial={{ opacity: 1, scale: 1 }}
               animate={
                 phase === 'video'
@@ -342,7 +366,7 @@ export default function InvitePage() {
             >
               <video
                 ref={videoRef}
-                className="block max-h-[66vh] w-[min(82vw,680px)] max-w-none object-contain sm:max-h-[68vh] sm:w-[min(78vw,780px)] lg:max-h-[70vh] lg:w-[min(68vw,940px)] xl:w-[min(62vw,1040px)]"
+                className="block max-h-[64vh] w-screen max-w-none object-contain sm:max-h-[68vh] sm:w-[min(78vw,780px)] lg:max-h-[70vh] lg:w-[min(68vw,940px)] xl:w-[min(62vw,1040px)]"
                 autoPlay
                 muted
                 playsInline
