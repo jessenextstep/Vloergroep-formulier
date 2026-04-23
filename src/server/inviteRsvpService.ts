@@ -122,18 +122,19 @@ function buildSenderEmail(value?: string): { name: string; email: string } {
   };
 }
 
-function getAdminEmail(env: InviteRsvpEnvironment): string {
+function getAdminEmail(
+  env: InviteRsvpEnvironment,
+  sender?: { name: string; email: string },
+): string {
   const adminEmail =
     extractEmailAddress(env.adminEmail) ||
     extractEmailAddress(process.env.INVITE_ADMIN_EMAIL) ||
     extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL) ||
+    extractEmailAddress(sender?.email) ||
     extractEmailAddress(env.senderEmail) ||
     extractEmailAddress(process.env.BREVO_FROM_EMAIL) ||
-    extractEmailAddress(process.env.RESEND_FROM_EMAIL);
-
-  if (!adminEmail) {
-    throw new Error('Missing admin confirmation email.');
-  }
+    extractEmailAddress(process.env.RESEND_FROM_EMAIL) ||
+    'info@vloergroep.nl';
 
   return adminEmail;
 }
@@ -211,7 +212,7 @@ export async function processInviteRsvp(
     });
 
     const sender = buildSenderEmail(env.senderEmail);
-    const adminEmail = getAdminEmail(env);
+    const adminEmail = getAdminEmail(env, sender);
     const siteUrl = resolveSiteUrl(env);
     const logoUrl = buildEmailLogoUrl(siteUrl);
     const customerEmail = buildInviteAcceptedCustomerEmail({ invite, logoUrl });

@@ -329,7 +329,7 @@ export default function InvitePage() {
           >
             <video
               ref={videoRef}
-              className="mx-auto block max-h-[84vh] w-[min(97vw,860px)] max-w-none object-contain sm:w-[min(95vw,980px)] lg:w-[min(89vw,1340px)] xl:w-[min(84vw,1500px)]"
+              className="mx-auto block max-h-[72vh] w-[min(88vw,720px)] max-w-none object-contain sm:w-[min(84vw,820px)] lg:w-[min(74vw,1040px)] xl:w-[min(68vw,1160px)]"
               autoPlay
               muted
               playsInline
@@ -463,13 +463,14 @@ export default function InvitePage() {
                 scale: showPaper ? 1 : 0.992,
               }}
               transition={{ duration: 1.75, ease: [0.14, 1, 0.22, 1] }}
-              className="mx-auto w-full max-w-3xl"
+              className="mx-auto w-full max-w-4xl px-1 sm:px-4"
             >
-              <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))] p-4 shadow-[0_26px_90px_rgba(0,0,0,0.54)] backdrop-blur-2xl sm:p-6">
-                <div className="pointer-events-none absolute inset-x-10 top-0 h-28 bg-[radial-gradient(circle,rgba(224,172,62,0.16),transparent_72%)] blur-2xl" />
-                <div className="pointer-events-none absolute inset-x-5 bottom-3 top-6 rounded-[30px] bg-[#ebe2d1] opacity-70 shadow-[0_18px_40px_rgba(0,0,0,0.12)]" />
+              <div className="relative px-2 py-5 sm:px-6 sm:py-7">
+                <div className="pointer-events-none absolute inset-x-8 top-5 h-32 bg-[radial-gradient(circle,rgba(224,172,62,0.18),transparent_72%)] blur-2xl" />
+                <div className="pointer-events-none absolute inset-x-4 bottom-0 top-7 rounded-[18px] bg-[#ddd4c5] opacity-80 shadow-[0_18px_46px_rgba(0,0,0,0.16)]" />
+                <div className="pointer-events-none absolute inset-x-2 bottom-3 top-3 rounded-[16px] border border-[#f0e6d5]/80 bg-[#f1e8d8] opacity-90" />
 
-                <div className="relative overflow-hidden rounded-[28px] border border-[#d8d1c4] bg-[linear-gradient(180deg,#f7f3ea_0%,#f2ece0_100%)] p-6 text-[#151515] shadow-[0_20px_44px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-10">
+                <div className="relative overflow-hidden rounded-[12px] border border-[#d8d1c4] bg-[linear-gradient(180deg,#f7f3ea_0%,#f2ece0_100%)] p-6 text-[#151515] shadow-[0_28px_56px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-10">
                   <div
                     className="pointer-events-none absolute inset-0"
                     aria-hidden="true"
@@ -580,7 +581,7 @@ export default function InvitePage() {
                         </div>
 
                         <h1 className="max-w-3xl font-display text-[2.6rem] font-bold leading-[0.98] tracking-[-0.05em] text-[#151515] sm:text-[3.5rem]">
-                          Officiële uitnodiging
+                          Uitnodiging voor de officiele opening
                         </h1>
 
                         <div className="mt-5 h-px w-full max-w-[180px] bg-[#ddd4c5]" />
@@ -590,49 +591,38 @@ export default function InvitePage() {
                         </p>
 
                         <p className="mt-5 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
-                          Met veel plezier nodigen wij u persoonlijk uit voor de officiële opening van VloerGroep.
+                          Met veel plezier nodigen wij u persoonlijk uit voor een bijzondere avond rond de officiele opening van VloerGroep.
                         </p>
 
                         <p className="mt-5 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
-                          Graag verwelkomen wij <span className="font-semibold text-[#151515]">{invite.company || invite.email}</span> op een avond waarin ontmoeting,
-                          kwaliteit en een nieuwe stap voorwaarts centraal staan.
+                          Voor <span className="font-semibold text-[#151515]">{invite.company || invite.email}</span> houden wij hiervoor graag persoonlijk een plaats vrij. U behoort tot de eerste kring die wij willen meenemen in de start van VloerGroep en in de route die wij vanaf hier verder vormgeven.
                         </p>
 
                         <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/62 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.05)] sm:p-6">
                           <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9f7a1c]">
-                            Wat deze avond u brengt
+                            Waarom wij u er graag bij hebben
                           </div>
 
-                          <div className="grid gap-4 sm:grid-cols-3">
-                            <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
-                              <div className="text-sm font-semibold text-[#151515]">
-                                Vooruitblik als eerste
-                              </div>
-                              <p className="mt-2 text-sm leading-6 text-[#4a453d]">
-                                Krijg als een van de eersten zicht op hoe VloerGroep vakmanschap, kwaliteit en samenwerking concreet wil versterken.
-                              </p>
-                            </div>
-                            <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
-                              <div className="text-sm font-semibold text-[#151515]">
-                                Waardevolle ontmoetingen
-                              </div>
-                              <p className="mt-2 text-sm leading-6 text-[#4a453d]">
-                                Ontmoet in een rustige setting de mensen achter het initiatief en andere serieuze partijen uit de branche.
-                              </p>
-                            </div>
-                            <div className="rounded-[18px] border border-black/6 bg-[#f8f4ec] p-4">
-                              <div className="text-sm font-semibold text-[#151515]">
-                                Kansen voor de vakman
-                              </div>
-                              <p className="mt-2 text-sm leading-6 text-[#4a453d]">
-                                Krijg gevoel bij wat deze ontwikkeling kan betekenen voor duidelijkere opdrachten, meer structuur en professionele groei.
-                              </p>
-                            </div>
-                          </div>
-
-                          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#595248]">
-                            Voor vakmensen draait deze avond om vroeg inzicht, sterke contacten en een eerste indruk van de kansen die VloerGroep op termijn kan ontsluiten.
-                          </p>
+                          <ul className="space-y-4 text-sm leading-7 text-[#4a453d] sm:text-[15px]">
+                            <li className="flex gap-3">
+                              <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#c4932d]" />
+                              <span>
+                                <span className="font-semibold text-[#151515]">Als eerste aan tafel.</span> U ziet als een van de eersten waar VloerGroep naartoe beweegt.
+                              </span>
+                            </li>
+                            <li className="flex gap-3">
+                              <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#c4932d]" />
+                              <span>
+                                <span className="font-semibold text-[#151515]">Uw blik telt mee.</span> De inzichten van vakmensen helpen ons de route vanaf de start scherper te maken.
+                              </span>
+                            </li>
+                            <li className="flex gap-3">
+                              <span className="mt-[10px] h-2.5 w-2.5 shrink-0 rounded-full bg-[#c4932d]" />
+                              <span>
+                                <span className="font-semibold text-[#151515]">De juiste mensen in een ruimte.</span> Een verzorgde avond om de eerste kring rond VloerGroep te ontmoeten.
+                              </span>
+                            </li>
+                          </ul>
                         </div>
 
                         <div className="mt-8 rounded-[24px] border border-[#ded6c8] bg-white/65 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] sm:p-7">
@@ -678,7 +668,15 @@ export default function InvitePage() {
                         </div>
 
                         <p className="mt-8 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
-                          Wij zouden het bijzonder waarderen om u die avond persoonlijk te mogen ontvangen.
+                          Wij zouden het bijzonder vinden u die avond persoonlijk te mogen ontvangen.
+                        </p>
+
+                        <p className="mt-6 max-w-2xl text-base leading-8 text-[#4a453d] sm:text-lg">
+                          Met vriendelijke groet,
+                          <br />
+                          <span className="font-semibold text-[#151515]">Rico van der Meer</span>
+                          <br />
+                          VloerGroep
                         </p>
 
                         <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -688,12 +686,12 @@ export default function InvitePage() {
                             disabled={rsvpState === 'submitting'}
                             className="inline-flex min-h-[52px] items-center justify-center rounded-full bg-[#0a0a0a] px-7 py-3 font-display text-sm font-bold tracking-[-0.02em] text-white transition-transform duration-200 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {rsvpState === 'submitting' ? 'Uitnodiging bevestigen...' : 'Ik accepteer de uitnodiging'}
+                            {rsvpState === 'submitting' ? 'Plaats reserveren...' : 'Reserveer mijn plaats'}
                           </button>
 
                           <div className="flex items-center gap-2 text-sm leading-6 text-[#5b554d]">
                             <Mail size={16} className="text-[#9f7a1c]" />
-                            Bevestiging per e-mail volgt automatisch
+                            Na uw bevestiging ontvangt u direct een persoonlijke bevestiging
                           </div>
                         </div>
 
