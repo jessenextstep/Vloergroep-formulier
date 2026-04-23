@@ -188,7 +188,7 @@ export default function AdsScanApp() {
   const showProgressHeader = step > 0 && step <= TOTAL_STEPS;
   const showIntroMobileHeader = step === 0;
   const hasCompactStickyFooter = step === 0;
-  const hasStandardStickyFooter = step > 0 && step <= TOTAL_STEPS;
+  const hasStandardStickyFooter = (step > 0 && step <= TOTAL_STEPS) || step === 7;
   const mainBottomPaddingClass = hasCompactStickyFooter
     ? 'pb-[108px] md:pb-28'
     : hasStandardStickyFooter

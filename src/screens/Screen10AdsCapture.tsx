@@ -67,8 +67,12 @@ async function parseLeadSubmissionResponse(response: Response): Promise<LeadSubm
 
 export default function Screen10AdsCapture({ state, results, sessionStartedAt }: Props) {
   const formStatusId = useId();
+  const formId = useId();
   const submitAbortRef = useRef<AbortController | null>(null);
   const submitTimeoutRef = useRef<number | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const companyInputRef = useRef<HTMLInputElement | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
   const [submissionStage, setSubmissionStage] = useState<'form' | 'sending' | 'done' | 'error'>('form');
   const [deliveryMode, setDeliveryMode] = useState<'live' | 'preview' | null>(null);
   const [serverMessage, setServerMessage] = useState('');
@@ -132,6 +136,30 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
     };
   }, []);
 
+  useEffect(() => {
+    if (submissionStage !== 'form') {
+      return;
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      if (!formData.name.trim()) {
+        nameInputRef.current?.focus();
+        return;
+      }
+
+      if (!formData.company.trim()) {
+        companyInputRef.current?.focus();
+        return;
+      }
+
+      if (!formData.email.trim()) {
+        emailInputRef.current?.focus();
+      }
+    }, 120);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [formData.company, formData.email, formData.name, submissionStage]);
+
   const profile = useMemo(() => buildLeadProfile(state, results, 'scan'), [results, state]);
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
   const companyName = (formData.company || state.companyName || '').trim();
@@ -141,10 +169,10 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
   const weeksLabel = `${formatNumber(results.totals.totalExtraCapacityWeeks, 1)} weken`;
   const intro = `Laat hieronder weten waar we de scan voor ${companyReference} mogen bezorgen. Dan sturen we direct jouw persoonlijke uitkomst met wat VloerGroep voor jouw bedrijf kan betekenen.`;
   const teaserItems = [
-    `Je potentiële extra omzet: ${formatCurrency(results.totals.totalExtraRevenue)} per jaar`,
-    `Je mogelijke tijdswinst: ${hoursSavedLabel} minder regelwerk per week`,
-    `Je cashflowkans: ${formatCurrency(results.cashflow.fasterCashflow)} sneller vrij`,
-    `Je groeiruimte: circa ${weeksLabel} extra capaciteit per jaar`,
+    `Tot ${formatCurrency(results.totals.totalExtraRevenue)} extra omzet per jaar`,
+    `${hoursSavedLabel} minder regelwerk per week`,
+    `${formatCurrency(results.cashflow.fasterCashflow)} sneller vrij in cashflow`,
+    `Ongeveer ${weeksLabel} extra groeiruimte per jaar`,
   ];
 
   const validate = useCallback(() => {
@@ -299,7 +327,7 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center pt-6 md:pb-8 md:pt-5">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center pt-6 md:pt-5">
       <AnimatePresence mode="wait">
         {submissionStage === 'form' ? (
           <motion.div
@@ -309,160 +337,168 @@ export default function Screen10AdsCapture({ state, results, sessionStartedAt }:
             exit={{ opacity: 0, scale: 0.985 }}
             className="w-full"
           >
-            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-              <div>
-                <div className="mb-7 text-center lg:text-left">
-                  <span className="mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold">
-                    Jouw uitslag staat klaar
-                  </span>
-                  <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl">
-                    {heading}
-                  </h2>
-                  <p className="max-w-2xl text-base leading-relaxed text-white/76 md:text-lg">
-                    {intro}
-                  </p>
-                </div>
-
-                <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,31,31,0.54),rgba(16,16,16,0.34))] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-                  <div className="mb-4 inline-flex rounded-full border border-amber-gold/18 bg-amber-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                    Wat je direct ontvangt
-                  </div>
-                  <ul className="space-y-3">
-                    {teaserItems.map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm leading-6 text-white/78 md:text-[15px]">
-                        <ShieldCheck size={17} className="mt-1 shrink-0 text-amber-gold" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(29,29,29,0.62),rgba(15,15,15,0.42))] p-5 shadow-[0_24px_64px_rgba(0,0,0,0.32)] backdrop-blur-xl md:p-6">
-                <form onSubmit={handleSubmit} noValidate>
-                  <div className="space-y-4">
-                    <TextField
-                      id="ads-capture-name"
-                      name="name"
-                      label="Voornaam"
-                      icon={User}
-                      type="text"
-                      placeholder="Bijv. Mark"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      autoComplete="given-name"
-                      autoCapitalize="words"
-                      enterKeyHint="next"
-                      maxLength={80}
-                      error={errors.name}
-                    />
-
-                    <TextField
-                      id="ads-capture-company"
-                      name="company"
-                      label="Bedrijfsnaam"
-                      icon={Building2}
-                      type="text"
-                      placeholder="Bijv. Jansen Vloeren"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      autoComplete="organization"
-                      autoCapitalize="words"
-                      enterKeyHint="next"
-                      maxLength={120}
-                      error={errors.company}
-                    />
-
-                    <TextField
-                      id="ads-capture-email"
-                      name="email"
-                      label="E-mailadres"
-                      icon={Mail}
-                      type="email"
-                      placeholder="naam@bedrijf.nl"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      autoComplete="email"
-                      enterKeyHint="next"
-                      inputMode="email"
-                      maxLength={160}
-                      error={errors.email}
-                    />
-
-                    <TextField
-                      id="ads-capture-phone"
-                      name="phone"
-                      label="Telefoonnummer"
-                      labelHint="Optioneel"
-                      helperText="Alleen handig als je wilt dat Rico later kort met je meedenkt."
-                      icon={Phone}
-                      type="tel"
-                      placeholder="06 12 34 56 78"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      autoComplete="tel"
-                      enterKeyHint="done"
-                      inputMode="tel"
-                      maxLength={40}
-                      error={errors.phone}
-                    />
-
-                    <input
-                      type="text"
-                      name="website"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      tabIndex={-1}
-                      autoComplete="off"
-                      className="hidden"
-                      aria-hidden="true"
-                    />
-
-                    <label
-                      htmlFor="ads-capture-consent"
-                      className="flex items-start gap-3 rounded-[20px] border border-white/10 bg-white/5 p-4 text-sm leading-6 text-white/72"
-                    >
-                      <input
-                        id="ads-capture-consent"
-                        name="consent"
-                        type="checkbox"
-                        checked={formData.consent}
-                        onChange={handleInputChange}
-                        className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent text-amber-gold accent-amber-gold"
-                      />
-                      <span>
-                        Ja, VloerGroep mag mijn scan mailen en contact opnemen als daar een relevante vervolgstap uit komt.
-                      </span>
-                    </label>
-                    {errors.consent ? (
-                      <p className="pl-1 text-[12px] font-medium leading-5 text-red-300">{errors.consent}</p>
-                    ) : null}
-                  </div>
-
-                  {serverMessage ? (
-                    <p
-                      id={formStatusId}
-                      className="mt-4 rounded-[18px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-200"
-                    >
-                      {serverMessage}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-6 flex flex-col gap-3">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full !py-4 text-base shadow-lg shadow-amber-gold/25"
-                    >
-                      {isSubmitting ? 'Je scan wordt verstuurd...' : 'Ontvang mijn scan per mail'}
-                    </Button>
-                    <p className="text-center text-xs leading-5 text-white/46">
-                      Direct na verzenden ontvang je je scan in je inbox.
-                    </p>
-                  </div>
-                </form>
-              </div>
+            <div className="mb-7 text-center md:text-left">
+              <span className="mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold">
+                Jouw uitslag staat klaar
+              </span>
+              <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl">
+                {heading}
+              </h2>
+              <p className="max-w-2xl text-base leading-relaxed text-white/76 md:text-lg">
+                {intro}
+              </p>
             </div>
+
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {teaserItems.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,31,31,0.44),rgba(16,16,16,0.28))] px-4 py-4 text-sm leading-6 text-white/78 backdrop-blur-xl"
+                >
+                  <ShieldCheck size={17} className="mt-1 shrink-0 text-amber-gold" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(29,29,29,0.62),rgba(15,15,15,0.42))] p-5 shadow-[0_24px_64px_rgba(0,0,0,0.32)] backdrop-blur-xl md:p-6">
+              <form id={formId} onSubmit={handleSubmit} noValidate>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <TextField
+                    ref={nameInputRef}
+                    id="ads-capture-name"
+                    name="name"
+                    label="Voornaam"
+                    icon={User}
+                    type="text"
+                    placeholder="Bijv. Mark"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    autoComplete="given-name"
+                    autoCapitalize="words"
+                    enterKeyHint="next"
+                    maxLength={80}
+                    error={errors.name}
+                  />
+
+                  <TextField
+                    ref={companyInputRef}
+                    id="ads-capture-company"
+                    name="company"
+                    label="Bedrijfsnaam"
+                    icon={Building2}
+                    type="text"
+                    placeholder="Bijv. Jansen Vloeren"
+                    value={formData.company}
+                    onChange={handleInputChange}
+                    autoComplete="organization"
+                    autoCapitalize="words"
+                    enterKeyHint="next"
+                    maxLength={120}
+                    error={errors.company}
+                  />
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.78fr)]">
+                  <TextField
+                    ref={emailInputRef}
+                    id="ads-capture-email"
+                    name="email"
+                    label="E-mailadres"
+                    helperText="Hier sturen we direct jouw scan naartoe."
+                    icon={Mail}
+                    type="email"
+                    placeholder="naam@bedrijf.nl"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    autoComplete="email"
+                    enterKeyHint="next"
+                    inputMode="email"
+                    maxLength={160}
+                    error={errors.email}
+                  />
+
+                  <TextField
+                    id="ads-capture-phone"
+                    name="phone"
+                    label="Telefoonnummer"
+                    labelHint="Optioneel"
+                    helperText="Alleen als je wilt dat we kort met je meedenken."
+                    icon={Phone}
+                    type="tel"
+                    placeholder="06 12 34 56 78"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    autoComplete="tel"
+                    enterKeyHint="done"
+                    inputMode="tel"
+                    maxLength={40}
+                    error={errors.phone}
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="hidden"
+                  aria-hidden="true"
+                />
+
+                <label
+                  htmlFor="ads-capture-consent"
+                  className="mt-4 flex items-start gap-3 rounded-[20px] border border-white/10 bg-white/5 p-4 text-sm leading-6 text-white/72"
+                >
+                  <input
+                    id="ads-capture-consent"
+                    name="consent"
+                    type="checkbox"
+                    checked={formData.consent}
+                    onChange={handleInputChange}
+                    className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent text-amber-gold accent-amber-gold"
+                  />
+                  <span>
+                    Ja, VloerGroep mag mijn scan mailen en contact opnemen als daar een relevante vervolgstap uit komt.
+                  </span>
+                </label>
+                {errors.consent ? (
+                  <p className="mt-2 pl-1 text-[12px] font-medium leading-5 text-red-300">{errors.consent}</p>
+                ) : null}
+
+                {serverMessage ? (
+                  <p
+                    id={formStatusId}
+                    className="mt-4 rounded-[18px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-200"
+                  >
+                    {serverMessage}
+                  </p>
+                ) : null}
+              </form>
+            </div>
+
+            <div className="h-28 w-full shrink-0" />
+
+            <nav
+              aria-label="Gegevens versturen"
+              className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/5 bg-[#050505]/92 p-3 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-2xl sm:p-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
+            >
+              <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-2 sm:px-6">
+                <p className="hidden text-sm leading-6 text-white/54 md:block">
+                  Je scan wordt direct na verzenden naar je inbox gestuurd.
+                </p>
+                <Button
+                  type="submit"
+                  form={formId}
+                  disabled={isSubmitting}
+                  className="ml-auto !px-6 !py-3 text-[15px] shadow-lg shadow-amber-gold/20"
+                >
+                  {isSubmitting ? 'Je scan wordt verstuurd...' : 'Ontvang mijn scan per mail'}
+                </Button>
+              </div>
+            </nav>
           </motion.div>
         ) : (
           <motion.div
