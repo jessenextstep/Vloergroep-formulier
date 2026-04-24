@@ -43,7 +43,7 @@ function readStoredFormData(defaults: LeadCaptureFormData): LeadCaptureFormData 
     return {
       ...defaults,
       ...JSON.parse(storedValue),
-      intent: 'demo',
+      intent: 'scan',
     } as LeadCaptureFormData;
   } catch {
     return defaults;
@@ -83,7 +83,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       company: state.companyName || '',
       email: '',
       phone: '',
-      intent: 'demo',
+      intent: 'scan',
       consent: true,
       website: '',
     }),
@@ -95,7 +95,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       const nextName = current.name || state.firstName || '';
       const nextCompany = current.company || state.companyName || '';
 
-      if (nextName === current.name && nextCompany === current.company && current.intent === 'demo') {
+      if (nextName === current.name && nextCompany === current.company && current.intent === 'scan') {
         return current;
       }
 
@@ -103,7 +103,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
         ...current,
         name: nextName,
         company: nextCompany,
-        intent: 'demo',
+        intent: 'scan',
       };
     });
   }, [state.companyName, state.firstName]);
@@ -118,7 +118,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
         CAPTURE_STORAGE_KEY,
         JSON.stringify({
           ...formData,
-          intent: 'demo',
+          intent: 'scan',
         }),
       );
     }, FORM_STORAGE_WRITE_DELAY_MS);
@@ -135,23 +135,23 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
     };
   }, []);
 
-  const profile = buildLeadProfile(state, results, 'demo');
+  const profile = buildLeadProfile(state, results, 'scan');
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
   const companyName = (formData.company || state.companyName || '').trim();
   const growthFocus = profile.primaryAngle.toLowerCase();
   const companyReference = companyName ? companyName : 'jouw bedrijf';
   const heading =
     firstName.length > 0
-      ? `${firstName}, laat je gegevens achter voor je gratis persoonlijke VloerGroep demo`
-      : 'Laat je gegevens achter voor je gratis persoonlijke VloerGroep demo';
+      ? `${firstName}, ontvang je complete scan per mail`
+      : 'Ontvang je complete scan per mail';
   const introText = companyName
-    ? `We gebruiken je scan voor een gratis persoonlijke demo voor ${companyName}. Daarin laten we zien waar volgens jouw antwoorden de meeste winst zit in ${growthFocus} en hoe we ${companyName} nog verder kunnen laten groeien.`
-    : `We gebruiken je scan voor een gratis persoonlijke demo. Daarin laten we zien waar volgens jouw antwoorden de meeste winst zit in ${growthFocus} en hoe we jouw bedrijf nog verder kunnen laten groeien.`;
+    ? `Je scan voor ${companyName} staat klaar. Vul je gegevens in en we sturen de volledige berekening met toelichting direct naar je inbox.`
+    : 'Je scan staat klaar. Vul je gegevens in en we sturen de volledige berekening met toelichting direct naar je inbox.';
   const successHeading = firstName ? `Dankjewel, ${firstName}` : 'Dankjewel';
-  const successIntro = 'Je aanvraag voor een gratis persoonlijke VloerGroep demo is goed ontvangen.';
+  const successIntro = 'Je complete scan is onderweg naar je inbox.';
   const successBody = companyName
-    ? `We gaan nu iets moois voorbereiden voor ${companyName}: een demo waarin we samen ontdekken hoe VloerGroep het meeste voordeel kan opleveren in ${growthFocus} en waar de grootste groeikans ligt.`
-    : `We gaan nu een persoonlijke demo voor je voorbereiden waarin we samen ontdekken hoe VloerGroep het meeste voordeel kan opleveren in ${growthFocus} en waar de grootste groeikans ligt.`;
+    ? `In de mail zie je rustig hoe we tot de cijfers voor ${companyName} komen. Daar kun je ook een demonstratie plannen als je wilt zien hoe VloerGroep dit in de praktijk kan laten werken.`
+    : 'In de mail zie je rustig hoe we tot de cijfers komen. Daar kun je ook een demonstratie plannen als je wilt zien hoe VloerGroep dit in de praktijk kan laten werken.';
   const successNote =
     deliveryMode === 'preview'
       ? 'Je aanvraag is goed ontvangen. Ook als de bevestigingsmail niet direct binnenkomt, is alles gewoon goed aangekomen.'
@@ -174,11 +174,10 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
       nextErrors.email = 'Vul een geldig e-mailadres in';
     }
 
-    if (!formData.phone.trim()) {
-      nextErrors.phone = 'Telefoonnummer is verplicht';
-    } else if (
-      !/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/.test(formData.phone) ||
-      formData.phone.trim().length < 8
+    if (
+      formData.phone.trim() &&
+      (!/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/.test(formData.phone) ||
+        formData.phone.trim().length < 8)
     ) {
       nextErrors.phone = 'Vul een geldig telefoonnummer in';
     }
@@ -207,7 +206,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
     setFormData((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
-      intent: 'demo',
+      intent: 'scan',
     }));
 
     if (errors[name as keyof FormErrors]) {
@@ -243,7 +242,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
     const payload: LeadSubmissionPayload = {
       contact: {
         ...formData,
-        intent: 'demo',
+        intent: 'scan',
       },
       quiz: state,
       meta: {
@@ -390,7 +389,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 <TextField
                   id="capture-phone"
                   name="phone"
-                  label="Telefoonnummer"
+                  label="Telefoonnummer (optioneel)"
                   icon={Phone}
                   value={formData.phone}
                   onChange={handleInputChange}
@@ -400,7 +399,6 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                   autoComplete="tel"
                   inputMode="tel"
                   enterKeyHint="done"
-                  required
                   error={errors.phone}
                 />
               </div>
@@ -430,7 +428,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                     className="mt-0.5 h-5 w-5 rounded-md border-white/35 bg-transparent text-amber-gold shadow-[0_0_0_1px_rgba(255,255,255,0.02)] focus:ring-2 focus:ring-amber-gold/70 focus:ring-offset-2 focus:ring-offset-[#0b0b0b]"
                   />
                   <span className="text-sm leading-6 text-white/80">
-                    Ik geef toestemming dat VloerGroep contact met mij opneemt over mijn scan en een gratis persoonlijke demo voor {companyReference}.
+                    Ik geef toestemming dat VloerGroep mijn complete scan mailt en mijn gegevens mag gebruiken om deze aanvraag op te volgen.
                   </span>
                 </label>
                 {errors.consent && (
@@ -456,7 +454,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
 
               <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={isSubmitting} className="w-full !px-8 !py-4 text-base shadow-xl shadow-amber-gold/20 sm:w-auto">
-                  {isSubmitting ? 'Bezig met versturen...' : 'Vraag mijn gratis demo aan'}
+                  {isSubmitting ? 'Bezig met versturen...' : 'Ontvang mijn complete scan'}
                 </Button>
               </div>
               </fieldset>
@@ -495,10 +493,10 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
 
               <div className="mb-8 rounded-[24px] border border-amber-gold/14 bg-amber-gold/6 p-5 text-center md:p-6">
                 <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                  In jouw demo
+                  In je mailbox
                 </div>
                 <p className="text-base leading-7 text-white/82">
-                  We zoomen als eerste in op <strong className="text-white">{growthFocus}</strong> en laten zien hoe VloerGroep dit concreet voor <strong className="text-white">{companyReference}</strong> kan versnellen.
+                  Je ontvangt de volledige scan voor <strong className="text-white">{companyReference}</strong>, met extra aandacht voor <strong className="text-white">{growthFocus}</strong>.
                 </p>
               </div>
 

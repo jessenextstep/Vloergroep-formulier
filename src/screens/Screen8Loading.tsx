@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { brandWatermarkIcon } from '../lib/brandAssets';
 
 interface Props {
   onNext: () => void;
@@ -69,10 +69,14 @@ export default function Screen8Loading({ onNext }: Props) {
 
         <div className="relative z-10 rounded-full bg-[linear-gradient(180deg,rgba(38,38,38,0.62),rgba(18,18,18,0.38))] p-5 text-amber-gold shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
           <motion.div
-            animate={prefersReducedMotion ? undefined : { scale: [0.96, 1.04, 0.96] }}
+            animate={prefersReducedMotion ? undefined : { scale: [0.96, 1.04, 0.96], rotate: [0, 0, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            className="h-9 w-9 bg-amber-gold drop-shadow-[0_0_10px_rgba(224,172,62,0.45)]"
+            style={{
+              WebkitMask: `url("${brandWatermarkIcon}") center / contain no-repeat`,
+              mask: `url("${brandWatermarkIcon}") center / contain no-repeat`,
+            }}
           >
-            <Sparkles size={34} className="drop-shadow-[0_0_10px_rgba(224,172,62,0.45)]" />
           </motion.div>
         </div>
       </div>

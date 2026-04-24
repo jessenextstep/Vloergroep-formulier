@@ -129,7 +129,7 @@ function buildDemoRequestUrl(siteUrl: string | undefined, contact: LeadCaptureFo
     return null;
   }
 
-  const url = new URL('/persoonlijke-demo', `${normalizedSiteUrl}/`);
+  const url = new URL('/demo-inplannen', `${normalizedSiteUrl}/`);
   url.searchParams.set('name', contact.name);
   url.searchParams.set('company', contact.company);
   url.searchParams.set('email', contact.email);
