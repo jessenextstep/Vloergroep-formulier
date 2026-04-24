@@ -149,10 +149,9 @@ function resolveAdminMailRouting(env: DemoScheduleEnvironment): {
   const to = uniqueEmailList(
     PRIMARY_LEAD_NOTIFICATION_EMAIL,
     configuredAdminEmail.toLowerCase() !== LEAD_NOTIFICATION_CC_EMAIL ? configuredAdminEmail : null,
+    LEAD_NOTIFICATION_CC_EMAIL,
   );
-  const cc = uniqueEmailList(LEAD_NOTIFICATION_CC_EMAIL).filter(
-    (email) => !to.some((toEmail) => toEmail.toLowerCase() === email.toLowerCase()),
-  );
+  const cc: string[] = [];
 
   return {
     to,

@@ -1,4 +1,5 @@
 import type { InviteLookupResult } from './inviteService.js';
+import { formatDutchDate } from '../lib/dateFormat.js';
 
 interface InviteEmailContext {
   invite: InviteLookupResult;
@@ -109,7 +110,7 @@ export function buildInviteAcceptedCustomerEmail({ invite, logoUrl, heroImageUrl
         <tr>
           <td style="padding:20px 20px 16px 20px;">
             <div style="margin:0 0 10px 0;font-size:12px;line-height:1.3;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E0AC3E;">Officiele opening</div>
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${invite.launchDate || '-'}</span></p>
+            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${invite.launchDate ? formatDutchDate(invite.launchDate) : '-'}</span></p>
             <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tijd: <span style="color:#ffffff;font-weight:700;">${invite.launchTime || '-'}</span></p>
             <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Locatie: <span style="color:#ffffff;font-weight:700;">${invite.launchLocation || '-'}</span></p>
           </td>
@@ -131,7 +132,7 @@ export function buildInviteAcceptedCustomerEmail({ invite, logoUrl, heroImageUrl
     `Beste ${greetingName},`,
     '',
     `Uw uitnodiging is bevestigd voor ${invite.company || getRecipientName(invite)}.`,
-    `Datum: ${invite.launchDate || '-'}`,
+    `Datum: ${invite.launchDate ? formatDutchDate(invite.launchDate) : '-'}`,
     `Tijd: ${invite.launchTime || '-'}`,
     `Locatie: ${invite.launchLocation || '-'}`,
     invite.calendarUrl ? `Importeer in agenda: ${invite.calendarUrl}` : '',
@@ -170,7 +171,7 @@ export function buildInviteAcceptedAdminEmail({ invite, logoUrl, heroImageUrl }:
             <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Naam: <span style="color:#ffffff;font-weight:700;">${recipientName}</span></p>
             <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Bedrijf: <span style="color:#ffffff;font-weight:700;">${invite.company || '-'}</span></p>
             <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">E-mail: <span style="color:#ffffff;font-weight:700;">${invite.email}</span></p>
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${invite.launchDate || '-'}</span></p>
+            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${invite.launchDate ? formatDutchDate(invite.launchDate) : '-'}</span></p>
             <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tijd: <span style="color:#ffffff;font-weight:700;">${invite.launchTime || '-'}</span></p>
             <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Locatie: <span style="color:#ffffff;font-weight:700;">${invite.launchLocation || '-'}</span></p>
           </td>
@@ -185,7 +186,7 @@ export function buildInviteAcceptedAdminEmail({ invite, logoUrl, heroImageUrl }:
     `Naam: ${recipientName}`,
     `Bedrijf: ${invite.company || '-'}`,
     `E-mail: ${invite.email}`,
-    `Datum: ${invite.launchDate || '-'}`,
+    `Datum: ${invite.launchDate ? formatDutchDate(invite.launchDate) : '-'}`,
     `Tijd: ${invite.launchTime || '-'}`,
     `Locatie: ${invite.launchLocation || '-'}`,
   ].join('\n');

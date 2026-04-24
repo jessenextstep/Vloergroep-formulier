@@ -10,6 +10,7 @@ import {
 
 import { ScreenHeroImage } from './components/ScreenHeroImage';
 import { brandWatermarkIcon } from './lib/brandAssets';
+import { formatDutchDate } from './lib/dateFormat';
 import { heroScreenThanks } from './lib/brandAssets';
 import inviteLetterLogo from './Afbeeldingen/Logo voor op witte achtergronden PNG.png';
 import inviteVideo from './Afbeeldingen/Openingsvideo.mp4';
@@ -440,7 +441,7 @@ export default function InvitePage() {
                       : (
                         <>
                           Uw aanwezigheid is bevestigd. We zien u graag op{' '}
-                          <span className="font-semibold text-white">{invite?.launchDate || '-'}</span> om{' '}
+                          <span className="font-semibold text-white">{invite?.launchDate ? formatDutchDate(invite.launchDate) : '-'}</span> om{' '}
                           <span className="font-semibold text-white">{invite?.launchTime || '-'}</span>{' '}
                           in <span className="font-semibold text-white">{invite?.launchLocation || '-'}</span>.
                         </>
@@ -467,7 +468,7 @@ export default function InvitePage() {
                           Datum
                         </div>
                         <div className="mt-1 text-sm leading-6 text-white/84">
-                          {invite?.launchDate || '-'}
+                          {invite?.launchDate ? formatDutchDate(invite.launchDate) : '-'}
                         </div>
                       </div>
                     </div>
@@ -722,7 +723,7 @@ export default function InvitePage() {
                                   Datum
                                 </div>
                                 <div className="mt-1 text-sm leading-6 text-[#151515]">
-                                  {invite.launchDate || '-'}
+                                  {invite.launchDate ? formatDutchDate(invite.launchDate) : '-'}
                                 </div>
                               </div>
                             </div>

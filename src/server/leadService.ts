@@ -484,13 +484,9 @@ export async function processLeadSubmission(
     configuredInternalEmail && configuredInternalEmail.toLowerCase() !== LEAD_NOTIFICATION_CC_EMAIL
       ? configuredInternalEmail
       : null,
-  );
-  const internalCcEmails = uniqueEmailList(
     LEAD_NOTIFICATION_CC_EMAIL,
-    configuredInternalEmail && configuredInternalEmail.toLowerCase() === LEAD_NOTIFICATION_CC_EMAIL
-      ? configuredInternalEmail
-      : null,
-  ).filter((email) => !internalToEmails.some((toEmail) => toEmail.toLowerCase() === email.toLowerCase()));
+  );
+  const internalCcEmails: string[] = [];
   const internalReplyEmail = internalToEmails[0] || PRIMARY_LEAD_NOTIFICATION_EMAIL;
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
   const brevoListIds = resolveBrevoListIds(payload.contact.intent, env);
