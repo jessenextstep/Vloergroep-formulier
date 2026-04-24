@@ -38,6 +38,7 @@ interface LeadHandlerResult {
 interface ResendEmailPayload {
   from: string;
   to: string | string[];
+  cc?: string | string[];
   subject: string;
   html: string;
   text: string;
@@ -59,6 +60,8 @@ interface BrevoErrorBody {
 const PAYMENT_DAYS = new Set([14, 30, 45, 60, 90]);
 const LEAD_INTENTS = new Set(['demo', 'info', 'scan']);
 const LEAD_SOURCES = new Set<LeadSource>(['groeiscan', 'ads-scan']);
+const PRIMARY_LEAD_NOTIFICATION_EMAIL = 'info@vloergroep.nl';
+const LEAD_NOTIFICATION_CC_EMAIL = 'joost@vloergroep.nl';
 
 function usesResendTestingDomain(fromAddress: string): boolean {
   return /@resend\.dev>?$/i.test(fromAddress.trim());
@@ -97,6 +100,28 @@ function extractEmailAddress(value?: string): string | null {
   const candidate = (angleMatch?.[1] ?? trimmed).trim().replace(/^['"]+|['"]+$/g, '');
 
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
+
+function uniqueEmailList(...values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>();
+  const emails: string[] = [];
+
+  for (const value of values) {
+    const email = extractEmailAddress(value);
+    if (!email) {
+      continue;
+    }
+
+    const key = email.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    emails.push(email);
+  }
+
+  return emails;
 }
 
 function buildResendFromEmail(value?: string): string {
@@ -382,6 +407,7 @@ async function sendBrevoTransactionalEmail(
   payload: {
     sender: { name: string; email: string };
     to: Array<{ email: string; name?: string }>;
+    cc?: Array<{ email: string; name?: string }>;
     subject: string;
     htmlContent: string;
     textContent: string;
@@ -449,11 +475,23 @@ export async function processLeadSubmission(
   const resendApiKey = env.resendApiKey || process.env.RESEND_API_KEY;
   const configuredResendFromEmail = env.resendFromEmail || process.env.RESEND_FROM_EMAIL;
   const resendFromEmail = buildResendFromEmail(configuredResendFromEmail);
-  const internalEmail =
+  const configuredInternalEmail =
     extractEmailAddress(env.internalEmail) ||
     extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL) ||
-    extractEmailAddress(process.env.DEMO_REQUEST_ADMIN_EMAIL) ||
-    'info@vloergroep.nl';
+    extractEmailAddress(process.env.DEMO_REQUEST_ADMIN_EMAIL);
+  const internalToEmails = uniqueEmailList(
+    PRIMARY_LEAD_NOTIFICATION_EMAIL,
+    configuredInternalEmail && configuredInternalEmail.toLowerCase() !== LEAD_NOTIFICATION_CC_EMAIL
+      ? configuredInternalEmail
+      : null,
+  );
+  const internalCcEmails = uniqueEmailList(
+    LEAD_NOTIFICATION_CC_EMAIL,
+    configuredInternalEmail && configuredInternalEmail.toLowerCase() === LEAD_NOTIFICATION_CC_EMAIL
+      ? configuredInternalEmail
+      : null,
+  ).filter((email) => !internalToEmails.some((toEmail) => toEmail.toLowerCase() === email.toLowerCase()));
+  const internalReplyEmail = internalToEmails[0] || PRIMARY_LEAD_NOTIFICATION_EMAIL;
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
   const brevoListIds = resolveBrevoListIds(payload.contact.intent, env);
   const siteUrl = resolveSiteUrl(env);
@@ -535,7 +573,56 @@ export async function processLeadSubmission(
     });
   }
 
+  const senderAddress =
+    extractEmailAddress(process.env.BREVO_FROM_EMAIL) ||
+    extractEmailAddress(resendFromEmail) ||
+    PRIMARY_LEAD_NOTIFICATION_EMAIL;
+
+  const sendLeadEmailsViaBrevo = async () => {
+    if (!brevoApiKey) {
+      return false;
+    }
+
+    await Promise.all([
+      sendBrevoTransactionalEmail(brevoApiKey, {
+        sender: { name: 'Rico van VloerGroep', email: senderAddress },
+        to: [{ email: payload.contact.email, name: payload.contact.name }],
+        subject: customerMail.subject,
+        htmlContent: customerMail.html,
+        textContent: customerMail.text,
+        replyTo: { email: internalReplyEmail },
+        tags: ['lead-scan', payload.meta.source, intentTag, 'customer'],
+      }),
+      sendBrevoTransactionalEmail(brevoApiKey, {
+        sender: { name: 'Rico van VloerGroep', email: senderAddress },
+        to: internalToEmails.map((email) => ({ email, name: 'VloerGroep' })),
+        cc: internalCcEmails.map((email) => ({ email, name: 'Joost van VloerGroep' })),
+        subject: internalMail.subject,
+        htmlContent: internalMail.html,
+        textContent: internalMail.text,
+        replyTo: { email: payload.contact.email },
+        tags: ['lead-scan', payload.meta.source, intentTag, 'admin'],
+      }),
+    ]);
+
+    return true;
+  };
+
   if (!resendApiKey && environment !== 'production') {
+    try {
+      if (await sendLeadEmailsViaBrevo()) {
+        return {
+          status: 200,
+          body: {
+            ok: true,
+            deliveryMode: 'live',
+          },
+        };
+      }
+    } catch (brevoMailError) {
+      console.error('Lead emails via Brevo failed in local/preview mode', brevoMailError);
+    }
+
     return {
       status: 200,
       body: {
@@ -547,6 +634,20 @@ export async function processLeadSubmission(
   }
 
   if (resendConfigurationIssue) {
+    try {
+      if (await sendLeadEmailsViaBrevo()) {
+        return {
+          status: 200,
+          body: {
+            ok: true,
+            deliveryMode: 'live',
+          },
+        };
+      }
+    } catch (brevoMailError) {
+      console.error('Lead emails via Brevo failed after Resend configuration issue', brevoMailError);
+    }
+
     if (brevoSynced) {
       return {
         status: 200,
@@ -570,7 +671,8 @@ export async function processLeadSubmission(
 
   console.info('Resend send started', {
     customerEmail: payload.contact.email,
-    internalEmail,
+    internalToEmails,
+    internalCcEmails,
     from: resendFromEmail,
   });
 
@@ -583,7 +685,7 @@ export async function processLeadSubmission(
         subject: customerMail.subject,
         html: customerMail.html,
         text: customerMail.text,
-        reply_to: internalEmail,
+        reply_to: internalReplyEmail,
         tags: [
           { name: 'category', value: categoryTag },
           { name: 'source', value: payload.meta.source },
@@ -596,7 +698,8 @@ export async function processLeadSubmission(
       resendApiKey,
       {
         from: resendFromEmail,
-        to: internalEmail,
+        to: internalToEmails,
+        cc: internalCcEmails.length > 0 ? internalCcEmails : undefined,
         subject: internalMail.subject,
         html: internalMail.html,
         text: internalMail.text,
@@ -613,7 +716,6 @@ export async function processLeadSubmission(
   ]);
 
   const [customerResendResult, internalResendResult] = resendResults;
-  const senderAddress = extractEmailAddress(resendFromEmail) || 'info@vloergroep.nl';
   let customerBrevoFallbackDelivered = false;
   let internalBrevoFallbackDelivered = false;
 
@@ -628,7 +730,7 @@ export async function processLeadSubmission(
           subject: customerMail.subject,
           htmlContent: customerMail.html,
           textContent: customerMail.text,
-          replyTo: { email: internalEmail },
+          replyTo: { email: internalReplyEmail },
           tags: ['lead-scan', payload.meta.source, intentTag, 'customer'],
         });
         customerBrevoFallbackDelivered = true;
@@ -645,7 +747,8 @@ export async function processLeadSubmission(
       try {
         await sendBrevoTransactionalEmail(brevoApiKey, {
           sender: { name: 'Rico van VloerGroep', email: senderAddress },
-          to: [{ email: internalEmail, name: 'VloerGroep' }],
+          to: internalToEmails.map((email) => ({ email, name: 'VloerGroep' })),
+          cc: internalCcEmails.map((email) => ({ email, name: 'Joost van VloerGroep' })),
           subject: internalMail.subject,
           htmlContent: internalMail.html,
           textContent: internalMail.text,
@@ -667,7 +770,8 @@ export async function processLeadSubmission(
   if (customerResendResult.status === 'fulfilled' && internalResendResult.status === 'fulfilled') {
     console.info('Resend send succeeded', {
       customerEmail: payload.contact.email,
-      internalEmail,
+      internalToEmails,
+      internalCcEmails,
       from: resendFromEmail,
     });
   }

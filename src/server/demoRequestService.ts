@@ -37,6 +37,7 @@ interface DemoRequestHandlerResult {
 interface ResendEmailPayload {
   from: string;
   to: string | string[];
+  cc?: string | string[];
   subject: string;
   html: string;
   text: string;
@@ -54,6 +55,8 @@ const DEMO_PREFERENCE_TIMES = new Set<DemoPreferenceTime>([
   'afternoon',
   'late-afternoon',
 ]);
+const PRIMARY_LEAD_NOTIFICATION_EMAIL = 'info@vloergroep.nl';
+const LEAD_NOTIFICATION_CC_EMAIL = 'joost@vloergroep.nl';
 
 function normalizeAbsoluteUrl(value?: string): string | null {
   if (!value) {
@@ -88,6 +91,28 @@ function extractEmailAddress(value?: string): string | null {
   const candidate = (angleMatch?.[1] ?? trimmed).trim().replace(/^['"]+|['"]+$/g, '');
 
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
+
+function uniqueEmailList(...values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>();
+  const emails: string[] = [];
+
+  for (const value of values) {
+    const email = extractEmailAddress(value);
+    if (!email) {
+      continue;
+    }
+
+    const key = email.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    emails.push(email);
+  }
+
+  return emails;
 }
 
 function buildResendFromEmail(value?: string): string {
@@ -152,12 +177,31 @@ function resolveSiteUrl(env: DemoRequestEnvironment): string | undefined {
 }
 
 function resolveAdminEmail(env: DemoRequestEnvironment): string {
-  return (
-    extractEmailAddress(env.adminEmail) ||
+  return extractEmailAddress(env.adminEmail) ||
     extractEmailAddress(process.env.DEMO_REQUEST_ADMIN_EMAIL) ||
     extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL) ||
-    'joost@vloergroep.nl'
+    PRIMARY_LEAD_NOTIFICATION_EMAIL;
+}
+
+function resolveAdminMailRouting(env: DemoRequestEnvironment): {
+  to: string[];
+  cc: string[];
+  replyEmail: string;
+} {
+  const configuredAdminEmail = resolveAdminEmail(env);
+  const to = uniqueEmailList(
+    PRIMARY_LEAD_NOTIFICATION_EMAIL,
+    configuredAdminEmail.toLowerCase() !== LEAD_NOTIFICATION_CC_EMAIL ? configuredAdminEmail : null,
   );
+  const cc = uniqueEmailList(LEAD_NOTIFICATION_CC_EMAIL).filter(
+    (email) => !to.some((toEmail) => toEmail.toLowerCase() === email.toLowerCase()),
+  );
+
+  return {
+    to,
+    cc,
+    replyEmail: to[0] || PRIMARY_LEAD_NOTIFICATION_EMAIL,
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -302,6 +346,7 @@ async function sendBrevoTransactionalEmail(
   payload: {
     sender: { name: string; email: string };
     to: Array<{ email: string; name?: string }>;
+    cc?: Array<{ email: string; name?: string }>;
     subject: string;
     htmlContent: string;
     textContent: string;
@@ -430,7 +475,7 @@ export async function processDemoRequestSubmission(
   const siteUrl = resolveSiteUrl(env);
   const logoUrl = buildEmailLogoUrl(siteUrl);
   const heroImageUrl = buildEmailDemoConfirmationHeroUrl(siteUrl);
-  const adminEmail = resolveAdminEmail(env);
+  const adminRouting = resolveAdminMailRouting(env);
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
   const brevoListIds = resolveBrevoListIds(env);
   const environment = env.environment || process.env.NODE_ENV || 'development';
@@ -458,6 +503,40 @@ export async function processDemoRequestSubmission(
     adminCalendarUrl,
     adminActionUrl,
   });
+  const senderAddress =
+    extractEmailAddress(process.env.BREVO_FROM_EMAIL) ||
+    extractEmailAddress(resendFromEmail) ||
+    PRIMARY_LEAD_NOTIFICATION_EMAIL;
+
+  const sendDemoRequestEmailsViaBrevo = async () => {
+    if (!brevoApiKey) {
+      return false;
+    }
+
+    await Promise.all([
+      sendBrevoTransactionalEmail(brevoApiKey, {
+        sender: { name: 'Rico van VloerGroep', email: senderAddress },
+        to: [{ email: payload.request.email, name: payload.request.name }],
+        subject: customerMail.subject,
+        htmlContent: customerMail.html,
+        textContent: customerMail.text,
+        replyTo: { email: adminRouting.replyEmail },
+        tags: ['demo-request', 'customer'],
+      }),
+      sendBrevoTransactionalEmail(brevoApiKey, {
+        sender: { name: 'Rico van VloerGroep', email: senderAddress },
+        to: adminRouting.to.map((email) => ({ email, name: 'VloerGroep' })),
+        cc: adminRouting.cc.map((email) => ({ email, name: 'Joost van VloerGroep' })),
+        subject: adminMail.subject,
+        htmlContent: adminMail.html,
+        textContent: adminMail.text,
+        replyTo: { email: payload.request.email },
+        tags: ['demo-request', 'admin'],
+      }),
+    ]);
+
+    return true;
+  };
 
   let brevoSynced = false;
   if (brevoApiKey) {
@@ -479,6 +558,21 @@ export async function processDemoRequestSubmission(
   }
 
   if (!resendApiKey && environment !== 'production') {
+    try {
+      if (await sendDemoRequestEmailsViaBrevo()) {
+        return {
+          status: 200,
+          body: {
+            ok: true,
+            deliveryMode: 'live',
+            message: 'Je voorkeur is ontvangen. Joost neemt contact met je op om een moment te bevestigen.',
+          },
+        };
+      }
+    } catch (brevoMailError) {
+      console.error('Demo request emails via Brevo failed in local/preview mode', brevoMailError);
+    }
+
     return {
       status: 200,
       body: {
@@ -490,6 +584,21 @@ export async function processDemoRequestSubmission(
   }
 
   if (resendConfigurationIssue) {
+    try {
+      if (await sendDemoRequestEmailsViaBrevo()) {
+        return {
+          status: 200,
+          body: {
+            ok: true,
+            deliveryMode: 'live',
+            message: 'Je voorkeur is ontvangen. Joost neemt contact met je op om een moment te bevestigen.',
+          },
+        };
+      }
+    } catch (brevoMailError) {
+      console.error('Demo request emails via Brevo failed after Resend configuration issue', brevoMailError);
+    }
+
     if (brevoSynced) {
       return {
         status: 200,
@@ -521,7 +630,7 @@ export async function processDemoRequestSubmission(
           subject: customerMail.subject,
           html: customerMail.html,
           text: customerMail.text,
-          reply_to: adminEmail,
+          reply_to: adminRouting.replyEmail,
           tags: [
             { name: 'flow', value: 'demo_request' },
             { name: 'audience', value: 'customer' },
@@ -533,7 +642,8 @@ export async function processDemoRequestSubmission(
         resendApiKey!,
         {
           from: resendFromEmail,
-          to: adminEmail,
+          to: adminRouting.to,
+          cc: adminRouting.cc.length > 0 ? adminRouting.cc : undefined,
           subject: adminMail.subject,
           html: adminMail.html,
           text: adminMail.text,
@@ -560,7 +670,6 @@ export async function processDemoRequestSubmission(
 
     if (brevoApiKey) {
       try {
-        const senderAddress = extractEmailAddress(resendFromEmail) || 'info@vloergroep.nl';
         await Promise.all([
           sendBrevoTransactionalEmail(brevoApiKey, {
             sender: { name: 'Rico van VloerGroep', email: senderAddress },
@@ -568,12 +677,13 @@ export async function processDemoRequestSubmission(
             subject: customerMail.subject,
             htmlContent: customerMail.html,
             textContent: customerMail.text,
-            replyTo: { email: adminEmail },
+            replyTo: { email: adminRouting.replyEmail },
             tags: ['demo-request', 'customer'],
           }),
           sendBrevoTransactionalEmail(brevoApiKey, {
             sender: { name: 'Rico van VloerGroep', email: senderAddress },
-            to: [{ email: adminEmail, name: 'Joost van VloerGroep' }],
+            to: adminRouting.to.map((email) => ({ email, name: 'VloerGroep' })),
+            cc: adminRouting.cc.map((email) => ({ email, name: 'Joost van VloerGroep' })),
             subject: adminMail.subject,
             htmlContent: adminMail.html,
             textContent: adminMail.text,

@@ -35,6 +35,7 @@ interface DemoScheduleEnvironment {
 interface ResendEmailPayload {
   from: string;
   to: string | string[];
+  cc?: string | string[];
   subject: string;
   html: string;
   text: string;
@@ -46,6 +47,9 @@ interface BrevoErrorBody {
   code?: string;
   message?: string;
 }
+
+const PRIMARY_LEAD_NOTIFICATION_EMAIL = 'info@vloergroep.nl';
+const LEAD_NOTIFICATION_CC_EMAIL = 'joost@vloergroep.nl';
 
 function extractEmailAddress(value?: string): string | null {
   if (!value) {
@@ -60,6 +64,28 @@ function extractEmailAddress(value?: string): string | null {
   const angleMatch = trimmed.match(/<([^>]+)>/);
   const candidate = (angleMatch?.[1] ?? trimmed).trim().replace(/^['"]+|['"]+$/g, '');
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
+
+function uniqueEmailList(...values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>();
+  const emails: string[] = [];
+
+  for (const value of values) {
+    const email = extractEmailAddress(value);
+    if (!email) {
+      continue;
+    }
+
+    const key = email.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    emails.push(email);
+  }
+
+  return emails;
 }
 
 function buildResendFromEmail(value?: string): string {
@@ -110,8 +136,29 @@ function resolveAdminEmail(env: DemoScheduleEnvironment): string {
     extractEmailAddress(env.adminEmail) ||
     extractEmailAddress(process.env.DEMO_REQUEST_ADMIN_EMAIL) ||
     extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL) ||
-    'joost@vloergroep.nl'
+    PRIMARY_LEAD_NOTIFICATION_EMAIL
   );
+}
+
+function resolveAdminMailRouting(env: DemoScheduleEnvironment): {
+  to: string[];
+  cc: string[];
+  replyEmail: string;
+} {
+  const configuredAdminEmail = resolveAdminEmail(env);
+  const to = uniqueEmailList(
+    PRIMARY_LEAD_NOTIFICATION_EMAIL,
+    configuredAdminEmail.toLowerCase() !== LEAD_NOTIFICATION_CC_EMAIL ? configuredAdminEmail : null,
+  );
+  const cc = uniqueEmailList(LEAD_NOTIFICATION_CC_EMAIL).filter(
+    (email) => !to.some((toEmail) => toEmail.toLowerCase() === email.toLowerCase()),
+  );
+
+  return {
+    to,
+    cc,
+    replyEmail: to[0] || PRIMARY_LEAD_NOTIFICATION_EMAIL,
+  };
 }
 
 function isIsoDate(value: string): boolean {
@@ -166,6 +213,7 @@ async function sendBrevoTransactionalEmail(
   payload: {
     sender: { name: string; email: string };
     to: Array<{ email: string; name?: string }>;
+    cc?: Array<{ email: string; name?: string }>;
     subject: string;
     htmlContent: string;
     textContent: string;
@@ -193,7 +241,8 @@ async function deliverEmails(
   env: DemoScheduleEnvironment,
   messages: Array<{
     audience: 'customer' | 'admin';
-    to: string;
+    to: string | string[];
+    cc?: string | string[];
     replyTo: string;
     subject: string;
     html: string;
@@ -218,6 +267,7 @@ async function deliverEmails(
             {
               from: resendFromEmail,
               to: message.to,
+              cc: message.cc,
               subject: message.subject,
               html: message.html,
               text: message.text,
@@ -247,7 +297,11 @@ async function deliverEmails(
     messages.map((message) =>
       sendBrevoTransactionalEmail(brevoApiKey, {
         sender: { name: 'Rico van VloerGroep', email: senderAddress },
-        to: [{ email: message.to }],
+        to: (Array.isArray(message.to) ? message.to : [message.to]).map((email) => ({ email })),
+        cc: (Array.isArray(message.cc) ? message.cc : message.cc ? [message.cc] : []).map((email) => ({
+          email,
+          name: email.toLowerCase() === LEAD_NOTIFICATION_CC_EMAIL ? 'Joost van VloerGroep' : undefined,
+        })),
         subject: message.subject,
         htmlContent: message.html,
         textContent: message.text,
@@ -372,7 +426,7 @@ export async function processDemoScheduleAction(
   const siteUrl = resolveSiteUrl(env);
   const logoUrl = buildEmailLogoUrl(siteUrl);
   const heroImageUrl = buildEmailDemoConfirmationHeroUrl(siteUrl);
-  const adminEmail = resolveAdminEmail(env);
+  const adminRouting = resolveAdminMailRouting(env);
 
   if (record.status === 'confirmed') {
     return {
@@ -446,7 +500,7 @@ export async function processDemoScheduleAction(
       {
         audience: 'customer',
         to: confirmedRecord.customer.email,
-        replyTo: adminEmail,
+        replyTo: adminRouting.replyEmail,
         subject: customerMail.subject,
         html: customerMail.html,
         text: customerMail.text,
@@ -454,7 +508,8 @@ export async function processDemoScheduleAction(
       },
       {
         audience: 'admin',
-        to: adminEmail,
+        to: adminRouting.to,
+        cc: adminRouting.cc,
         replyTo: confirmedRecord.customer.email,
         subject: adminMail.subject,
         html: adminMail.html,
@@ -518,7 +573,7 @@ export async function processDemoScheduleAction(
       {
         audience: 'customer',
         to: nextRecord.customer.email,
-        replyTo: adminEmail,
+        replyTo: adminRouting.replyEmail,
         subject: customerMail.subject,
         html: customerMail.html,
         text: customerMail.text,
@@ -526,7 +581,8 @@ export async function processDemoScheduleAction(
       },
       {
         audience: 'admin',
-        to: adminEmail,
+        to: adminRouting.to,
+        cc: adminRouting.cc,
         replyTo: nextRecord.customer.email,
         subject: adminMail.subject,
         html: adminMail.html,
@@ -559,7 +615,7 @@ export async function processDemoScheduleAction(
       {
         audience: 'customer',
         to: nextRecord.customer.email,
-        replyTo: adminEmail,
+        replyTo: adminRouting.replyEmail,
         subject: customerMail.subject,
         html: customerMail.html,
         text: customerMail.text,
@@ -590,7 +646,8 @@ export async function processDemoScheduleAction(
   const deliveryMode = await deliverEmails(env, [
     {
       audience: 'admin',
-      to: adminEmail,
+      to: adminRouting.to,
+      cc: adminRouting.cc,
       replyTo: nextRecord.customer.email,
       subject: adminMail.subject,
       html: adminMail.html,
