@@ -3,7 +3,6 @@ import React from 'react';
 import {
   ArrowRight,
   CalendarDays,
-  CheckCircle2,
   Clock3,
   LoaderCircle,
   PhoneCall,
@@ -66,8 +65,8 @@ export default function DemoSchedulePage() {
   const [message, setMessage] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
   const [mode, setMode] = React.useState<ActionMode>('accept');
+  const [selectedAcceptDate, setSelectedAcceptDate] = React.useState('');
   const [proposalDate, setProposalDate] = React.useState('');
-  const [proposalSecondaryDate, setProposalSecondaryDate] = React.useState('');
   const [proposalTime, setProposalTime] = React.useState<DemoPreferenceTime>('morning');
   const [phoneConfirmed, setPhoneConfirmed] = React.useState(false);
 
@@ -92,8 +91,8 @@ export default function DemoSchedulePage() {
       setActor(data.actor);
       setRecord(data.record);
       setCalendarUrl(data.calendarUrl ?? null);
+      setSelectedAcceptDate(data.record.currentProposal.date);
       setProposalDate(data.record.currentProposal.date);
-      setProposalSecondaryDate(data.record.currentProposal.secondaryDate ?? '');
       setProposalTime(data.record.currentProposal.time);
       setPhoneConfirmed(false);
       setMessage('');
@@ -122,19 +121,29 @@ export default function DemoSchedulePage() {
     setMessage('');
 
     try {
+      const payload =
+        action === 'accept'
+          ? {
+              token: tokenRef.current,
+              action,
+              proposalDate: selectedAcceptDate || record.currentProposal.date,
+              proposalTime: record.currentProposal.time,
+              phoneConfirmed: false,
+            }
+          : {
+              token: tokenRef.current,
+              action,
+              proposalDate,
+              proposalTime,
+              phoneConfirmed,
+            };
+
       const response = await fetch('/api/demo-schedule', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          token: tokenRef.current,
-          action,
-          proposalDate,
-          proposalSecondaryDate,
-          proposalTime,
-          phoneConfirmed,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = (await response.json()) as DemoScheduleActionResponse;
@@ -148,6 +157,8 @@ export default function DemoSchedulePage() {
       setCalendarUrl(data.calendarUrl ?? null);
       setMessage(data.message || '');
       setMode(data.record.status === 'confirmed' ? 'accept' : 'propose');
+      setSelectedAcceptDate(data.record.currentProposal.date);
+      setProposalDate(data.record.currentProposal.date);
       setPhoneConfirmed(false);
     } catch (error) {
       setErrorMessage(
@@ -220,53 +231,76 @@ export default function DemoSchedulePage() {
                       </p>
                     </div>
 
-                    <div className="mt-7 flex flex-wrap items-center justify-center gap-3 rounded-[26px] border border-white/8 bg-white/[0.04] px-4 py-4 md:px-5">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={joostPhoto}
-                          alt="Joost van VloerGroep"
-                          className="h-14 w-14 rounded-full border border-white/12 object-cover shadow-[0_16px_30px_rgba(0,0,0,0.3)]"
-                        />
+                    <div className="mx-auto mt-7 max-w-3xl rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="absolute inset-0 rounded-full bg-amber-gold/18 blur-xl" />
+                            <img
+                              src={joostPhoto}
+                              alt="Joost van VloerGroep"
+                              className="relative h-16 w-16 rounded-full border border-amber-gold/30 object-cover shadow-[0_16px_30px_rgba(0,0,0,0.34)]"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
+                              Afspraak afgestemd door
+                            </div>
+                            <div className="mt-1 text-lg font-semibold leading-tight text-white">Joost Slot</div>
+                            <p className="mt-1 text-sm leading-6 text-white/62">VloerGroep</p>
+                          </div>
+                        </div>
                         <div>
-                          <div className="text-sm font-semibold text-white">{record.customer.company}</div>
-                          <p className="text-sm leading-6 text-white/62">
-                            {record.customer.name} · {record.customer.email}
+                          <div className="text-sm font-semibold text-white sm:text-right">{record.customer.company}</div>
+                          <p className="mt-1 text-sm leading-6 text-white/62 sm:text-right">
+                            {record.customer.name}
                           </p>
                         </div>
                       </div>
-                      <span className="hidden h-8 w-px bg-white/8 md:block" />
-                      <div className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
+                          {record.customer.email}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
+                          {record.customer.phone}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
                         {record.status === 'confirmed'
                           ? `Bevestigd · ${record.currentProposal.date}`
                           : record.awaitingActor === 'admin'
                             ? 'Wacht op Joost'
                             : 'Wacht op klant'}
+                        </span>
                       </div>
                     </div>
 
                     <div className="mt-7 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
                       <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
                         <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-gold">
-                          Huidig voorstel
+                          Huidige voorkeur
                         </div>
                         <div className="space-y-3 text-sm leading-7 text-white/72">
-                          <div>
-                            <div className="text-white/42">Datum</div>
-                            <div className="text-white">{record.currentProposal.date}</div>
-                          </div>
-                          {record.currentProposal.secondaryDate ? (
-                            <div>
-                              <div className="text-white/42">Tweede datum</div>
-                              <div className="text-white">{record.currentProposal.secondaryDate}</div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-[20px] border border-white/8 bg-white/5 px-4 py-4">
+                              <div className="text-white/42">Eerste datum</div>
+                              <div className="text-white">{record.currentProposal.date}</div>
                             </div>
-                          ) : null}
-                          <div>
-                            <div className="text-white/42">Moment</div>
-                            <div className="text-white">{getMomentLabel(record.currentProposal.time)}</div>
+                          {record.currentProposal.secondaryDate ? (
+                              <div className="rounded-[20px] border border-white/8 bg-white/5 px-4 py-4">
+                                <div className="text-white/42">Tweede datum</div>
+                                <div className="text-white">{record.currentProposal.secondaryDate}</div>
+                              </div>
+                            ) : null}
                           </div>
-                          <div>
-                            <div className="text-white/42">Contact</div>
-                            <div className="text-white">{record.customer.phone}</div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-[20px] border border-white/8 bg-white/5 px-4 py-4">
+                              <div className="text-white/42">Moment</div>
+                              <div className="text-white">{getMomentLabel(record.currentProposal.time)}</div>
+                            </div>
+                            <div className="rounded-[20px] border border-white/8 bg-white/5 px-4 py-4">
+                              <div className="text-white/42">Contact</div>
+                              <div className="text-white">{record.customer.phone}</div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -344,9 +378,34 @@ export default function DemoSchedulePage() {
                           <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
                             <p className="text-sm leading-7 text-white/72">
                               {actor === 'admin'
-                                ? 'Met deze actie zet je het huidige voorstel direct vast voor de klant.'
+                                ? 'Kies welke datum je vastzet. De klant ontvangt daarna direct de bevestiging.'
                                 : 'Met deze actie bevestig je dat dit moment voor jullie klopt.'}
                             </p>
+                            {record.currentProposal.secondaryDate ? (
+                              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                {[
+                                  ['primary', record.currentProposal.date],
+                                  ['secondary', record.currentProposal.secondaryDate],
+                                ].map(([key, date]) => (
+                                  <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => setSelectedAcceptDate(date)}
+                                    className={cn(
+                                      'rounded-[22px] border px-4 py-4 text-left transition-all duration-200',
+                                      selectedAcceptDate === date
+                                        ? 'border-amber-gold/42 bg-amber-gold/12 text-white shadow-[0_0_0_4px_rgba(224,172,62,0.05)]'
+                                        : 'border-white/10 bg-white/5 text-white/72 hover:border-white/16 hover:bg-white/[0.06]',
+                                    )}
+                                  >
+                                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-gold">
+                                      {key === 'primary' ? 'Eerste datum' : 'Tweede datum'}
+                                    </div>
+                                    <div className="mt-1 text-base font-semibold">{date}</div>
+                                  </button>
+                                ))}
+                              </div>
+                            ) : null}
                             <div className="mt-5">
                               <Button
                                 onClick={() => void submitAction('accept')}
@@ -360,27 +419,15 @@ export default function DemoSchedulePage() {
                           </div>
                         ) : (
                           <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
-                            <div className="grid gap-4 md:grid-cols-2">
-                              <TextField
-                                name="proposalDate"
-                                label="Nieuwe datum"
-                                icon={CalendarDays}
-                                type="date"
-                                value={proposalDate}
-                                onChange={(event) => setProposalDate(event.target.value)}
-                                min={getTodayIsoDate()}
-                              />
-                              <TextField
-                                name="proposalSecondaryDate"
-                                label="Tweede datum"
-                                labelHint="Optioneel"
-                                icon={CalendarDays}
-                                type="date"
-                                value={proposalSecondaryDate}
-                                onChange={(event) => setProposalSecondaryDate(event.target.value)}
-                                min={getTodayIsoDate()}
-                              />
-                            </div>
+                            <TextField
+                              name="proposalDate"
+                              label="Nieuwe datum"
+                              icon={CalendarDays}
+                              type="date"
+                              value={proposalDate}
+                              onChange={(event) => setProposalDate(event.target.value)}
+                              min={getTodayIsoDate()}
+                            />
 
                             <div className="mt-4 space-y-3">
                               <label className="flex items-center gap-2 pl-1 text-[13px] font-semibold tracking-[0.01em] text-white/92">

@@ -314,24 +314,33 @@ export default function DemoRequestPage() {
                   </p>
                 </div>
 
-                <div className="mt-7 flex flex-wrap items-center justify-center gap-3 rounded-[26px] border border-white/8 bg-white/[0.04] px-4 py-4 text-left md:px-5">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={joostPhoto}
-                      alt="Joost van VloerGroep"
-                      className="h-14 w-14 rounded-full border border-white/12 object-cover shadow-[0_16px_30px_rgba(0,0,0,0.3)]"
-                    />
-                    <div>
-                      <div className="text-sm font-semibold text-white">Joost Slot · VloerGroep</div>
-                      <p className="text-sm leading-6 text-white/62">Hij stemt het moment daarna persoonlijk met je af.</p>
+                <div className="mx-auto mt-7 max-w-3xl rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="absolute inset-0 rounded-full bg-amber-gold/18 blur-xl" />
+                        <img
+                          src={joostPhoto}
+                          alt="Joost van VloerGroep"
+                          className="relative h-16 w-16 rounded-full border border-amber-gold/30 object-cover shadow-[0_16px_30px_rgba(0,0,0,0.34)]"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
+                          Je demo wordt afgestemd door
+                        </div>
+                        <div className="mt-1 text-lg font-semibold leading-tight text-white">Joost Slot</div>
+                        <p className="mt-1 text-sm leading-6 text-white/62">VloerGroep</p>
+                      </div>
                     </div>
-                  </div>
-                  <span className="hidden h-8 w-px bg-white/8 md:block" />
-                  <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-white/68">
-                    <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5">Ongeveer 20 minuten</span>
-                    <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5">
-                      {companyName ? `Toegepast op ${companyName}` : 'Toegepast op jullie bedrijf'}
-                    </span>
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
+                        Ongeveer 20 minuten
+                      </span>
+                      <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
+                        {companyName ? `${companyName}` : 'Jullie bedrijf'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

@@ -1,9 +1,14 @@
 import React from 'react';
+import { Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SliderProps {
   label: string;
   description?: string;
+  infoTooltip?: {
+    title?: string;
+    body: string;
+  };
   icon?: React.ReactNode;
   value: number;
   onChange: (val: number) => void;
@@ -19,6 +24,7 @@ interface SliderProps {
 function SliderComponent({ 
   label, 
   description,
+  infoTooltip,
   icon, 
   value, 
   onChange, 
@@ -32,6 +38,7 @@ function SliderComponent({
 }: SliderProps) {
   const sliderId = React.useId();
   const descriptionId = description ? `${sliderId}-description` : undefined;
+  const [tooltipOpen, setTooltipOpen] = React.useState(false);
   const percentage = ((value - min) / (max - min)) * 100;
   const scaleTicks = React.useMemo(() => {
     if (tickEvery && tickEvery > 0) {
@@ -83,7 +90,42 @@ function SliderComponent({
          <div className="flex min-w-0 flex-1 items-start gap-3 text-left">
            {icon && <div className="rounded-xl bg-amber-gold/8 p-2.5 text-amber-gold transition-all duration-200 group-hover:bg-amber-gold/10 group-focus-within:bg-amber-gold/12">{icon}</div>}
            <div className="flex min-w-0 flex-1 flex-col items-start text-left">
-             <label htmlFor={sliderId} className="block w-full text-left font-semibold leading-tight text-white">{label}</label>
+             <div className="flex w-full items-start gap-2">
+               <label htmlFor={sliderId} className="block flex-1 text-left font-semibold leading-tight text-white">{label}</label>
+               {infoTooltip ? (
+                 <div
+                   className="relative shrink-0"
+                   onMouseEnter={() => setTooltipOpen(true)}
+                   onMouseLeave={() => setTooltipOpen(false)}
+                 >
+                   <button
+                     type="button"
+                     aria-label={infoTooltip.title || 'Uitleg'}
+                     aria-expanded={tooltipOpen}
+                     onClick={() => setTooltipOpen((current) => !current)}
+                     onBlur={() => setTooltipOpen(false)}
+                     className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition-all duration-200 hover:border-white/16 hover:bg-white/[0.08] hover:text-white/82"
+                   >
+                     <Info size={13} />
+                   </button>
+                   <div
+                     className={cn(
+                       'pointer-events-none absolute right-0 top-8 z-20 w-[260px] rounded-[18px] border border-white/10 bg-[#141414]/95 p-4 text-left shadow-[0_18px_40px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all duration-200',
+                       tooltipOpen ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0',
+                     )}
+                   >
+                     {infoTooltip.title ? (
+                       <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-gold">
+                         {infoTooltip.title}
+                       </div>
+                     ) : null}
+                     <p className="text-[12px] leading-5 text-white/78">
+                       {infoTooltip.body}
+                     </p>
+                   </div>
+                 </div>
+               ) : null}
+             </div>
              {description && <span id={descriptionId} className="mt-1 block w-full text-left text-[12px] leading-5 text-white/80">{description}</span>}
            </div>
          </div>

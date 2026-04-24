@@ -47,7 +47,9 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
       <div className="mb-8 text-center md:text-left">
         <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Basis</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
-          {state.firstName ? `Wat zijn jullie gemiddelde uurtarief en werkweek, ${state.firstName}?` : 'Wat zijn jullie gemiddelde uurtarief en werkweek?'}
+          {state.firstName
+            ? `Wat rekenen jullie gemiddeld per uur en hoeveel weken per jaar werken jullie, ${state.firstName}?`
+            : 'Wat rekenen jullie gemiddeld per uur en hoeveel weken per jaar werken jullie?'}
         </h2>
         <p className="text-base text-[#FBEFD5]/80 pr-2">
           We rekenen hier met gemiddelden per werkende vakman op de vloer. Alle bedragen in de scan zijn indicatief en ex. btw.
@@ -70,8 +72,12 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
         />
         
         <Slider
-          label="Gemiddeld factureerbare uren per week per persoon"
-          description="Denk aan het gemiddelde aantal uren dat 1 vakman per week echt aan klanten kan doorrekenen. Tel dus alleen uitvoerende uren mee. Geen reistijd, offertes, planning, administratie, pauzes, herstel of wachten op materiaal."
+          label="Gemiddeld factureerbare uren per week p.p."
+          description="Het gemiddelde aantal uren dat 1 vakman per week echt aan klanten kan doorbelasten. Tel alleen uitvoerende uren mee."
+          infoTooltip={{
+            title: 'Voorbeeld',
+            body: 'Bij Vloerbedrijf De Boer werkt een vakman 40 uur. Hij is 30 uur echt op de klus bezig. De rest gaat naar rijden, klantcontact en voorbereiding. Dan vul je 30 uur p.p. in.',
+          }}
           icon={<Clock size={20} />}
           value={state.hoursPerWeek}
           onChange={(v) => updateState({ hoursPerWeek: v })}

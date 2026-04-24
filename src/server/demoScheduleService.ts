@@ -402,7 +402,32 @@ export async function processDemoScheduleAction(
   }
 
   if (action === 'accept') {
-    const confirmedRecord = updateRecordForConfirmation(record, actor, actor === 'admin' ? 'admin' : 'customer');
+    const acceptedProposalValidation = validateProposal(
+      payload.proposalDate || record.currentProposal.date,
+      undefined,
+      payload.proposalTime || record.currentProposal.time,
+      record.currentProposal.note,
+    );
+
+    if (acceptedProposalValidation.ok === false) {
+      return {
+        status: 400,
+        body: {
+          ok: false,
+          deliveryMode: 'preview',
+          message: acceptedProposalValidation.message,
+          actor,
+          record,
+        },
+      };
+    }
+
+    const confirmedRecord = updateRecordForConfirmation(
+      record,
+      actor,
+      actor === 'admin' ? 'admin' : 'customer',
+      acceptedProposalValidation.proposal,
+    );
     const calendarUrl = buildCalendarUrl(confirmedRecord);
     const customerMail = buildDemoScheduleConfirmedCustomerEmail({
       record: confirmedRecord,
