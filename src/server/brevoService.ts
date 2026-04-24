@@ -1,4 +1,5 @@
 import { LeadInsightProfile, getTeamSizeLabel } from '../lib/leadProfile.js';
+import { formatDutchDate } from '../lib/dateFormat.js';
 import {
   CalculationResults,
   DemoRequestFormData,
@@ -167,8 +168,8 @@ function buildDemoRequestAttributes({
     BEDRIJF: request.company,
     DEMO_AANGEVRAAGD: 'ja',
     DEMO_VERZOEK_DATUM: buildDateOnly(submittedAt),
-    DEMO_VOORKEUR_1: request.preferredDatePrimary,
-    DEMO_VOORKEUR_2: request.preferredDateSecondary,
+    DEMO_VOORKEUR_1: formatDutchDate(request.preferredDatePrimary),
+    DEMO_VOORKEUR_2: formatDutchDate(request.preferredDateSecondary),
     DEMO_DAGDEEL: getDemoPreferenceLabel(request.preferredTime),
     DEMO_OPMERKING: request.notes,
   });
