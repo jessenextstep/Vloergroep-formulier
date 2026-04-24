@@ -1,5 +1,6 @@
 const EMAIL_LOGO_PATH = '/email/vloergroep-logo-white.png';
 const EMAIL_INVITE_THANKS_HERO_PATH = '/email/hero-screen-thanks.webp';
+const EMAIL_DEMO_CONFIRMATION_HERO_PATH = '/email/agenda-confirmation.png';
 
 function normalizeAbsoluteUrl(value?: string): string | null {
   if (!value) {
@@ -49,4 +50,8 @@ export function buildEmailLogoUrl(siteUrl?: string): string | null {
 
 export function buildEmailInviteThanksHeroUrl(siteUrl?: string): string | null {
   return buildEmailAssetUrl(EMAIL_INVITE_THANKS_HERO_PATH, siteUrl);
+}
+
+export function buildEmailDemoConfirmationHeroUrl(siteUrl?: string): string | null {
+  return buildEmailAssetUrl(EMAIL_DEMO_CONFIRMATION_HERO_PATH, siteUrl);
 }

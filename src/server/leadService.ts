@@ -5,7 +5,9 @@ import {
   LeadSource,
   LeadSubmissionPayload,
   LeadSubmissionResponse,
+  parseLegacyTeamCount,
   QuizState,
+  readTeamCount,
 } from '../types.js';
 import {
   buildCustomerConfirmationEmail,
@@ -18,7 +20,6 @@ interface LeadEnvironment {
   resendApiKey?: string;
   resendFromEmail?: string;
   internalEmail?: string;
-  demoUrl?: string;
   environment?: string;
   siteUrl?: string;
   brevoApiKey?: string;
@@ -49,7 +50,6 @@ interface ResendEmailPayload {
   tags?: Array<{ name: string; value: string }>;
 }
 
-const TEAM_SIZES = new Set(['alone', '1-2', 'small-team', 'large-team']);
 const PAYMENT_DAYS = new Set([14, 30, 45, 60, 90]);
 const MISSED_PROJECTS = new Set([0, 1, 2, 3]);
 const LEAD_INTENTS = new Set(['demo', 'info', 'scan']);
@@ -116,6 +116,24 @@ function resolveSiteUrl(env: LeadEnvironment): string | undefined {
   }
 
   return undefined;
+}
+
+function buildDemoRequestUrl(siteUrl: string | undefined, contact: LeadCaptureFormData): string | null {
+  const normalizedSiteUrl = normalizeAbsoluteUrl(siteUrl);
+  if (!normalizedSiteUrl) {
+    return null;
+  }
+
+  const url = new URL('/persoonlijke-demo', `${normalizedSiteUrl}/`);
+  url.searchParams.set('name', contact.name);
+  url.searchParams.set('company', contact.company);
+  url.searchParams.set('email', contact.email);
+
+  if (contact.phone) {
+    url.searchParams.set('phone', contact.phone);
+  }
+
+  return url.toString();
 }
 
 function parseNumericEnvValue(value: string | number | undefined): number | null {
@@ -209,6 +227,7 @@ function validatePayload(rawPayload: unknown):
     website: readString(rawContact.website, 120),
   };
 
+  const teamCount = readTeamCount(rawQuiz.teamCount) ?? parseLegacyTeamCount(rawQuiz.teamSize);
   const hourlyRate = readNumber(rawQuiz.hourlyRate);
   const hoursPerWeek = readNumber(rawQuiz.hoursPerWeek);
   const weeksPerYear = readNumber(rawQuiz.weeksPerYear);
@@ -221,7 +240,7 @@ function validatePayload(rawPayload: unknown):
   const missedProjects = readNumber(rawQuiz.missedProjects);
 
   const quiz: QuizState | null =
-    TEAM_SIZES.has(rawQuiz.teamSize as string) &&
+    teamCount !== null &&
     hourlyRate !== null &&
     hoursPerWeek !== null &&
     weeksPerYear !== null &&
@@ -235,7 +254,7 @@ function validatePayload(rawPayload: unknown):
     missedProjects !== null &&
     MISSED_PROJECTS.has(missedProjects)
       ? {
-          teamSize: rawQuiz.teamSize as QuizState['teamSize'],
+          teamCount,
           companyName: readString(rawQuiz.companyName, 120),
           firstName: readString(rawQuiz.firstName, 80),
           hourlyRate,
@@ -280,7 +299,7 @@ function validatePayload(rawPayload: unknown):
   }
 
   if (!contact.consent) {
-    return { ok: false, message: 'Toestemming voor opvolging ontbreekt.' };
+    return { ok: false, message: 'Geef toestemming zodat we je scan kunnen mailen.' };
   }
 
   if (sessionStartedAt === null || submittedAt === null) {
@@ -388,14 +407,10 @@ export async function processLeadSubmission(
     env.internalEmail || process.env.LEAD_NOTIFICATION_EMAIL || 'info@vloergroep.nl';
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
   const brevoListIds = resolveBrevoListIds(payload.contact.intent, env);
-  const demoUrl =
-    env.demoUrl ||
-    process.env.VLOERGROEP_DEMO_URL ||
-    process.env.VITE_VLOERGROEP_DEMO_URL ||
-    'https://vloergroep.nl';
   const siteUrl = resolveSiteUrl(env);
   const logoUrl = buildEmailLogoUrl(siteUrl);
   const logoSrc = logoUrl;
+  const demoRequestUrl = buildDemoRequestUrl(siteUrl, payload.contact);
   const environment = env.environment || process.env.NODE_ENV || 'development';
   const resendConfigurationIssue =
     !resendApiKey
@@ -414,6 +429,7 @@ export async function processLeadSubmission(
     results,
     profile,
     logoSrc,
+    demoRequestUrl,
   });
 
   const internalMail = buildInternalLeadEmail({
@@ -488,7 +504,7 @@ export async function processLeadSubmission(
         body: {
           ok: true,
           deliveryMode: 'preview',
-          message: 'Je aanvraag is ontvangen. Je gegevens staan al goed in ons systeem, maar de bevestigingsmail is nog niet actief.',
+          message: 'Je aanvraag is ontvangen. De bevestigingsmail staat nog niet aan, maar je gegevens zijn wel goed aangekomen.',
         },
       };
     }

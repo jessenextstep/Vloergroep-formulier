@@ -160,14 +160,6 @@ function buildCustomerStoryBlocks({
   results: CalculationResults;
 }): StoryBlock[] {
   const paymentLabel = getPaymentDaysLabel(state.paymentDays).toLowerCase();
-  const ownerHoursSaved = formatNumber(
-    results.timeSaved.ownerHoursSaved,
-    results.timeSaved.ownerHoursSaved % 1 === 0 ? 0 : 1,
-  );
-  const teamHoursSaved = formatNumber(
-    results.timeSaved.teamEfficiencySaved,
-    results.timeSaved.teamEfficiencySaved % 1 === 0 ? 0 : 1,
-  );
   const totalHoursSaved = formatNumber(
     results.timeSaved.hoursPerWeekSaved,
     results.timeSaved.hoursPerWeekSaved % 1 === 0 ? 0 : 1,
@@ -183,11 +175,9 @@ function buildCustomerStoryBlocks({
       title: 'Tijd terug in de werkweek',
       metric: `${formatCurrency(results.timeSaved.extraRevenueTime)} omzetpotentie per jaar`,
       body:
-        `In je scan gaf je aan dat administratie, planning, communicatie en betalingen samen ongeveer ${ownerHoursSaved} uur per week kosten.` +
-        (results.timeSaved.teamEfficiencySaved > 0
-          ? ` Omdat je met een team werkt, rekenen we daarnaast op ${teamHoursSaved} uur extra efficiëntiewinst op de vloer door minder bellen, wachten en losse afstemming.`
-          : '') +
-        ` Doordat VloerGroep dit in één flow samenbrengt, komt voor ${companyLabel} ongeveer ${totalHoursSaved} uur per week vrij. Tegen ${formatCurrency(state.hourlyRate)} en ${state.weeksPerYear} werkweken onderbouwt dat circa ${formatCurrency(results.timeSaved.extraRevenueTime)} extra omzetpotentie uit ${monetizableHoursYear} inzetbare uren.`,
+        `In je scan gaf je aan dat administratie, planning, communicatie en betalingen samen ongeveer ${totalHoursSaved} uur per week kosten in jullie hele organisatie.` +
+        ` Doordat VloerGroep dit in één flow samenbrengt, komt voor ${companyLabel} die tijd weer vrij voor werk dat wél factureerbaar is.` +
+        ` Tegen ${formatCurrency(state.hourlyRate)} ex. btw en ${state.weeksPerYear} werkweken onderbouwt dat circa ${formatCurrency(results.timeSaved.extraRevenueTime)} extra omzetpotentie uit ${monetizableHoursYear} inzetbare uren.`,
     });
   }
 
@@ -198,8 +188,8 @@ function buildCustomerStoryBlocks({
       metric: `${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzet via leads`,
       body:
         `VloerGroep stuurt niet zomaar meer aanvragen door, maar vooral beter passende klussen op basis van capaciteit en type werk.` +
-        ` In deze scan rekenen we daarom bewust conservatief met ongeveer ${extraProjectsYear} extra passende opdrachten per jaar voor een bedrijf van jullie grootte.` +
-        ` Omgerekend naar ${extraHoursYear} extra factureerbare uren tegen ${formatCurrency(state.hourlyRate)} komt dat uit op circa ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzetpotentie.`,
+        ` In deze scan rekenen we daarom bewust conservatief met ongeveer ${extraProjectsYear} extra passende opdrachten per jaar voor een bedrijf met ${getTeamSizeLabel(state.teamCount).toLowerCase()}.` +
+        ` Omgerekend naar ${extraHoursYear} extra factureerbare uren tegen ${formatCurrency(state.hourlyRate)} ex. btw komt dat uit op circa ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra omzetpotentie.`,
     });
   }
 
@@ -288,15 +278,17 @@ export function buildCustomerConfirmationEmail({
   results,
   profile,
   logoSrc,
+  demoRequestUrl,
 }: {
   contact: LeadCaptureFormData;
   state: QuizState;
   results: CalculationResults;
   profile: LeadInsightProfile;
   logoSrc?: string | null;
+  demoRequestUrl?: string | null;
 }) {
   const summaryRows = buildLeadSummary(state, results, contact.intent).filter((row) =>
-    ['Team', 'Regelwerk', 'Betaaltermijn', 'Aandeel via VloerGroep'].includes(row.label),
+    ['Mensen in uitvoering', 'Regelwerk organisatie', 'Betaaltermijn', 'Aandeel via VloerGroep'].includes(row.label),
   );
   const companyLabel = contact.company || 'jouw bedrijf';
   const firstName = state.firstName || contact.name.split(' ')[0] || '';
@@ -322,6 +314,34 @@ export function buildCustomerConfirmationEmail({
   const subject = isAdsScan
     ? `Je VloerGroep scan voor ${companyLabel}`
     : `Bevestiging van je scan voor ${companyLabel}`;
+  const demoCallout =
+    isAdsScan && demoRequestUrl
+      ? `
+      <tr>
+        <td style="padding: 0 34px 18px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid rgba(214,164,64,0.18); border-radius: 22px; background: linear-gradient(180deg, rgba(214,164,64,0.12), rgba(214,164,64,0.04));">
+            <tr>
+              <td style="padding: 22px 24px;">
+                <div style="color: #d6a440; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">Persoonlijke demo</div>
+                <div style="color: #f6f1e6; font-size: 22px; line-height: 1.35; font-weight: 700; margin-bottom: 10px;">Zien hoe dit er voor ${escapeHtml(companyLabel)} in de praktijk uitziet?</div>
+                <div style="color: #d7ddd8; font-size: 14px; line-height: 1.7; margin-bottom: 18px;">
+                  Als je wilt, kun je hieronder rustig een voorkeursmoment doorgeven voor een persoonlijke demo met Joost van VloerGroep. In die demo laat hij zien hoe jullie kunnen starten, waar voor ${escapeHtml(companyLabel)} de eerste winst zit en hoe dit er in de praktijk uitziet.
+                </div>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="border-radius:999px;background-color:#E0AC3E;">
+                      <a href="${demoRequestUrl}" style="display:inline-block;padding:14px 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#050505;text-decoration:none;border-radius:999px;">
+                        Geef een voorkeursmoment door
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`
+      : '';
 
   const html = wrapEmail(
     `
@@ -333,6 +353,9 @@ export function buildCustomerConfirmationEmail({
           </div>
           <div style="color: #c8d0cd; font-size: 16px; line-height: 1.7;">
             ${escapeHtml(openingLine)} ${isAdsScan ? 'Je antwoorden zijn verwerkt.' : 'Je aanvraag is goed ontvangen.'} Hieronder zie je kort waar voor ${escapeHtml(companyLabel)} nu de meeste winst zit.
+          </div>
+          <div style="color: #8d9d99; font-size: 12px; line-height: 1.6; margin-top: 10px;">
+            Alle bedragen in deze scan zijn indicatief en ex. btw.
           </div>
         </td>
       </tr>
@@ -367,6 +390,7 @@ export function buildCustomerConfirmationEmail({
       </tr>`
           : ''
       }
+      ${demoCallout}
       <tr>
         <td style="padding: 0 34px 8px;">
           <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Kort ingevuld</div>
@@ -400,6 +424,12 @@ export function buildCustomerConfirmationEmail({
           `Zo bouwt VloerGroep deze uitkomst voor ${companyLabel} op:`,
           ...storyBlocks.map((item) => `- ${item.title}: ${item.metric}. ${item.body}`),
           '',
+          ...(demoRequestUrl
+            ? [
+                `Wil je dit voor ${companyLabel} rustig in de praktijk zien? Geef dan hier een voorkeursmoment door voor een persoonlijke demo met Joost van VloerGroep: ${demoRequestUrl}`,
+                '',
+              ]
+            : []),
         ]
       : []),
     'Kort ingevuld:',
@@ -430,42 +460,46 @@ export function buildInternalLeadEmail({
 }) {
   const summaryRows = buildLeadSummary(state, results, contact.intent).filter((row) =>
     [
-      'Team',
-      'Uurtarief',
-      'Regelwerk',
+      'Mensen in uitvoering',
+      'Uurtarief ex. btw',
+      'Regelwerk organisatie',
       'Betaaltermijn',
       'Aandeel via VloerGroep',
       'Gemiste grotere klussen',
       'Voorkeur',
     ].includes(row.label),
   );
-  const adminLeadCopy = `Start op ${profile.primaryAngle.toLowerCase()}. Daar zit nu de meeste urgentie.`;
   const isAdsScan = contact.intent === 'scan';
+  const companyLabel = contact.company || 'dit bedrijf';
+  const adminLeadCopy = `Open het gesprek bij ${profile.primaryAngle.toLowerCase()}. Daar is de kans het grootst dat ${companyLabel} zich meteen in herkent.`;
   const contactDetails = [contact.email, contact.phone].filter(Boolean).join(' · ');
   const leadTypeBadge = isAdsScan
-    ? 'Ads-scan'
+    ? 'Scan via advertentie'
     : contact.intent === 'demo'
       ? 'Demo-aanvraag'
       : 'Info-aanvraag';
   const internalSubject = isAdsScan
-    ? `Nieuwe ads-scan van ${contact.company || contact.name}`
+    ? `Nieuwe scan via advertentie van ${contact.company || contact.name}`
     : `Nieuwe scan van ${contact.company || contact.name}`;
   const internalPreview = isAdsScan
-    ? 'Nieuwe scan uit koud verkeer. Resultaten zijn al per mail verzonden.'
-    : 'Nieuwe scan met contactgegevens, kansen en opvolging.';
+    ? 'Nieuwe scan via advertentie. De persoonlijke scan is al verstuurd.'
+    : 'Nieuwe scan met bedrijfssituatie en eerste belnotities.';
+  const adminIntro = isAdsScan
+    ? `${contact.name} vulde de scan in voor ${companyLabel}. De persoonlijke scan is al verstuurd. Hieronder zie je waar dit bedrijf waarschijnlijk het eerst op aanhaakt.`
+    : `${contact.name} vulde de scan in voor ${companyLabel}. Hieronder zie je wat er bij dit bedrijf het meest opvalt en waar je het gesprek het beste kunt openen.`;
 
   const html = wrapEmail(
     `
       <tr>
         <td style="padding: 34px 34px 18px;">
-          ${renderLeadBadge(`Leadscore ${profile.score}/100`)}
+          ${renderLeadBadge(`Prioriteit ${profile.score}/100`)}
           ${renderLeadBadge(profile.temperature, 'muted')}
           ${renderLeadBadge(leadTypeBadge, 'muted')}
           <div style="font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -0.03em; margin: 10px 0 14px;">
             ${escapeHtml(internalSubject)}
           </div>
           <div style="color: #c8d0cd; font-size: 16px; line-height: 1.7;">
-            ${escapeHtml(contact.name)} vulde de scan in voor ${escapeHtml(contact.company)}.${isAdsScan ? ' De uitslag is al per mail verzonden; dit is een koude lead die bewust zijn gegevens heeft achtergelaten voor de scan.' : ' Hieronder staat de kortste route naar opvolging.'}
+            ${escapeHtml(adminIntro)}
           </div>
         </td>
       </tr>
@@ -512,7 +546,7 @@ export function buildInternalLeadEmail({
       </tr>
       <tr>
         <td style="padding: 6px 34px 0;">
-          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Kansen</div>
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Wat hier speelt</div>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
             ${renderBulletList(profile.opportunities.slice(0, 2).map((item) => shortenCopy(item, 165)))}
           </table>
@@ -520,7 +554,7 @@ export function buildInternalLeadEmail({
       </tr>
       <tr>
         <td style="padding: 6px 34px 0;">
-          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Valkuilen</div>
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Let hier op</div>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
             ${renderBulletList(profile.pitfalls.slice(0, 2).map((item) => shortenCopy(item, 165)))}
           </table>
@@ -528,7 +562,7 @@ export function buildInternalLeadEmail({
       </tr>
       <tr>
         <td style="padding: 6px 34px 34px;">
-          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Opvolging</div>
+          <div style="font-size: 18px; line-height: 1.3; font-weight: 700; margin-bottom: 12px;">Eerste aanpak</div>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
             ${renderBulletList([
               shortenCopy(profile.nextStep, 165),
@@ -544,26 +578,26 @@ export function buildInternalLeadEmail({
 
   const text = [
     internalSubject,
-    `Leadscore: ${profile.score}/100 (${profile.temperature})`,
+    `Prioriteit: ${profile.score}/100 (${profile.temperature})`,
     '',
     `Naam: ${contact.name}`,
     `Bedrijf: ${contact.company}`,
     `E-mail: ${contact.email}`,
     ...(contact.phone ? [`Telefoon: ${contact.phone}`] : []),
     '',
-    `Beste openingshoek: ${profile.primaryAngle}`,
+    `Beste ingang: ${profile.primaryAngle}`,
     adminLeadCopy,
     '',
     'Scanoverzicht:',
     ...summaryRows.map((row) => `- ${row.label}: ${row.value}`),
     '',
-    'Kansen:',
+    'Wat hier speelt:',
     ...profile.opportunities.slice(0, 2).map((item) => `- ${shortenCopy(item, 165)}`),
     '',
-    'Valkuilen:',
+    'Let hier op:',
     ...profile.pitfalls.slice(0, 2).map((item) => `- ${shortenCopy(item, 165)}`),
     '',
-    'Opvolging:',
+    'Eerste aanpak:',
     `- ${shortenCopy(profile.nextStep, 165)}`,
     ...profile.salesTips.slice(0, 2).map((item) => `- ${shortenCopy(item, 165)}`),
   ].join('\n');

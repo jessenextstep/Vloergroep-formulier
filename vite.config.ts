@@ -4,6 +4,7 @@ import type { IncomingMessage } from 'node:http';
 import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 import { processLeadSubmission } from './src/server/leadService';
+import { processDemoRequestSubmission } from './src/server/demoRequestService';
 import { getInviteByEncodedEmail } from './src/server/inviteService';
 import { processInviteRsvp } from './src/server/inviteRsvpService';
 
@@ -122,6 +123,46 @@ function leadApiDevPlugin() {
           }
         }
 
+        if (req.url?.startsWith('/api/demo-request')) {
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-store');
+
+          if (req.method !== 'POST') {
+            res.statusCode = 405;
+            res.end(JSON.stringify({
+              ok: false,
+              deliveryMode: 'preview',
+              message: 'Method not allowed.',
+            }));
+            return;
+          }
+
+          try {
+            const payload = await readJsonBody(req);
+            const result = await processDemoRequestSubmission(payload, {
+              resendApiKey: process.env.RESEND_API_KEY,
+              resendFromEmail: process.env.RESEND_FROM_EMAIL,
+              adminEmail: process.env.DEMO_REQUEST_ADMIN_EMAIL || 'joost@vloergroep.nl',
+              environment: process.env.NODE_ENV,
+              siteUrl: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
+              brevoApiKey: process.env.BREVO_API,
+            });
+
+            res.statusCode = result.status;
+            res.end(JSON.stringify(result.body));
+            return;
+          } catch (error) {
+            console.error('Demo request API dev middleware failed', error);
+            res.statusCode = 500;
+            res.end(JSON.stringify({
+              ok: false,
+              deliveryMode: 'preview',
+              message: 'Demo API kon lokaal niet worden verwerkt.',
+            }));
+            return;
+          }
+        }
+
         if (!req.url?.startsWith('/api/lead')) {
           return next();
         }
@@ -145,7 +186,6 @@ function leadApiDevPlugin() {
             resendApiKey: process.env.RESEND_API_KEY,
             resendFromEmail: process.env.RESEND_FROM_EMAIL,
             internalEmail: process.env.LEAD_NOTIFICATION_EMAIL,
-            demoUrl: process.env.VLOERGROEP_DEMO_URL,
             environment: process.env.NODE_ENV,
             siteUrl: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
           });

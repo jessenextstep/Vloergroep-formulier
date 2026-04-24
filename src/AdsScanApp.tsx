@@ -12,7 +12,7 @@ import { BrandLogo } from './components/BrandLogo';
 import { BrandWatermark } from './components/BrandWatermark';
 import { StepIndicator } from './components/StepIndicator';
 import { calculateResults } from './lib/calculations';
-import { QuizState, defaultQuizState } from './types';
+import { QuizState, defaultQuizState, normalizeStoredQuizState } from './types';
 
 const TOTAL_STEPS = 5;
 const LAST_APP_STEP = 7;
@@ -60,10 +60,7 @@ function loadStoredQuizState() {
       return defaultQuizState;
     }
 
-    return {
-      ...defaultQuizState,
-      ...JSON.parse(storedState),
-    } as QuizState;
+    return normalizeStoredQuizState(JSON.parse(storedState));
   } catch {
     return defaultQuizState;
   }

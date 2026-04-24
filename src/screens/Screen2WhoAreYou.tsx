@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { QuizState, TeamSize } from '../types';
+import React from 'react';
+import { Building2, User, Users } from 'lucide-react';
+
 import { BottomNav } from '../components/BottomNav';
-import { Card } from '../components/Card';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { Slider } from '../components/Slider';
 import { TextField } from '../components/TextField';
 import { heroScreen2 } from '../lib/brandAssets';
-import { User, Users, Building2, TrendingUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { QuizState } from '../types';
 
 interface Props {
   state: QuizState;
@@ -15,14 +15,19 @@ interface Props {
   onBack: () => void;
 }
 
-export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }: Props) {
-  const [showError, setShowError] = useState(false);
+function formatTeamCount(value: number) {
+  return value >= 25 ? '25+' : `${value}`;
+}
 
-  const teamOptions: { value: TeamSize; label: string; icon: React.ReactNode }[] = [
-    { value: 'alone', label: 'Ik werk alleen', icon: <User size={24} /> },
-    { value: '1-2', label: 'Ik werk met 1\u20132 man', icon: <Users size={24} /> },
-    { value: 'small-team', label: 'Klein team (3\u20135 man)', icon: <Building2 size={24} /> },
-    { value: 'large-team', label: 'Groter team (6+ personen)', icon: <TrendingUp size={24} /> },
+export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }: Props) {
+  const teamMarks = [
+    { value: 1, label: '1' },
+    { value: 3, label: '3' },
+    { value: 5, label: '5' },
+    { value: 8, label: '8' },
+    { value: 12, label: '12' },
+    { value: 18, label: '18' },
+    { value: 25, label: '25+' },
   ];
 
   return (
@@ -34,54 +39,34 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
       />
 
       <div className="mb-8 text-center md:text-left">
-        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Profiel</span>
-        <h2 id="team-size-label" className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Met hoeveel mensen werk je?</h2>
-        <p className="text-base text-white/80 leading-relaxed">
-          We stemmen de calculatie af op jouw actuele bedrijfsgrootte.
+        <span className="mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold">
+          Profiel
+        </span>
+        <h2 className="mb-3 text-3xl font-bold font-display tracking-tight text-white md:text-4xl">
+          Hoeveel mensen werken er bij jullie mee op de vloer?
+        </h2>
+        <p className="text-base leading-relaxed text-white/80">
+          Tel jezelf en de mensen mee die normaal factureerbare uren draaien. Kantoor of administratie hoef je hier niet mee te tellen.
         </p>
       </div>
 
-      <AnimatePresence>
-        {showError && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            id="team-size-error"
-            className="mb-6 text-amber-gold bg-amber-gold/10 p-3 lg:p-4 rounded-xl border border-amber-gold/20 text-sm md:text-base text-center"
-          >
-            Selecteer eerst met hoeveel mensen je werkt om verder te gaan.
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div
-        role="radiogroup"
-        aria-labelledby="team-size-label"
-        aria-describedby={showError ? 'team-size-error' : undefined}
-        className="grid grid-cols-2 gap-3 mb-10"
-      >
-        {teamOptions.map((opt) => (
-          <Card
-            key={opt.value}
-            role="radio"
-            interactive
-            selected={state.teamSize === opt.value}
-            onClick={() => {
-              updateState({ teamSize: opt.value });
-              if (showError) setShowError(false);
-            }}
-            className={`flex flex-col items-center justify-center p-4 text-center gap-3 ${showError && state.teamSize === '' ? 'border-amber-gold/50 shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50' : ''}`}
-          >
-            <div className={`p-3 rounded-2xl ${state.teamSize === opt.value ? 'bg-near-black text-amber-gold' : 'bg-white/5 text-white/50'}`}>
-              {opt.icon}
-            </div>
-            <span className="font-medium text-lg">{opt.label}</span>
-          </Card>
-        ))}
+      <div className="mb-10">
+        <Slider
+          label="Aantal mensen in uitvoering"
+          description="Gebruik het aantal mensen dat meestal echt werk op locatie uitvoert."
+          icon={<Users size={20} />}
+          value={state.teamCount}
+          onChange={(value) => updateState({ teamCount: value })}
+          min={1}
+          max={25}
+          step={1}
+          tickEvery={2}
+          marks={teamMarks}
+          formatValue={formatTeamCount}
+        />
       </div>
 
-      <div className="space-y-4 mb-12">
+      <div className="mb-12 space-y-4">
         <TextField
           id="profile-first-name"
           label="Voornaam"
@@ -113,20 +98,7 @@ export default function Screen2WhoAreYou({ state, updateState, onNext, onBack }:
       </div>
 
       <div className="mt-auto">
-        <BottomNav 
-          onNext={() => {
-            if (!state.teamSize) {
-              setShowError(true);
-              const el = document.getElementById('team-size-error') || document.querySelector('h2');
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-              return;
-            }
-            onNext();
-          }} 
-          onBack={onBack} 
-        />
+        <BottomNav onNext={onNext} onBack={onBack} />
       </div>
     </div>
   );

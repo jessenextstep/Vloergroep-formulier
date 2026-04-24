@@ -564,7 +564,7 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
               ) : null}
 
               <p className="mt-6 text-sm leading-6 text-white/50">
-                VloerGroep kijkt alleen mee als daar echt een logische vervolgstap uit komt.
+                Als je wilt, kijkt VloerGroep daarna graag even met je mee naar de uitkomst.
               </p>
             </div>
           </motion.div>

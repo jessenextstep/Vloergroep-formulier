@@ -3,13 +3,12 @@ import {
   LeadIntent,
   PaymentDays,
   QuizState,
-  TeamSize,
 } from '../types.js';
 import { clamp, formatCurrency, formatNumber } from './utils.js';
 
 export interface LeadInsightProfile {
   score: number;
-  temperature: 'Hot' | 'Warm' | 'Nurture';
+  temperature: 'Hoog' | 'Gemiddeld' | 'Licht';
   primaryAngle: string;
   primaryMessage: string;
   opportunities: string[];
@@ -29,14 +28,6 @@ export interface LeadKpi {
   caption: string;
 }
 
-const teamSizeLabels: Record<TeamSize, string> = {
-  '': 'Onbekend',
-  alone: 'Alleen',
-  '1-2': '1-2 extra mensen',
-  'small-team': 'Klein team (3-5 man)',
-  'large-team': 'Groot team (5+ personen)',
-};
-
 const paymentLabels: Record<PaymentDays, string> = {
   14: 'Binnen 14 dagen',
   30: 'Binnen 30 dagen',
@@ -51,8 +42,8 @@ const intentLabels: Record<LeadIntent, string> = {
   scan: 'Scan per mail',
 };
 
-export function getTeamSizeLabel(teamSize: TeamSize): string {
-  return teamSizeLabels[teamSize];
+export function getTeamSizeLabel(teamCount: number): string {
+  return teamCount === 1 ? '1 persoon in uitvoering' : `${teamCount} mensen in uitvoering`;
 }
 
 export function getPaymentDaysLabel(paymentDays: PaymentDays): string {
@@ -68,17 +59,17 @@ export function buildLeadKpis(results: CalculationResults): LeadKpi[] {
     {
       label: 'Extra omzetpotentie',
       value: formatCurrency(results.totals.totalExtraRevenue),
-      caption: 'Jaarlijks via tijdswinst, betere leads en samenwerking.',
+      caption: 'Indicatief per jaar, opgebouwd uit tijdswinst, betere leads en samenwerking.',
     },
     {
       label: 'Vrijgespeelde capaciteit',
       value: `+${formatNumber(results.totals.totalExtraCapacityWeeks, 1)} weken`,
-      caption: 'Extra ruimte om slimmer te plannen en meer aan te nemen.',
+      caption: 'Extra ruimte om slimmer te plannen en meer werk aan te nemen.',
     },
     {
       label: 'Sneller vrij werkkapitaal',
       value: formatCurrency(results.cashflow.fasterCashflow),
-      caption: 'Kapitaal dat minder lang vaststaat in openstaande posten.',
+      caption: 'Geld dat minder lang vaststaat in openstaande posten.',
     },
   ];
 }
@@ -89,12 +80,12 @@ export function buildLeadSummary(
   intent: LeadIntent,
 ): SummaryItem[] {
   return [
-    { label: 'Team', value: getTeamSizeLabel(state.teamSize) },
-    { label: 'Uurtarief', value: formatCurrency(state.hourlyRate) },
-    { label: 'Factureerbare uren', value: `${state.hoursPerWeek} uur per week` },
+    { label: 'Mensen in uitvoering', value: getTeamSizeLabel(state.teamCount) },
+    { label: 'Uurtarief ex. btw', value: formatCurrency(state.hourlyRate) },
+    { label: 'Factureerbare uren p.p.', value: `${state.hoursPerWeek} uur per week` },
     { label: 'Werkweken', value: `${state.weeksPerYear} per jaar` },
     {
-      label: 'Regelwerk',
+      label: 'Regelwerk organisatie',
       value: `${formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} uur per week`,
     },
     { label: 'Betaaltermijn', value: getPaymentDaysLabel(state.paymentDays) },
@@ -137,19 +128,19 @@ export function buildLeadProfile(
       key: 'time',
       label: 'Tijdswinst en rust in de operatie',
       score: timeScore,
-      message: `Er lekt nu ongeveer ${formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} uur per week weg aan regelwerk. Laat in de demo direct zien hoe planning, communicatie en betalingen in een flow samenkomen.`,
+      message: `Er lekt nu ongeveer ${formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} uur per week weg aan regelen. Laat vooral zien hoe planning, communicatie en betalingen weer rust en overzicht geven.`,
     },
     {
       key: 'cashflow',
       label: 'Sneller betaald en meer grip op cashflow',
       score: cashScore,
-      message: `De prospect heeft een duidelijke cashflow-case: ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} kan sneller vrijkomen. Zet het projectdepot en minder debiteurenstress vroeg in het gesprek neer.`,
+      message: `Er zit hier een duidelijke cashflowkans: ongeveer ${formatCurrency(results.cashflow.fasterCashflow)} kan sneller vrijkomen. Leg rustig uit wat projectdepot en geborgde betalingen daarin veranderen.`,
     },
     {
       key: 'growth',
       label: 'Groei via betere leads en samenwerking',
       score: growthScore,
-      message: `De groeikans ligt vooral in beter passende klussen en grotere projecten wel kunnen aannemen. Koppel VloerGroep aan omzetkansen in plaats van alleen software.`,
+      message: `De groeikans zit vooral in beter passende klussen en grotere projecten wel kunnen aannemen. Maak het concreet voor hun bedrijf, niet algemeen.`,
     },
   ].sort((left, right) => right.score - left.score);
 
@@ -158,12 +149,12 @@ export function buildLeadProfile(
   score += Math.min(state.missedProjects * 8, 24);
   score += state.paymentDays >= 45 ? 14 : state.paymentDays >= 30 ? 8 : 4;
   score += state.percentageVloergroep >= 60 ? 10 : state.percentageVloergroep >= 40 ? 6 : 3;
-  score += state.teamSize === 'large-team' ? 8 : state.teamSize === 'small-team' ? 6 : state.teamSize === '1-2' ? 4 : 2;
+  score += Math.min(state.teamCount * 1.2, 10);
   score += intent === 'demo' ? 8 : intent === 'scan' ? 3 : 0;
   score = clamp(Math.round(score), 24, 98);
 
   const temperature: LeadInsightProfile['temperature'] =
-    score >= 78 ? 'Hot' : score >= 58 ? 'Warm' : 'Nurture';
+    score >= 78 ? 'Hoog' : score >= 58 ? 'Gemiddeld' : 'Licht';
 
   const opportunities: string[] = [];
   if (results.timeSaved.hoursPerWeekSaved >= 2) {
@@ -178,12 +169,12 @@ export function buildLeadProfile(
   }
   if (state.missedProjects > 0) {
     opportunities.push(
-      `Er gaan nu grotere opdrachten verloren door capaciteit. Het netwerkverhaal is concreet, omdat ${state.missedProjects === 3 ? 'meerdere' : state.missedProjects} grotere klus${state.missedProjects > 1 ? 'sen' : ''} per jaar blijft liggen.`,
+      `Er blijven nu grotere opdrachten liggen doordat capaciteit of afstemming ontbreekt. Dat maakt samenwerking via het netwerk meteen relevant voor dit bedrijf.`,
     );
   }
   if (results.growthLeads.extraRevenueLeads >= 10000) {
     opportunities.push(
-      `Beter gekwalificeerde leads vertegenwoordigen al circa ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra jaaromzet, zonder dat er meer ruis in het proces komt.`,
+      `Beter passende opdrachten vertegenwoordigen al circa ${formatCurrency(results.growthLeads.extraRevenueLeads)} extra jaaromzet, zonder extra ruis in planning en uitvoering.`,
     );
   }
   if (opportunities.length === 0) {
@@ -193,9 +184,9 @@ export function buildLeadProfile(
   }
 
   const pitfalls: string[] = [];
-  if (state.teamSize === 'alone') {
+  if (state.teamCount === 1) {
     pitfalls.push(
-      `Dit is een solo-ondernemer. Verkoop geen zwaar systeem; laat vooral eenvoud, snelheid en minder gedoe zien.`,
+      `Dit is een klein bedrijf. Houd het gesprek praktisch, kort en dicht op de werkdag.`,
     );
   }
   if (state.percentageVloergroep < 50) {
@@ -213,38 +204,38 @@ export function buildLeadProfile(
       `Samenwerking is niet direct de grootste pijn. Positioneer het netwerk als bonus, niet als hoofdargument.`,
     );
   }
-  if (results.timeSaved.ownerHoursSaved < 1.5) {
+  if (results.timeSaved.hoursPerWeekSaved < 2) {
     pitfalls.push(
-      `Administratieve frustratie wordt nog niet als dramatisch ervaren. Laat de demo daarom ook premium uitstraling en controle op projecten zien.`,
+      `De tijdspijn voelt waarschijnlijk niet extreem. Laat daarom ook zien wat meer overzicht en strakkere samenwerking oplevert.`,
     );
   }
   if (pitfalls.length === 0) {
     pitfalls.push(
-      `Er is geen grote blokkade zichtbaar, dus de grootste valkuil is een te generieke demo. Maak het gesprek scherp en persoonlijk.`,
+      `Er is geen grote blokkade zichtbaar. De valkuil is dan te algemeen blijven en te weinig aan te sluiten op hun eigen werkweek.`,
     );
   }
 
   const salesTips: string[] = [
     `Open met: “Voor ${state.companyName || 'jouw bedrijf'} zit de snelste winst in ${angleRanking[0].label.toLowerCase()}.”`,
-    temperature === 'Hot'
-      ? 'Bel deze lead snel na. De combinatie van pijn, schaal en interesse maakt de kans op een afspraak hoog.'
-      : 'Gebruik de eerste follow-up om de berekening te vertalen naar een concrete werkdag, niet alleen naar losse cijfers.',
+    temperature === 'Hoog'
+      ? 'Bel dit bedrijf snel na. Hier zit genoeg urgentie in om het gesprek meteen concreet te maken.'
+      : 'Vertaal de scan in je eerste gesprek naar hun werkdag en bedrijfssituatie, niet alleen naar losse cijfers.',
     intent === 'demo'
-      ? 'De prospect vroeg al om een demo. Zet de afspraak zo kort mogelijk op de bal en laat in 15 minuten de belangrijkste flow zien.'
+      ? 'Deze aanvraag vraagt al om een demo. Houd je opening kort en ga daarna meteen naar de grootste winsthoek.'
       : intent === 'scan'
-        ? 'Deze lead komt uit koud verkeer en heeft eerst waarde gevraagd. Start met een korte, concrete opvolgmail rond de grootste winsthoek en bied daarna pas een walkthrough aan.'
-        : 'Start met de samenvatting per mail en bied daarna een vrijblijvende walkthrough aan als zachte vervolgstap.',
+        ? 'De scan is al verstuurd. Open je eerste contact bij de sterkste uitkomst en vraag of ze dat nu ook zo ervaren in hun bedrijf.'
+        : 'Stuur eerst de samenvatting. Pak daarna in je eerste contact de grootste winsthoek erbij.',
     state.missedProjects > 0
-      ? 'Laat in het gesprek expliciet zien hoe projectdepot en samenwerking risico wegnemen bij grotere klussen.'
+      ? 'Laat concreet zien hoe samenwerking, projectdepot en duidelijke verdeling grotere klussen veiliger maken.'
       : 'Laat zien hoe VloerGroep de bestaande operatie strakker maakt, ook zonder meteen groter te hoeven worden.',
   ];
 
   const nextStep =
     intent === 'demo'
-      ? 'Binnen 1 werkdag opvolgen met een korte demo-uitnodiging en de drie belangrijkste pijnpunten uit de scan.'
+      ? 'Bel binnen 1 werkdag. Open met de sterkste uitkomst uit de scan en prik daarna pas een demo.'
       : intent === 'scan'
-        ? 'Stuur direct de scan per mail, zet deze lead in nurture, en volg daarna kort op met de sterkste winsthoek uit de berekening.'
-        : 'Samenvatting mailen, daarna opvolgen met een consultatief gesprek over tijdswinst en cashflow.';
+        ? 'De scan is al verstuurd. Pak binnen 1 of 2 werkdagen de sterkste uitkomst erbij en vraag of ze dat herkennen in hun bedrijf.'
+        : 'Stuur eerst de samenvatting. Bel daarna kort na en open bij de grootste winsthoek uit de scan.';
 
   return {
     score,

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { QuizState, defaultQuizState } from './types';
+import { QuizState, defaultQuizState, normalizeStoredQuizState } from './types';
 import { calculateResults } from './lib/calculations';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
@@ -63,10 +63,7 @@ function loadStoredQuizState() {
       return defaultQuizState;
     }
 
-    return {
-      ...defaultQuizState,
-      ...JSON.parse(storedState),
-    } as QuizState;
+    return normalizeStoredQuizState(JSON.parse(storedState));
   } catch {
     return defaultQuizState;
   }

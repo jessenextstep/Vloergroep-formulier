@@ -1,12 +1,13 @@
-export type TeamSize = '' | 'alone' | '1-2' | 'small-team' | 'large-team';
+export type LegacyTeamSize = '' | 'alone' | '1-2' | 'small-team' | 'large-team';
 export type PaymentDays = 14 | 30 | 45 | 60 | 90;
 export type MissedProjects = 0 | 1 | 2 | 3;
 export type LeadScenario = 'conservative' | 'realistic' | 'ambitious';
 export type LeadIntent = 'demo' | 'info' | 'scan';
 export type LeadSource = 'groeiscan' | 'ads-scan';
+export type DemoPreferenceTime = 'morning' | 'afternoon' | 'late-afternoon';
 
 export interface QuizState {
-  teamSize: TeamSize;
+  teamCount: number;
   companyName: string;
   firstName: string;
 
@@ -31,7 +32,7 @@ export interface QuizState {
 }
 
 export const defaultQuizState: QuizState = {
-  teamSize: '',
+  teamCount: 1,
   companyName: '',
   firstName: '',
 
@@ -54,6 +55,55 @@ export const defaultQuizState: QuizState = {
 
   missedProjects: 0,
 };
+
+const LEGACY_TEAM_COUNT_MAP: Record<Exclude<LegacyTeamSize, ''>, number> = {
+  alone: 1,
+  '1-2': 2,
+  'small-team': 4,
+  'large-team': 8,
+};
+
+export function clampTeamCount(value: number): number {
+  if (!Number.isFinite(value)) {
+    return defaultQuizState.teamCount;
+  }
+
+  return Math.max(1, Math.min(25, Math.round(value)));
+}
+
+export function parseLegacyTeamCount(value: unknown): number | null {
+  if (typeof value !== 'string' || !(value in LEGACY_TEAM_COUNT_MAP)) {
+    return null;
+  }
+
+  return LEGACY_TEAM_COUNT_MAP[value as Exclude<LegacyTeamSize, ''>];
+}
+
+export function readTeamCount(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return clampTeamCount(value);
+  }
+
+  return null;
+}
+
+export function normalizeStoredQuizState(rawState: unknown): QuizState {
+  if (typeof rawState !== 'object' || rawState === null) {
+    return defaultQuizState;
+  }
+
+  const parsedState = rawState as Partial<QuizState> & { teamSize?: LegacyTeamSize };
+  const teamCount =
+    readTeamCount(parsedState.teamCount) ??
+    parseLegacyTeamCount(parsedState.teamSize) ??
+    defaultQuizState.teamCount;
+
+  return {
+    ...defaultQuizState,
+    ...parsedState,
+    teamCount,
+  };
+}
 
 export interface CalculationResults {
   base: {
@@ -110,6 +160,35 @@ export interface LeadSubmissionPayload {
 }
 
 export interface LeadSubmissionResponse {
+  ok: boolean;
+  deliveryMode: 'live' | 'preview';
+  message?: string;
+}
+
+export interface DemoRequestFormData {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  preferredDatePrimary: string;
+  preferredDateSecondary: string;
+  preferredTime: DemoPreferenceTime;
+  notes: string;
+  consent: boolean;
+  website: string;
+}
+
+export interface DemoRequestPayload {
+  request: DemoRequestFormData;
+  meta: {
+    source: 'scan-email' | 'direct';
+    submittedAt: number;
+    pathname?: string;
+    userAgent?: string;
+  };
+}
+
+export interface DemoRequestSubmissionResponse {
   ok: boolean;
   deliveryMode: 'live' | 'preview';
   message?: string;

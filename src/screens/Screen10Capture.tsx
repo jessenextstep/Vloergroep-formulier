@@ -154,7 +154,7 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
     : `We gaan nu een persoonlijke demo voor je voorbereiden waarin we samen ontdekken hoe VloerGroep het meeste voordeel kan opleveren in ${growthFocus} en waar de grootste groeikans ligt.`;
   const successNote =
     deliveryMode === 'preview'
-      ? 'Je aanvraag staat goed in ons systeem. Ook als je bevestigingsmail niet direct binnenkomt, nemen we je aanvraag gewoon mee in de opvolging.'
+      ? 'Je aanvraag is goed ontvangen. Ook als de bevestigingsmail niet direct binnenkomt, is alles gewoon goed aangekomen.'
       : '';
 
   const validate = useCallback(() => {

@@ -1,28 +1,22 @@
-import { QuizState, CalculationResults } from '../types.js';
+import { CalculationResults, QuizState, clampTeamCount } from '../types.js';
 
-export function getFteEstimate(teamSize: QuizState['teamSize']): number {
-  if (teamSize === '1-2') return 2;
-  if (teamSize === 'small-team') return 4;
-  if (teamSize === 'large-team') return 8;
-  return 1;
+export function getFteEstimate(teamCount: QuizState['teamCount']): number {
+  return clampTeamCount(teamCount);
 }
 
 export function calculateResults(state: QuizState, customMargin: number = 51.8): CalculationResults {
-  // 0. FTE BEPALING (Realistische schaling i.p.v. blinde vermenigvuldiging)
-  const fte = getFteEstimate(state.teamSize);
+  const teamCount = getFteEstimate(state.teamCount);
   
   // 1. BASIS
-  // Jaaromzet groeit mee met het aantal mensen dat op de vloer staat
-  const baseYearlyHours = state.hoursPerWeek * state.weeksPerYear * fte;
+  // Jaaromzet groeit mee met het aantal mensen dat op de vloer staat en gemiddeld factureerbare uren draait.
+  const baseYearlyHours = state.hoursPerWeek * state.weeksPerYear * teamCount;
   const baseYearlyRevenue = baseYearlyHours * state.hourlyRate;
 
   // 2. TIJDSWINST
-  // Tijdswinst zit hem in de eigenaar / kantoor (ingevulde sliders), PLUS verhoogde efficiëntie voor de operatie.
-  // We rekenen super conservatief: 1,5 uur winst per medewerker buiten de eigenaar (minder bellen, zoeken, foutjes).
+  // De ingevulde tijdlekken gaan over de hele organisatie. Daarom tellen we hier geen extra verborgen team-opslag bovenop.
   const ownerTimeSavedPerWeek = state.timeAdmin + state.timePlanning + state.timeComm + state.timePayment;
-  const teamEfficiencySavedPerWeek = (fte > 1) ? (fte - 1) * 1.5 : 0;
-  
-  const totalTimeSavedPerWeek = ownerTimeSavedPerWeek + teamEfficiencySavedPerWeek;
+  const teamEfficiencySavedPerWeek = 0;
+  const totalTimeSavedPerWeek = ownerTimeSavedPerWeek;
   const timeSavedPerYear = totalTimeSavedPerWeek * state.weeksPerYear;
   
   // 85% is in de praktijk realistisch te factureren of converteert in vrije werkcapaciteit
@@ -42,8 +36,8 @@ export function calculateResults(state: QuizState, customMargin: number = 51.8):
   const fasterCashflow = baseYearlyRevenue * (state.percentageVloergroep / 100) * (capDays / 365);
 
   // 6. GROEI VIA BETERE LEADS
-  // Een groter bedrijf kan van nature meer leads aan, maar we laten de lead-aanstroom degressief stijgen (realistischer).
-  const BASE_LEADS_PER_MONTH = 4 + (fte * 2); // al=6, 1-2=8, sm=12, lg=20
+  // Een groter team kan meer passende opdrachten oppakken, maar we houden de aanwas bewust conservatief.
+  const BASE_LEADS_PER_MONTH = 4 + (teamCount * 1.5);
   const BASE_HOURS_PER_LEAD = 12;
 
   // Realistische aanname: 10% uplift in conversie / beter geprijsde klussen d.m.v. betere leadkwalificatie
@@ -54,8 +48,8 @@ export function calculateResults(state: QuizState, customMargin: number = 51.8):
   const extraRevenueLeads = extraHoursLeadsYear * state.hourlyRate;
 
   // 7. GROEI VIA GROTERE KLUSSEN
-  // Een klus die afgeketst wordt door capaciteitsgebrek bij een 6-manszaak had een veel massievere omvang (200+ uur) dan een afgeketste klus bij 1 man (80 uur).
-  const missedProjectSizeHours = 60 + (fte * 20); // al=80h, 1-2=100h, sm=140h, lg=220h
+  // Een bedrijf met meer vakmensen kan grotere klussen samen uitvoeren, dus ook grotere misgelopen waarde terugpakken.
+  const missedProjectSizeHours = 60 + (teamCount * 20);
   const extraRevenueTeam = state.missedProjects * missedProjectSizeHours * state.hourlyRate;
 
   // 8. TOTALS

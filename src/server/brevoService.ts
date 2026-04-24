@@ -1,5 +1,11 @@
 import { LeadInsightProfile, getTeamSizeLabel } from '../lib/leadProfile.js';
-import { CalculationResults, LeadCaptureFormData, QuizState } from '../types.js';
+import {
+  CalculationResults,
+  DemoRequestFormData,
+  DemoPreferenceTime,
+  LeadCaptureFormData,
+  QuizState,
+} from '../types.js';
 
 interface BrevoSyncOptions {
   apiKey: string;
@@ -17,8 +23,26 @@ interface BrevoErrorBody {
   message?: string;
 }
 
+interface DemoRequestBrevoSyncOptions {
+  apiKey: string;
+  listIds?: number[];
+  request: DemoRequestFormData;
+  submittedAt: number;
+}
+
 function buildDateOnly(timestamp: number): string {
   return new Date(timestamp).toISOString().slice(0, 10);
+}
+
+function getDemoPreferenceLabel(value: DemoPreferenceTime): string {
+  switch (value) {
+    case 'morning':
+      return 'Ochtend';
+    case 'afternoon':
+      return 'Middag';
+    case 'late-afternoon':
+      return 'Einde middag';
+  }
 }
 
 function getFirstName(fullName: string, preferredFirstName: string): string {
@@ -55,7 +79,7 @@ function buildBrevoAttributes({
     BEDRIJF: contact.company,
     SOURCE: source,
     LEAD_INTENT: contact.intent,
-    TEAM_GROOTTE: getTeamSizeLabel(state.teamSize),
+    TEAM_GROOTTE: getTeamSizeLabel(state.teamCount),
     UURTARIEF: String(state.hourlyRate),
     FACTUREERBARE_UREN_PER_WEEK: String(state.hoursPerWeek),
     WERKWEKEN_PER_JAAR: String(state.weeksPerYear),
@@ -121,6 +145,26 @@ function dedupeListIds(listIds: number[] | undefined): number[] {
   return [...new Set(listIds.filter((value) => Number.isInteger(value) && value > 0))];
 }
 
+function buildDemoRequestAttributes({
+  request,
+  submittedAt,
+}: Omit<DemoRequestBrevoSyncOptions, 'apiKey' | 'listIds'>): Record<string, string> {
+  const firstName = getFirstName(request.name, '');
+
+  return compactAttributes({
+    VOLLEDIGE_NAAM: request.name,
+    FIRSTNAME: firstName,
+    TELEFOONNUMMER: request.phone,
+    BEDRIJF: request.company,
+    DEMO_AANGEVRAAGD: 'ja',
+    DEMO_VERZOEK_DATUM: buildDateOnly(submittedAt),
+    DEMO_VOORKEUR_1: request.preferredDatePrimary,
+    DEMO_VOORKEUR_2: request.preferredDateSecondary,
+    DEMO_DAGDEEL: getDemoPreferenceLabel(request.preferredTime),
+    DEMO_OPMERKING: request.notes,
+  });
+}
+
 export async function syncLeadToBrevo({
   apiKey,
   listIds,
@@ -152,6 +196,33 @@ export async function syncLeadToBrevo({
   for (const listId of targetListIds) {
     await sendBrevoRequest(apiKey, `/contacts/lists/${listId}/contacts/add`, {
       emails: [contact.email],
+    });
+  }
+}
+
+export async function syncDemoRequestToBrevo({
+  apiKey,
+  listIds,
+  request,
+  submittedAt,
+}: DemoRequestBrevoSyncOptions): Promise<void> {
+  const targetListIds = dedupeListIds(listIds);
+  const attributes = buildDemoRequestAttributes({
+    request,
+    submittedAt,
+  });
+
+  await sendBrevoRequest(apiKey, '/contacts', {
+    email: request.email,
+    attributes,
+    updateEnabled: true,
+    emailBlacklisted: false,
+    smsBlacklisted: false,
+  });
+
+  for (const listId of targetListIds) {
+    await sendBrevoRequest(apiKey, `/contacts/lists/${listId}/contacts/add`, {
+      emails: [request.email],
     });
   }
 }

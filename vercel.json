@@ -11,6 +11,14 @@
     {
       "source": "/vakman-scan",
       "destination": "/"
+    },
+    {
+      "source": "/persoonlijke-demo",
+      "destination": "/"
+    },
+    {
+      "source": "/demo-inplannen",
+      "destination": "/"
     }
   ]
 }

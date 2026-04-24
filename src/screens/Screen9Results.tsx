@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { QuizState, CalculationResults } from '../types';
 import { formatCurrency, formatNumber } from '../lib/utils';
-import { buildLeadProfile } from '../lib/leadProfile';
+import { buildLeadProfile, getPaymentDaysLabel } from '../lib/leadProfile';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
@@ -34,6 +34,9 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
             ? `We hebben de berekening speciaal voor ${state.companyName} gemaakt op basis van je antwoorden.` 
             : `Volledig toegespitst op de antwoorden uit jouw praktijk.`}
         </p>
+        <p className="text-sm text-[#FBEFD5]/42 max-w-2xl mx-auto mt-3">
+          Alle bedragen in deze scan zijn indicatief en ex. btw.
+        </p>
       </div>
 
       {/* Primary KPIs */}
@@ -46,7 +49,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           <h2 className="text-4xl font-bold font-display text-white mb-1">
             {formatCurrency(results.totals.totalExtraRevenue)}
           </h2>
-          <p className="text-[11px] text-[#FBEFD5]/40 mt-auto">Groeipotentieel via leads & tijd</p>
+          <p className="text-[11px] text-[#FBEFD5]/40 mt-auto">Groeipotentieel via tijd, leads en samenwerking</p>
         </Card>
 
         <Card className="relative overflow-hidden group !p-6 flex flex-col justify-between">
@@ -68,7 +71,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           <h2 className="text-4xl font-bold font-display text-white mb-1">
             {formatCurrency(results.cashflow.fasterCashflow)}
           </h2>
-          <p className="text-[11px] text-[#FBEFD5]/40 mt-auto">Direct beschikbaar werkkapitaal</p>
+          <p className="text-[11px] text-[#FBEFD5]/40 mt-auto">Sneller vrij geld voor je bedrijf</p>
         </Card>
 
         <Card className="relative overflow-hidden group !p-6 flex flex-col justify-between">
@@ -90,7 +93,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">1</div>
           <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Tijdswinst per week</h4>
-            <p className="text-xs text-[#FBEFD5]/50">{formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} uur uit regelen gehaald</p>
+            <p className="text-xs text-[#FBEFD5]/50">{formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} uur minder regelwerk in de organisatie</p>
           </div>
         </div>
 
@@ -98,7 +101,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">2</div>
           <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Focus op betere leads</h4>
-            <p className="text-xs text-[#FBEFD5]/50">Alleen de juiste aanvragen</p>
+            <p className="text-xs text-[#FBEFD5]/50">Meer passende klussen voor jullie team</p>
           </div>
         </div>
 
@@ -106,7 +109,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           <div className="w-10 h-10 shrink-0 rounded-full bg-amber-gold/10 flex items-center justify-center text-amber-gold font-bold">3</div>
           <div className="min-w-0 flex-1 text-left">
             <h4 className="text-sm font-semibold text-white">Samenwerking</h4>
-            <p className="text-xs text-[#FBEFD5]/50">{state.missedProjects}x meepakken via teamwerk</p>
+            <p className="text-xs text-[#FBEFD5]/50">{state.missedProjects === 0 ? 'Netwerk als extra optie' : `${state.missedProjects} misgelopen klus${state.missedProjects > 1 ? 'sen' : ''} weer kunnen oppakken`}</p>
           </div>
         </div>
         
@@ -172,10 +175,8 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                     Tijdswinst (automatisering & overzicht)
                   </h5>
                   <p className="mb-4">
-                    {results.timeSaved.ownerHoursSaved > 0 
-                      ? `Zelf win je zo'n ${formatNumber(results.timeSaved.ownerHoursSaved, 1)} uur aan regelwerk terug.` 
-                      : `Zelf heb je de boel extreem strak georganiseerd, netjes.`}
-                    {results.timeSaved.teamEfficiencySaved > 0 && ` Omdat je niet alleen werkt, rekenen we voor het team op de vloer ook een voorzichtige winst van ${formatNumber(results.timeSaved.teamEfficiencySaved, 1)} uur. Geen rondslingerende appjes meer of wachten op afspraken.`} In totaal winnen jullie die tijd wekelijks terug door:
+                    In de scan heb je ingevuld hoeveel tijd er in jullie hele organisatie per week opgaat aan administratie, planning, communicatie en betalingen.
+                    Daardoor rekenen we niet met een ruwe aanname per medewerker, maar met jouw eigen totaal. In totaal winnen jullie die tijd wekelijks terug door:
                   </p>
                   <ul className="space-y-1.5 mb-5 pl-4">
                     <li className="flex gap-2.5 items-start">
@@ -198,7 +199,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                   {results.timeSaved.hoursPerWeekSaved > 0 && (
                     <div className="flex gap-3 items-start bg-amber-gold/5 p-4 rounded-xl border border-amber-gold/10 text-white/90">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-gold shrink-0 mt-2"></div>
-                      <span>Dit levert in totaal circa {formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} bruikbare uren per week op. Daarvan rekenen we 85% als realistisch inzetbaar voor extra werk of vrije tijd.</span>
+                      <span>Dit levert in totaal circa {formatNumber(results.timeSaved.hoursPerWeekSaved, 1)} bruikbare uren per week op voor het hele bedrijf. Daarvan rekenen we 85% als realistisch inzetbaar voor extra werk of rust in de planning.</span>
                     </div>
                   )}
                 </div>
@@ -211,7 +212,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                       Extra omzet (tijd → betaalde uren)
                     </h5>
                     <p className="mb-4">
-                      De uren die vrijkomen worden niet "extra gewerkt", maar verschuiven van regelen naar betaald werk. We rekenen met {state.weeksPerYear} werkbare weken per jaar tegen jouw uurtarief van {formatCurrency(state.hourlyRate)}.
+                      De uren die vrijkomen worden niet “extra gewerkt”, maar verschuiven van regelen naar betaald werk. We rekenen met {state.weeksPerYear} werkbare weken per jaar tegen jullie gemiddelde uurtarief van {formatCurrency(state.hourlyRate)} ex. btw.
                     </p>
                     <div className="flex gap-3 items-start bg-amber-gold/5 p-4 rounded-xl border border-amber-gold/10 text-white/90">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-gold shrink-0 mt-2"></div>
@@ -232,8 +233,8 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                     Groei (betere leads & samenwerking)
                   </h5>
                   <p className="mb-4">
-                    Je krijgt minder ruis en meer gerichte klussen door de VloerGroep matchmaking. Omdat we rekenen met de capaciteit van jullie team, betekent dit zo'n {formatNumber(results.growthLeads.extraProjectsYear, 1)} extra succesvolle, perfect aansluitende klussen per jaar.
-                    {state.missedProjects > 0 ? ` Ook zagen we in de scan dat jullie weleens een flinke klus moeten laten schieten. Via de projectuitwisseling vang je die verdienste (gemiddeld ${formatCurrency(results.growthCollaboration.extraRevenueTeam)} voor jullie teamgrootte) dit keer wél op.` : ''}
+                    Je krijgt minder ruis en meer gerichte klussen door de VloerGroep matchmaking. Voor een bedrijf met {state.teamCount} {state.teamCount === 1 ? 'persoon' : 'mensen'} in uitvoering rekenen we daarom met zo'n {formatNumber(results.growthLeads.extraProjectsYear, 1)} extra passende klussen per jaar.
+                    {state.missedProjects > 0 ? ` Ook gaf je aan dat jullie soms een grotere klus moeten laten lopen. Via de projectuitwisseling en samenwerking in het netwerk vang je daarvan ongeveer ${formatCurrency(results.growthCollaboration.extraRevenueTeam)} weer op.` : ''}
                   </p>
                   <ul className="space-y-1.5 mb-5 pl-4">
                     <li className="flex gap-2.5 items-start">
@@ -252,7 +253,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                   <div className="flex gap-3 items-start bg-amber-gold/5 p-4 rounded-xl border border-amber-gold/10 text-white/90">
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-gold shrink-0 mt-2"></div>
                     <div className="w-full">
-                      <span>Hier zie je hoe dat is opgebouwd voor jullie grootte:</span>
+                      <span>Hier zie je hoe dat is opgebouwd voor jullie bedrijf:</span>
                       <ul className="mt-3 space-y-2 text-sm">
                         <li className="flex justify-between items-center border-b border-amber-gold/10 pb-2">
                           <span className="text-white/70">10% groei via leads ({formatNumber(results.growthLeads.extraHoursYear, 0)} uur × {formatCurrency(state.hourlyRate)})</span>
@@ -260,7 +261,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                         </li>
                         {state.missedProjects > 0 && (
                           <li className="flex justify-between items-center border-b border-amber-gold/10 pb-2">
-                            <span className="text-white/70">Grotere projecten pakken ({state.missedProjects} klussen x {formatCurrency(state.hourlyRate)} p/u)</span>
+                          <span className="text-white/70">Grotere projecten alsnog kunnen uitvoeren</span>
                             <strong className="text-amber-gold">{formatCurrency(results.growthCollaboration.extraRevenueTeam)}</strong>
                           </li>
                         )}
@@ -280,7 +281,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
                     Cashflow (sneller de touwtjes in handen)
                   </h5>
                   <p className="mb-4">
-                    Dit is geen extra omzet, maar wél een fundamentele groeiversneller. Je gaf aan dat je nu overwegend {state.paymentDays} dagen moet wachten op je geld. Omdat VloerGroep vanuit het veilige projectdepot direct betaalt, bevrijd je heel veel vastzittend werkkapitaal voor jullie operatie:
+                    Dit is geen extra omzet, maar wel een fundamentele groeiversneller. Je gaf aan dat je nu meestal {getPaymentDaysLabel(state.paymentDays).toLowerCase()} moet wachten op je geld. Omdat VloerGroep vanuit het veilige projectdepot direct betaalt, komt er veel minder geld vast te zitten in openstaande posten:
                   </p>
                   <ul className="space-y-1.5 mb-5 pl-4">
                     <li className="flex gap-2.5 items-start">
