@@ -47,7 +47,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
       <div className="mb-8 text-center md:text-left">
         <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Basis</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">
-          {state.firstName ? `Wat zijn jullie tarief en gemiddelde werkweek, ${state.firstName}?` : 'Wat zijn jullie tarief en gemiddelde werkweek?'}
+          {state.firstName ? `Wat zijn jullie gemiddelde uurtarief en werkweek, ${state.firstName}?` : 'Wat zijn jullie gemiddelde uurtarief en werkweek?'}
         </h2>
         <p className="text-base text-[#FBEFD5]/80 pr-2">
           We rekenen hier met gemiddelden per werkende vakman op de vloer. Alle bedragen in de scan zijn indicatief en ex. btw.
@@ -71,7 +71,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
         
         <Slider
           label="Gemiddeld factureerbare uren per week per persoon"
-          description="Tel alleen uren mee die je echt aan klanten doorberekent. Dus geen reistijd, offertes, planning, administratie, pauzes of wachten op materiaal."
+          description="Denk aan het gemiddelde aantal uren dat 1 vakman per week echt aan klanten kan doorrekenen. Tel dus alleen uitvoerende uren mee. Geen reistijd, offertes, planning, administratie, pauzes, herstel of wachten op materiaal."
           icon={<Clock size={20} />}
           value={state.hoursPerWeek}
           onChange={(v) => updateState({ hoursPerWeek: v })}
@@ -92,6 +92,7 @@ export default function Screen3Base({ state, updateState, onNext, onBack }: Prop
 
         <Slider
           label="Werkweken per jaar"
+          description="Hoeveel weken werkt een vakman bij jullie gemiddeld echt in een jaar? Trek dus vakanties, feestdagen, ziekte en rustige weken er al vanaf."
           icon={<CalendarDays size={20} />}
           value={state.weeksPerYear}
           onChange={(v) => updateState({ weeksPerYear: v })}

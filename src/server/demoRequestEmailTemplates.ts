@@ -1,10 +1,25 @@
-import type { DemoPreferenceTime, DemoRequestFormData } from '../types.js';
+import type {
+  DemoRequestFormData,
+  DemoScheduleActor,
+  DemoScheduleRecord,
+} from '../types.js';
+import { getPreferenceLabel } from './demoScheduleFlow.js';
 
 interface DemoRequestEmailContext {
   request: DemoRequestFormData;
   logoUrl?: string | null;
   heroImageUrl?: string | null;
   adminCalendarUrl?: string | null;
+  adminActionUrl?: string | null;
+}
+
+interface DemoScheduleEmailContext {
+  record: DemoScheduleRecord;
+  actor?: DemoScheduleActor;
+  actionUrl?: string | null;
+  calendarUrl?: string | null;
+  logoUrl?: string | null;
+  heroImageUrl?: string | null;
 }
 
 function escapeHtml(value: string): string {
@@ -18,17 +33,6 @@ function escapeHtml(value: string): string {
 
 function getFirstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] || fullName.trim();
-}
-
-function getPreferenceLabel(value: DemoPreferenceTime): string {
-  switch (value) {
-    case 'morning':
-      return 'Ochtend';
-    case 'afternoon':
-      return 'Middag';
-    case 'late-afternoon':
-      return 'Einde middag';
-  }
 }
 
 function renderEmailShell({
@@ -91,6 +95,24 @@ function renderEmailShell({
 </html>`;
 }
 
+function renderPrimaryButton(url: string | null | undefined, label: string) {
+  if (!url) {
+    return '';
+  }
+
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px 0;">
+      <tr>
+        <td style="border-radius:999px;background-color:#E0AC3E;">
+          <a href="${url}" style="display:inline-block;padding:14px 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#050505;text-decoration:none;border-radius:999px;">
+            ${label}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function renderSummaryCard(request: DemoRequestFormData) {
   const secondaryRow = request.preferredDateSecondary
     ? `
@@ -113,6 +135,34 @@ function renderSummaryCard(request: DemoRequestFormData) {
           <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Moment: <span style="color:#ffffff;font-weight:700;">${escapeHtml(getPreferenceLabel(request.preferredTime))}</span></p>
           <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Telefoon: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.phone)}</span></p>
           ${notesRow}
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function renderRecordSummary(record: DemoScheduleRecord) {
+  const secondaryRow = record.currentProposal.secondaryDate
+    ? `
+      <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tweede datum: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.currentProposal.secondaryDate)}</span></p>
+    `
+    : '';
+  const noteRow = record.currentProposal.note
+    ? `
+      <p style="margin:12px 0 0 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Toelichting: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.currentProposal.note)}</span></p>
+    `
+    : '';
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:20px 0 22px 0;border-collapse:collapse;background-color:#121212;border:1px solid rgba(255,255,255,0.08);border-radius:18px;">
+      <tr>
+        <td style="padding:20px 20px 16px 20px;">
+          <div style="margin:0 0 10px 0;font-size:12px;line-height:1.3;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E0AC3E;">Afspraakvoorstel</div>
+          <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.currentProposal.date)}</span></p>
+          ${secondaryRow}
+          <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Moment: <span style="color:#ffffff;font-weight:700;">${escapeHtml(getPreferenceLabel(record.currentProposal.time))}</span></p>
+          <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Contact: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.customer.name)} · ${escapeHtml(record.customer.phone)}</span></p>
+          ${noteRow}
         </td>
       </tr>
     </table>
@@ -146,7 +196,7 @@ export function buildDemoRequestCustomerEmail({
         Tijdens deze demo laat Joost rustig zien hoe jullie kunnen starten, waar voor ${escapeHtml(request.company)} de eerste winst zit en hoe dit er in de praktijk uitziet.
       </p>
       <p style="margin:0;font-size:16px;line-height:1.9;color:#FBEFD5;">
-        Je ontvangt dus nog geen definitieve afspraakbevestiging. Joost kijkt eerst even in zijn agenda en neemt daarna contact met je op om het moment samen vast te zetten.
+        Je ontvangt dus nog geen definitieve afspraakbevestiging. Joost kijkt eerst even in zijn agenda en zet daarna het juiste moment met jullie vast.
       </p>
     `,
   });
@@ -164,7 +214,7 @@ export function buildDemoRequestCustomerEmail({
     request.notes ? `Opmerking: ${request.notes}` : '',
     '',
     `Tijdens deze demo laat Joost rustig zien hoe jullie kunnen starten, waar voor ${request.company} de eerste winst zit en hoe dit er in de praktijk uitziet.`,
-    'Joost kijkt eerst even in zijn agenda en neemt daarna contact met je op om het moment samen vast te zetten.',
+    'Je ontvangt dus nog geen definitieve afspraakbevestiging. Joost kijkt eerst even in zijn agenda en zet daarna het juiste moment met jullie vast.',
   ]
     .filter(Boolean)
     .join('\n');
@@ -181,21 +231,8 @@ export function buildDemoRequestAdminEmail({
   logoUrl,
   heroImageUrl,
   adminCalendarUrl,
+  adminActionUrl,
 }: DemoRequestEmailContext) {
-  const calendarButton = adminCalendarUrl
-    ? `
-      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px 0;">
-        <tr>
-          <td style="border-radius:999px;background-color:#E0AC3E;">
-            <a href="${adminCalendarUrl}" style="display:inline-block;padding:14px 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#050505;text-decoration:none;border-radius:999px;">
-              Zet eerste voorkeur in agenda
-            </a>
-          </td>
-        </tr>
-      </table>
-    `
-    : '';
-
   const html = renderEmailShell({
     logoUrl,
     heroImageUrl,
@@ -206,31 +243,11 @@ export function buildDemoRequestAdminEmail({
       <p style="margin:0 0 18px 0;font-size:16px;line-height:1.9;color:#FBEFD5;">
         ${escapeHtml(request.name)} wil een persoonlijke demo inplannen voor <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.company)}</span>.
       </p>
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0;border-collapse:collapse;background-color:#121212;border:1px solid rgba(255,255,255,0.08);border-radius:18px;">
-        <tr>
-          <td style="padding:20px 20px 16px 20px;">
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Naam: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.name)}</span></p>
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Bedrijf: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.company)}</span></p>
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">E-mail: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.email)}</span></p>
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Telefoon: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.phone)}</span></p>
-            <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Eerste voorkeur: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.preferredDatePrimary)}</span></p>
-            ${
-              request.preferredDateSecondary
-                ? `<p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tweede voorkeur: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.preferredDateSecondary)}</span></p>`
-                : ''
-            }
-            <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Moment: <span style="color:#ffffff;font-weight:700;">${escapeHtml(getPreferenceLabel(request.preferredTime))}</span></p>
-            ${
-              request.notes
-                ? `<p style="margin:12px 0 0 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Opmerking: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.notes)}</span></p>`
-                : ''
-            }
-          </td>
-        </tr>
-      </table>
-      ${calendarButton}
+      ${renderSummaryCard(request)}
+      ${renderPrimaryButton(adminActionUrl, 'Reageer op verzoek')}
+      ${renderPrimaryButton(adminCalendarUrl, 'Zet eerste voorkeur in agenda')}
       <p style="margin:0;font-size:16px;line-height:1.9;color:#FBEFD5;">
-        Kijk even in je agenda en neem daarna contact op om het definitieve moment te bevestigen.
+        Open het verzoek om het direct te accepteren of een nieuw moment terug te sturen.
       </p>
     `,
   });
@@ -246,15 +263,182 @@ export function buildDemoRequestAdminEmail({
     request.preferredDateSecondary ? `Tweede voorkeur: ${request.preferredDateSecondary}` : '',
     `Moment: ${getPreferenceLabel(request.preferredTime)}`,
     request.notes ? `Opmerking: ${request.notes}` : '',
+    adminActionUrl ? `Reageer op verzoek: ${adminActionUrl}` : '',
     adminCalendarUrl ? `Zet eerste voorkeur in agenda: ${adminCalendarUrl}` : '',
-    '',
-    'Kijk even in je agenda en neem daarna contact op om het definitieve moment te bevestigen.',
   ]
     .filter(Boolean)
     .join('\n');
 
   return {
     subject: `Nieuw demoverzoek: ${request.company}`,
+    html,
+    text,
+  };
+}
+
+export function buildDemoScheduleCustomerProposalEmail({
+  record,
+  actionUrl,
+  logoUrl,
+  heroImageUrl,
+}: DemoScheduleEmailContext) {
+  const firstName = getFirstName(record.customer.name);
+  const html = renderEmailShell({
+    logoUrl,
+    heroImageUrl,
+    eyebrow: 'Nieuw voorstel',
+    title: `${firstName}, Joost heeft een moment voor jullie klaargezet`,
+    intro: `Voor ${record.customer.company} staat nu een concreet voorstel klaar. Je kunt het direct accepteren of een ander moment terugsturen.`,
+    body: `
+      <p style="margin:0 0 18px 0;font-size:16px;line-height:1.9;color:#FBEFD5;">
+        Beste ${escapeHtml(firstName)},
+      </p>
+      ${renderRecordSummary(record)}
+      ${renderPrimaryButton(actionUrl, 'Bekijk afspraakvoorstel')}
+      <p style="margin:0;font-size:16px;line-height:1.9;color:#FBEFD5;">
+        Als dit moment niet past, kun je op dezelfde pagina direct een nieuw moment terugsturen.
+      </p>
+    `,
+  });
+
+  const text = [
+    `${firstName}, Joost heeft een moment voor jullie klaargezet`,
+    '',
+    `Datum: ${record.currentProposal.date}`,
+    record.currentProposal.secondaryDate ? `Tweede datum: ${record.currentProposal.secondaryDate}` : '',
+    `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
+    record.currentProposal.note ? `Toelichting: ${record.currentProposal.note}` : '',
+    actionUrl ? `Bekijk afspraakvoorstel: ${actionUrl}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    subject: `${record.customer.company}: voorstel voor jullie demo`,
+    html,
+    text,
+  };
+}
+
+export function buildDemoScheduleAdminProposalEmail({
+  record,
+  actionUrl,
+  calendarUrl,
+  logoUrl,
+  heroImageUrl,
+}: DemoScheduleEmailContext) {
+  const html = renderEmailShell({
+    logoUrl,
+    heroImageUrl,
+    eyebrow: 'Nieuwe voorkeur',
+    title: `${record.customer.company} stuurde een nieuw moment terug`,
+    intro: `${record.customer.name} heeft een nieuw voorstel doorgegeven. Je kunt het direct bekijken, accepteren of opnieuw aanpassen.`,
+    body: `
+      ${renderRecordSummary(record)}
+      ${renderPrimaryButton(actionUrl, 'Open afspraakdossier')}
+      ${renderPrimaryButton(calendarUrl, 'Zet voorstel in agenda')}
+      <p style="margin:0;font-size:16px;line-height:1.9;color:#FBEFD5;">
+        Vanuit hetzelfde dossier kun je de afspraak direct vastzetten of een nieuw moment terugsturen.
+      </p>
+    `,
+  });
+
+  const text = [
+    `${record.customer.company} stuurde een nieuw moment terug`,
+    '',
+    `Contact: ${record.customer.name}`,
+    `Datum: ${record.currentProposal.date}`,
+    record.currentProposal.secondaryDate ? `Tweede datum: ${record.currentProposal.secondaryDate}` : '',
+    `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
+    calendarUrl ? `Zet voorstel in agenda: ${calendarUrl}` : '',
+    actionUrl ? `Open afspraakdossier: ${actionUrl}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    subject: `Nieuw demovoorstel: ${record.customer.company}`,
+    html,
+    text,
+  };
+}
+
+export function buildDemoScheduleConfirmedCustomerEmail({
+  record,
+  calendarUrl,
+  logoUrl,
+  heroImageUrl,
+}: DemoScheduleEmailContext) {
+  const firstName = getFirstName(record.customer.name);
+  const html = renderEmailShell({
+    logoUrl,
+    heroImageUrl,
+    eyebrow: 'Afspraak bevestigd',
+    title: `${firstName}, jullie demo staat vast`,
+    intro: `De afspraak voor ${record.customer.company} is bevestigd. Hieronder staat het definitieve moment.`,
+    body: `
+      <p style="margin:0 0 18px 0;font-size:16px;line-height:1.9;color:#FBEFD5;">
+        Beste ${escapeHtml(firstName)},
+      </p>
+      ${renderRecordSummary(record)}
+      ${renderPrimaryButton(calendarUrl, 'Importeer in agenda')}
+      <p style="margin:0;font-size:16px;line-height:1.9;color:#FBEFD5;">
+        Joost laat tijdens dit moment rustig zien hoe ${escapeHtml(record.customer.company)} kan starten en hoe dit er in de praktijk uitziet.
+      </p>
+    `,
+  });
+
+  const text = [
+    `${firstName}, jullie demo staat vast`,
+    '',
+    `Datum: ${record.currentProposal.date}`,
+    `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
+    calendarUrl ? `Importeer in agenda: ${calendarUrl}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    subject: `${record.customer.company}: jullie demo is bevestigd`,
+    html,
+    text,
+  };
+}
+
+export function buildDemoScheduleConfirmedAdminEmail({
+  record,
+  calendarUrl,
+  logoUrl,
+  heroImageUrl,
+}: DemoScheduleEmailContext) {
+  const html = renderEmailShell({
+    logoUrl,
+    heroImageUrl,
+    eyebrow: 'Afspraak bevestigd',
+    title: `Demo bevestigd voor ${record.customer.company}`,
+    intro: `Het moment is nu definitief bevestigd. Hieronder staat het dossier nog één keer compact bij elkaar.`,
+    body: `
+      ${renderRecordSummary(record)}
+      ${renderPrimaryButton(calendarUrl, 'Zet afspraak in agenda')}
+      <p style="margin:0;font-size:16px;line-height:1.9;color:#FBEFD5;">
+        Neem dit moment mee als definitieve afspraak.
+      </p>
+    `,
+  });
+
+  const text = [
+    `Demo bevestigd voor ${record.customer.company}`,
+    '',
+    `Contact: ${record.customer.name}`,
+    `Datum: ${record.currentProposal.date}`,
+    `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
+    calendarUrl ? `Zet afspraak in agenda: ${calendarUrl}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    subject: `Definitieve demo-afspraak: ${record.customer.company}`,
     html,
     text,
   };

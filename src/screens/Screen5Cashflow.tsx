@@ -21,7 +21,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
     { label: 'Binnen 14 dagen', value: 14 },
     { label: 'Binnen 30 dagen', value: 30 },
     { label: 'Binnen 45 dagen', value: 45 },
-    { label: 'Meer dan 60 dgn', value: 60 },
+    { label: '60+ dagen', value: 60 },
   ];
 
   const pctMarks = [
@@ -43,7 +43,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
       <div className="mb-10 text-center md:text-left">
         <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Cashflow</span>
-        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoe snel krijg je nu meestal betaald?</h2>
+        <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoe snel wordt je bedrijf nu meestal betaald?</h2>
         <p className="text-base text-[#FBEFD5]/80">
           VloerGroep werkt met een veilig projectdepot. Kies hier hoelang je vandaag de dag vaak nog op je geld moet wachten.
         </p>
@@ -52,7 +52,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
       <div className="space-y-10 mb-8">
         
         <fieldset className="space-y-4">
-          <legend id="payment-days-label" className="block text-lg font-semibold text-white/90">Hoe snel word jij nu gemiddeld betaald?</legend>
+          <legend id="payment-days-label" className="block text-lg font-semibold text-white/90">Hoe snel wordt je bedrijf nu gemiddeld betaald?</legend>
           <div role="radiogroup" aria-labelledby="payment-days-label" className="grid grid-cols-2 gap-3">
             {paymentOptions.map(opt => (
               <button
@@ -77,9 +77,13 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
         <div className="space-y-4">
           <label className="block text-lg font-semibold text-white/90">Hoeveel van je omzet zou je via VloerGroep willen laten lopen?</label>
+          <p className="text-sm leading-6 text-[#FBEFD5]/72">
+            Hiermee bedoelen we: welk deel van jullie werk zou je uiteindelijk via VloerGroep willen laten binnenkomen, plannen en financieel laten afwikkelen. Denk dus niet aan alles meteen, maar aan het deel waarvan je zegt: dit zou logisch zijn om via VloerGroep te laten lopen als het goed werkt.
+          </p>
 
           <Slider
             label="Aandeel via VloerGroep"
+            description="Vul in welk deel van jullie omzet je op termijn via VloerGroep zou willen laten verlopen als dit goed aansluit op jullie manier van werken."
             icon={<Percent size={20} />}
             value={state.percentageVloergroep}
             onChange={(v) => updateState({ percentageVloergroep: v })}
@@ -92,7 +96,7 @@ export default function Screen5Cashflow({ state, updateState, onNext, onBack }: 
 
           <ProofCallout
             title="Wist je dat VloerGroep betalingen sneller beschikbaar maakt via het projectdepot?"
-            body="Hoe meer omzet je via VloerGroep laat lopen, hoe meer geld sneller vrijkomt en minder lang vastzit in openstaande posten."
+            body="Hoe groter het deel werk dat via VloerGroep loopt, hoe meer geld sneller vrijkomt en hoe minder lang het vaststaat in openstaande posten."
           />
         </div>
 

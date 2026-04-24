@@ -1,10 +1,12 @@
 export type LegacyTeamSize = '' | 'alone' | '1-2' | 'small-team' | 'large-team';
 export type PaymentDays = 14 | 30 | 45 | 60 | 90;
-export type MissedProjects = 0 | 1 | 2 | 3;
+export type MissedProjects = number;
 export type LeadScenario = 'conservative' | 'realistic' | 'ambitious';
 export type LeadIntent = 'demo' | 'info' | 'scan';
 export type LeadSource = 'groeiscan' | 'ads-scan';
 export type DemoPreferenceTime = 'morning' | 'afternoon' | 'late-afternoon';
+export type DemoScheduleActor = 'admin' | 'customer';
+export type DemoScheduleStatus = 'awaiting_admin' | 'awaiting_customer' | 'confirmed';
 
 export interface QuizState {
   teamCount: number;
@@ -69,6 +71,14 @@ export function clampTeamCount(value: number): number {
   }
 
   return Math.max(1, Math.min(25, Math.round(value)));
+}
+
+export function clampMissedProjects(value: number): number {
+  if (!Number.isFinite(value)) {
+    return defaultQuizState.missedProjects;
+  }
+
+  return Math.max(0, Math.min(20, Math.round(value)));
 }
 
 export function parseLegacyTeamCount(value: unknown): number | null {
@@ -192,4 +202,64 @@ export interface DemoRequestSubmissionResponse {
   ok: boolean;
   deliveryMode: 'live' | 'preview';
   message?: string;
+}
+
+export interface DemoScheduleProposal {
+  date: string;
+  secondaryDate?: string;
+  time: DemoPreferenceTime;
+  note?: string;
+}
+
+export interface DemoScheduleHistoryItem {
+  actor: DemoScheduleActor;
+  kind: 'request' | 'proposal' | 'accepted' | 'confirmed';
+  timestamp: number;
+  summary: string;
+}
+
+export interface DemoScheduleRecord {
+  id: string;
+  version: number;
+  status: DemoScheduleStatus;
+  awaitingActor: DemoScheduleActor | null;
+  confirmedBy?: 'admin' | 'customer' | 'phone';
+  customer: {
+    name: string;
+    company: string;
+    email: string;
+    phone: string;
+  };
+  source: 'scan-email' | 'direct';
+  initialRequest: DemoRequestFormData;
+  currentProposal: DemoScheduleProposal;
+  history: DemoScheduleHistoryItem[];
+  updatedAt: number;
+}
+
+export interface DemoScheduleStateResponse {
+  ok: boolean;
+  message?: string;
+  actor?: DemoScheduleActor;
+  record?: DemoScheduleRecord;
+  calendarUrl?: string;
+}
+
+export interface DemoScheduleActionPayload {
+  token: string;
+  action: 'accept' | 'propose';
+  proposalDate?: string;
+  proposalSecondaryDate?: string;
+  proposalTime?: DemoPreferenceTime;
+  proposalNote?: string;
+  phoneConfirmed?: boolean;
+}
+
+export interface DemoScheduleActionResponse {
+  ok: boolean;
+  deliveryMode: 'live' | 'preview';
+  message?: string;
+  actor?: DemoScheduleActor;
+  record?: DemoScheduleRecord;
+  calendarUrl?: string;
 }

@@ -5,6 +5,7 @@ import {
   LeadSource,
   LeadSubmissionPayload,
   LeadSubmissionResponse,
+  clampMissedProjects,
   parseLegacyTeamCount,
   QuizState,
   readTeamCount,
@@ -50,8 +51,12 @@ interface ResendEmailPayload {
   tags?: Array<{ name: string; value: string }>;
 }
 
+interface BrevoErrorBody {
+  code?: string;
+  message?: string;
+}
+
 const PAYMENT_DAYS = new Set([14, 30, 45, 60, 90]);
-const MISSED_PROJECTS = new Set([0, 1, 2, 3]);
 const LEAD_INTENTS = new Set(['demo', 'info', 'scan']);
 const LEAD_SOURCES = new Set<LeadSource>(['groeiscan', 'ads-scan']);
 
@@ -184,6 +189,21 @@ function resolveBrevoListIds(
   ];
 }
 
+async function parseBrevoError(response: Response): Promise<string> {
+  const rawBody = await response.text();
+
+  if (!rawBody) {
+    return `Brevo request failed with status ${response.status}.`;
+  }
+
+  try {
+    const data = JSON.parse(rawBody) as BrevoErrorBody;
+    return data.message || data.code || `Brevo request failed with status ${response.status}.`;
+  } catch {
+    return rawBody.slice(0, 240);
+  }
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -251,8 +271,7 @@ function validatePayload(rawPayload: unknown):
     paymentDays !== null &&
     PAYMENT_DAYS.has(paymentDays) &&
     percentageVloergroep !== null &&
-    missedProjects !== null &&
-    MISSED_PROJECTS.has(missedProjects)
+    missedProjects !== null
       ? {
           teamCount,
           companyName: readString(rawQuiz.companyName, 120),
@@ -270,7 +289,7 @@ function validatePayload(rawPayload: unknown):
           conversionRate: 25,
           hoursPerLead: 12,
           leadScenario: 'realistic',
-          missedProjects: missedProjects as QuizState['missedProjects'],
+          missedProjects: clampMissedProjects(missedProjects),
         }
       : null;
 
@@ -358,6 +377,33 @@ async function sendResendEmail(
   return data.id;
 }
 
+async function sendBrevoTransactionalEmail(
+  apiKey: string,
+  payload: {
+    sender: { name: string; email: string };
+    to: Array<{ email: string; name?: string }>;
+    subject: string;
+    htmlContent: string;
+    textContent: string;
+    replyTo?: { email: string };
+    tags?: string[];
+  },
+): Promise<void> {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseBrevoError(response));
+  }
+}
+
 export async function processLeadSubmission(
   rawPayload: unknown,
   env: LeadEnvironment = {},
@@ -404,7 +450,10 @@ export async function processLeadSubmission(
   const configuredResendFromEmail = env.resendFromEmail || process.env.RESEND_FROM_EMAIL;
   const resendFromEmail = buildResendFromEmail(configuredResendFromEmail);
   const internalEmail =
-    env.internalEmail || process.env.LEAD_NOTIFICATION_EMAIL || 'info@vloergroep.nl';
+    extractEmailAddress(env.internalEmail) ||
+    extractEmailAddress(process.env.LEAD_NOTIFICATION_EMAIL) ||
+    extractEmailAddress(process.env.DEMO_REQUEST_ADMIN_EMAIL) ||
+    'info@vloergroep.nl';
   const brevoApiKey = env.brevoApiKey || process.env.BREVO_API || process.env.BREVO_API_KEY;
   const brevoListIds = resolveBrevoListIds(payload.contact.intent, env);
   const siteUrl = resolveSiteUrl(env);
@@ -519,56 +568,111 @@ export async function processLeadSubmission(
     };
   }
 
-  try {
-    console.info('Resend send started', {
-      customerEmail: payload.contact.email,
-      internalEmail,
-      from: resendFromEmail,
-    });
+  console.info('Resend send started', {
+    customerEmail: payload.contact.email,
+    internalEmail,
+    from: resendFromEmail,
+  });
 
-    await Promise.all([
-      sendResendEmail(
-        resendApiKey,
-        {
-          from: resendFromEmail,
-          to: payload.contact.email,
+  const resendResults = await Promise.allSettled([
+    sendResendEmail(
+      resendApiKey,
+      {
+        from: resendFromEmail,
+        to: payload.contact.email,
+        subject: customerMail.subject,
+        html: customerMail.html,
+        text: customerMail.text,
+        reply_to: internalEmail,
+        tags: [
+          { name: 'category', value: categoryTag },
+          { name: 'source', value: payload.meta.source },
+          { name: 'intent', value: intentTag },
+        ],
+      },
+      `customer:${submissionFingerprint}`,
+    ),
+    sendResendEmail(
+      resendApiKey,
+      {
+        from: resendFromEmail,
+        to: internalEmail,
+        subject: internalMail.subject,
+        html: internalMail.html,
+        text: internalMail.text,
+        reply_to: payload.contact.email,
+        tags: [
+          { name: 'category', value: categoryTag },
+          { name: 'source', value: payload.meta.source },
+          { name: 'intent', value: intentTag },
+          { name: 'temperature', value: temperatureTag },
+        ],
+      },
+      `internal:${submissionFingerprint}`,
+    ),
+  ]);
+
+  const [customerResendResult, internalResendResult] = resendResults;
+  const senderAddress = extractEmailAddress(resendFromEmail) || 'info@vloergroep.nl';
+  let customerBrevoFallbackDelivered = false;
+  let internalBrevoFallbackDelivered = false;
+
+  if (customerResendResult.status === 'rejected') {
+    console.error('Customer scan email via Resend failed', customerResendResult.reason);
+
+    if (brevoApiKey) {
+      try {
+        await sendBrevoTransactionalEmail(brevoApiKey, {
+          sender: { name: 'Rico van VloerGroep', email: senderAddress },
+          to: [{ email: payload.contact.email, name: payload.contact.name }],
           subject: customerMail.subject,
-          html: customerMail.html,
-          text: customerMail.text,
-          reply_to: internalEmail,
-          tags: [
-            { name: 'category', value: categoryTag },
-            { name: 'source', value: payload.meta.source },
-            { name: 'intent', value: intentTag },
-          ],
-        },
-        `customer:${submissionFingerprint}`,
-      ),
-      sendResendEmail(
-        resendApiKey,
-        {
-          from: resendFromEmail,
-          to: internalEmail,
+          htmlContent: customerMail.html,
+          textContent: customerMail.text,
+          replyTo: { email: internalEmail },
+          tags: ['lead-scan', payload.meta.source, intentTag, 'customer'],
+        });
+        customerBrevoFallbackDelivered = true;
+      } catch (brevoMailError) {
+        console.error('Customer scan email via Brevo fallback failed', brevoMailError);
+      }
+    }
+  }
+
+  if (internalResendResult.status === 'rejected') {
+    console.error('Internal scan email via Resend failed', internalResendResult.reason);
+
+    if (brevoApiKey) {
+      try {
+        await sendBrevoTransactionalEmail(brevoApiKey, {
+          sender: { name: 'Rico van VloerGroep', email: senderAddress },
+          to: [{ email: internalEmail, name: 'VloerGroep' }],
           subject: internalMail.subject,
-          html: internalMail.html,
-          text: internalMail.text,
-          reply_to: payload.contact.email,
-          tags: [
-            { name: 'category', value: categoryTag },
-            { name: 'source', value: payload.meta.source },
-            { name: 'intent', value: intentTag },
-            { name: 'temperature', value: temperatureTag },
-          ],
-        },
-        `internal:${submissionFingerprint}`,
-      ),
-    ]);
+          htmlContent: internalMail.html,
+          textContent: internalMail.text,
+          replyTo: { email: payload.contact.email },
+          tags: ['lead-scan', payload.meta.source, intentTag, 'admin'],
+        });
+        internalBrevoFallbackDelivered = true;
+      } catch (brevoMailError) {
+        console.error('Internal scan email via Brevo fallback failed', brevoMailError);
+      }
+    }
+  }
+
+  const customerMailDelivered =
+    customerResendResult.status === 'fulfilled' || customerBrevoFallbackDelivered;
+  const internalMailDelivered =
+    internalResendResult.status === 'fulfilled' || internalBrevoFallbackDelivered;
+
+  if (customerResendResult.status === 'fulfilled' && internalResendResult.status === 'fulfilled') {
     console.info('Resend send succeeded', {
       customerEmail: payload.contact.email,
       internalEmail,
       from: resendFromEmail,
     });
+  }
 
+  if (customerMailDelivered && internalMailDelivered) {
     return {
       status: 200,
       body: {
@@ -576,36 +680,39 @@ export async function processLeadSubmission(
         deliveryMode: 'live',
       },
     };
-  } catch (error) {
-    console.error('Lead submission failed', error);
+  }
 
-    const resendConfigurationMessage =
-      error instanceof Error &&
-      error.message.includes('You can only send testing emails to your own email address')
+  const resendConfigurationMessage =
+    customerResendResult.status === 'rejected' &&
+    customerResendResult.reason instanceof Error &&
+    customerResendResult.reason.message.includes('You can only send testing emails to your own email address')
+      ? 'Resend gebruikt nog een testafzender. Zet in Vercel `RESEND_FROM_EMAIL` op een adres van een geverifieerd Resend-domein.'
+      : internalResendResult.status === 'rejected' &&
+          internalResendResult.reason instanceof Error &&
+          internalResendResult.reason.message.includes('You can only send testing emails to your own email address')
         ? 'Resend gebruikt nog een testafzender. Zet in Vercel `RESEND_FROM_EMAIL` op een adres van een geverifieerd Resend-domein.'
         : null;
 
-    if (brevoSynced) {
-      return {
-        status: 200,
-        body: {
-          ok: true,
-          deliveryMode: 'preview',
-          message: 'Je aanvraag is ontvangen. De bevestigingsmail kon nog niet worden verstuurd, maar je gegevens zijn wel goed binnengekomen.',
-        },
-      };
-    }
-
+  if (brevoSynced) {
     return {
-      status: 502,
+      status: 200,
       body: {
-        ok: false,
+        ok: true,
         deliveryMode: 'preview',
-        message:
-          resendConfigurationMessage ||
-          brevoErrorMessage ||
-          'De aanvraag kon niet worden verzonden. Probeer het zo nog eens.',
+        message: 'Je aanvraag is ontvangen. De bevestigingsmail kon nog niet volledig worden verstuurd, maar je gegevens zijn wel goed binnengekomen.',
       },
     };
   }
+
+  return {
+    status: 502,
+    body: {
+      ok: false,
+      deliveryMode: 'preview',
+      message:
+        resendConfigurationMessage ||
+        brevoErrorMessage ||
+        'De aanvraag kon niet worden verzonden. Probeer het zo nog eens.',
+    },
+  };
 }

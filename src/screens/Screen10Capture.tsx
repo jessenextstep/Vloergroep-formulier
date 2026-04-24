@@ -502,6 +502,10 @@ export default function Screen10Capture({ state, results, sessionStartedAt }: Pr
                 </p>
               </div>
 
+              <p className="mb-8 text-center text-sm leading-6 text-white/58">
+                Kijk ook even in je ongewenste mail als je de bevestiging niet direct ziet.
+              </p>
+
               {successNote ? (
                 <div className="mb-8 rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(38,38,38,0.36),rgba(18,18,18,0.18))] p-4 text-center text-sm leading-6 text-white/62">
                   {successNote}

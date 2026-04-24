@@ -1,10 +1,12 @@
 import React from 'react';
-import { QuizState, MissedProjects } from '../types';
+import { QuizState } from '../types';
 import { BottomNav } from '../components/BottomNav';
 import { ProofCallout } from '../components/ProofCallout';
 import { ScreenHeroImage } from '../components/ScreenHeroImage';
+import { Slider } from '../components/Slider';
 import { AnimatedResultValue, StepResultCard } from '../components/StepResultCard';
 import { heroScreen6 } from '../lib/brandAssets';
+import { BriefcaseBusiness } from 'lucide-react';
 
 interface Props {
   state: QuizState;
@@ -14,18 +16,11 @@ interface Props {
 }
 
 export default function Screen7Collab({ state, updateState, onNext, onBack }: Props) {
-  
-  const missedOptions: { label: string; value: MissedProjects }[] = [
-    { label: 'Geen', value: 0 },
-    { label: '1 per jaar', value: 1 },
-    { label: '2 per jaar', value: 2 },
-    { label: '3+ per jaar', value: 3 },
-  ];
   const missedProjectsLabel =
     state.missedProjects === 0
       ? 'geen grote klussen'
-      : state.missedProjects === 3
-        ? '3+ grote klussen'
+      : state.missedProjects === 20
+        ? '20+ grote klussen'
         : `${state.missedProjects} grote ${state.missedProjects === 1 ? 'klus' : 'klussen'}`;
 
   return (
@@ -40,37 +35,35 @@ export default function Screen7Collab({ state, updateState, onNext, onBack }: Pr
         <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-gold mb-4">Groeikans</span>
         <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 tracking-tight text-white">Hoeveel grote klussen moet je weleens afwijzen?</h2>
         <p className="text-base text-[#FBEFD5]/80">
-          Met VloerGroep kun je gericht samenwerken met andere vakmannen, zodat je mega projecten die je nu laat schieten wél kunt aannemen.
+          Denk aan klussen die nu te groot zijn voor je eigen planning of bezetting. Met VloerGroep kun je daarvoor gericht samenwerken met andere vakmannen, zodat je vaker ja kunt zeggen tegen werk dat je nu moet laten lopen.
         </p>
       </div>
 
       <div className="space-y-12 mb-12">
-        <fieldset className="space-y-5">
-          <legend id="missed-projects-label" className="sr-only">Aantal grote klussen dat je afwijst</legend>
-          <div role="radiogroup" aria-labelledby="missed-projects-label" className="grid grid-cols-2 gap-3">
-            {missedOptions.map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                role="radio"
-                aria-checked={state.missedProjects === opt.value}
-                className={`py-4 px-4 rounded-[20px] font-display font-bold tracking-[-0.02em] border transition-all ${
-                  state.missedProjects === opt.value 
-                    ? 'bg-amber-gold/10 border-amber-gold text-amber-gold shadow-[0_0_15px_rgba(224,172,62,0.15)] ring-1 ring-amber-gold/50'
-                    : 'bg-white/5 border-white/10 text-[#FBEFD5]/80 hover:bg-white/10'
-                }`}
-                onClick={() => updateState({ missedProjects: opt.value })}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        <Slider
+          label="Gemiste grote klussen per jaar"
+          description="Een ruwe inschatting is genoeg. Denk aan grote opdrachten die je nu afwijst of doorschuift omdat planning, capaciteit of samenwerking ontbreekt."
+          icon={<BriefcaseBusiness size={20} />}
+          value={state.missedProjects}
+          onChange={(v) => updateState({ missedProjects: v })}
+          min={0}
+          max={20}
+          step={1}
+          tickEvery={5}
+          marks={[
+            { value: 0, label: '0' },
+            { value: 5, label: '5' },
+            { value: 10, label: '10' },
+            { value: 15, label: '15' },
+            { value: 20, label: '20+' },
+          ]}
+          formatValue={(v) => (v >= 20 ? '20+' : `${v}`)}
+        />
       </div>
 
       <ProofCallout
         title="Wist je dat VloerGroep grotere klussen veiliger laat samenwerken?"
-        body="Samenwerken voelt vaak als risico. Het VloerGroep netwerk en projectdepot zorgen ervoor dat geld veilig wordt verdeeld op een zakelijke manier zonder privé zorgen."
+        body="Samenwerken voelt vaak als risico. Met het netwerk en het projectdepot van VloerGroep kun je grotere klussen zakelijker verdelen, samen afronden en financieel beter borgen."
       />
 
       <StepResultCard>

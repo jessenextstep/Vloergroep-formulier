@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import AdsScanApp from './AdsScanApp.tsx';
+import DemoSchedulePage from './DemoSchedulePage.tsx';
 import DemoRequestPage from './DemoRequestPage.tsx';
 import InvitePage from './InvitePage.tsx';
 import { brandFavicon } from './lib/brandAssets.ts';
@@ -11,11 +12,14 @@ const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
 const isInviteRoute = pathname === '/uitnodiging';
 const isAdsScanRoute = pathname === '/ads-scan' || pathname === '/vakman-scan';
 const isDemoRequestRoute = pathname === '/persoonlijke-demo' || pathname === '/demo-inplannen';
+const isDemoScheduleRoute = pathname === '/demo-afspraak';
 
 document.title = isInviteRoute
   ? 'Persoonlijke uitnodiging | VloerGroep'
   : isDemoRequestRoute
     ? 'Persoonlijke demo | VloerGroep'
+  : isDemoScheduleRoute
+    ? 'Demo-afspraak | VloerGroep'
   : isAdsScanRoute
     ? 'Gratis vakman scan | VloerGroep'
     : 'VloerGroep Groeiscan';
@@ -38,6 +42,8 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {isInviteRoute ? (
       <InvitePage />
+    ) : isDemoScheduleRoute ? (
+      <DemoSchedulePage />
     ) : isDemoRequestRoute ? (
       <DemoRequestPage />
     ) : isAdsScanRoute ? (

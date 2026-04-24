@@ -9,6 +9,10 @@ import {
   buildDemoRequestCustomerEmail,
 } from './demoRequestEmailTemplates.js';
 import {
+  buildDemoScheduleRecord,
+  buildDemoScheduleUrl,
+} from './demoScheduleFlow.js';
+import {
   buildEmailDemoConfirmationHeroUrl,
   buildEmailLogoUrl,
 } from './emailBranding.js';
@@ -440,6 +444,8 @@ export async function processDemoRequestSubmission(
         : null;
 
   const adminCalendarUrl = buildAdminCalendarUrl(payload.request);
+  const demoRecord = buildDemoScheduleRecord(payload.request, payload.meta.source, payload.meta.submittedAt);
+  const adminActionUrl = buildDemoScheduleUrl(siteUrl, 'admin', demoRecord);
   const customerMail = buildDemoRequestCustomerEmail({
     request: payload.request,
     logoUrl,
@@ -450,6 +456,7 @@ export async function processDemoRequestSubmission(
     logoUrl,
     heroImageUrl,
     adminCalendarUrl,
+    adminActionUrl,
   });
 
   let brevoSynced = false;

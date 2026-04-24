@@ -19,6 +19,10 @@
     {
       "source": "/demo-inplannen",
       "destination": "/"
+    },
+    {
+      "source": "/demo-afspraak",
+      "destination": "/"
     }
   ]
 }

@@ -89,8 +89,8 @@ function getMissedProjectsLabel(value: QuizState['missedProjects']): string {
     return 'geen gemiste grotere klussen';
   }
 
-  if (value === 3) {
-    return '3 of meer gemiste grotere klussen per jaar';
+  if (value >= 20) {
+    return '20 of meer gemiste grotere klussen per jaar';
   }
 
   return `${value} gemiste grotere ${value === 1 ? 'klus' : 'klussen'} per jaar`;
@@ -331,7 +331,7 @@ export function buildCustomerConfirmationEmail({
                   <tr>
                     <td style="border-radius:999px;background-color:#E0AC3E;">
                       <a href="${demoRequestUrl}" style="display:inline-block;padding:14px 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#050505;text-decoration:none;border-radius:999px;">
-                        Geef een voorkeursmoment door
+                        Plan een demonstratie ->
                       </a>
                     </td>
                   </tr>
@@ -426,7 +426,7 @@ export function buildCustomerConfirmationEmail({
           '',
           ...(demoRequestUrl
             ? [
-                `Wil je dit voor ${companyLabel} rustig in de praktijk zien? Geef dan hier een voorkeursmoment door voor een persoonlijke demo met Joost van VloerGroep: ${demoRequestUrl}`,
+                `Wil je dit voor ${companyLabel} rustig in de praktijk zien? Plan dan hier een demonstratie met Joost van VloerGroep: ${demoRequestUrl}`,
                 '',
               ]
             : []),

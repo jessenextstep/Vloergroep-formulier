@@ -137,6 +137,15 @@ async function sendBrevoRequest(
   }
 }
 
+function isIgnorableListSyncError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const normalized = error.message.trim().toLowerCase();
+  return normalized.includes('contact already in list');
+}
+
 function dedupeListIds(listIds: number[] | undefined): number[] {
   if (!listIds || listIds.length === 0) {
     return [];
@@ -194,9 +203,15 @@ export async function syncLeadToBrevo({
   });
 
   for (const listId of targetListIds) {
-    await sendBrevoRequest(apiKey, `/contacts/lists/${listId}/contacts/add`, {
-      emails: [contact.email],
-    });
+    try {
+      await sendBrevoRequest(apiKey, `/contacts/lists/${listId}/contacts/add`, {
+        emails: [contact.email],
+      });
+    } catch (error) {
+      if (!isIgnorableListSyncError(error)) {
+        throw error;
+      }
+    }
   }
 }
 
@@ -221,8 +236,14 @@ export async function syncDemoRequestToBrevo({
   });
 
   for (const listId of targetListIds) {
-    await sendBrevoRequest(apiKey, `/contacts/lists/${listId}/contacts/add`, {
-      emails: [request.email],
-    });
+    try {
+      await sendBrevoRequest(apiKey, `/contacts/lists/${listId}/contacts/add`, {
+        emails: [request.email],
+      });
+    } catch (error) {
+      if (!isIgnorableListSyncError(error)) {
+        throw error;
+      }
+    }
   }
 }

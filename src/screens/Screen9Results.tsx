@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import extraOmzetIcon from '../Afbeeldingen/Extra omzet.png';
 
 interface Props {
   state: QuizState;
@@ -42,8 +43,14 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
       {/* Primary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-6">
         <Card className="relative overflow-hidden group !p-6 flex flex-col justify-between">
-          <div className="absolute top-0 right-0 p-4 opacity-20 text-amber-gold">
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+          <div className="relative mb-4 h-[58px] md:h-[64px]">
+            <div className="absolute left-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-amber-gold/14 blur-2xl" />
+            <img
+              src={extraOmzetIcon}
+              alt=""
+              aria-hidden="true"
+              className="relative z-10 h-auto w-[56px] object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.28)] md:w-[62px]"
+            />
           </div>
           <p className="text-xs uppercase tracking-widest text-amber-gold mb-2">Extra omzet p/j</p>
           <h2 className="text-4xl font-bold font-display text-white mb-1">

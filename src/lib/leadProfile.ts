@@ -79,6 +79,13 @@ export function buildLeadSummary(
   results: CalculationResults,
   intent: LeadIntent,
 ): SummaryItem[] {
+  const missedProjectsValue =
+    state.missedProjects === 0
+      ? 'Geen'
+      : state.missedProjects >= 20
+        ? '20 of meer per jaar'
+        : `${state.missedProjects} per jaar`;
+
   return [
     { label: 'Mensen in uitvoering', value: getTeamSizeLabel(state.teamCount) },
     { label: 'Uurtarief ex. btw', value: formatCurrency(state.hourlyRate) },
@@ -95,12 +102,7 @@ export function buildLeadSummary(
     },
     {
       label: 'Gemiste grotere klussen',
-      value:
-        state.missedProjects === 0
-          ? 'Geen'
-          : state.missedProjects === 3
-            ? '3 of meer per jaar'
-            : `${state.missedProjects} per jaar`,
+      value: missedProjectsValue,
     },
     { label: 'Voorkeur', value: getIntentLabel(intent) },
   ];

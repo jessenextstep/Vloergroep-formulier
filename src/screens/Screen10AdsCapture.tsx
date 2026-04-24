@@ -158,8 +158,8 @@ export default function Screen10AdsCapture({ state, sessionStartedAt }: Props) {
   }, [formData.company, formData.email, formData.name, submissionStage]);
 
   const firstName = (state.firstName || formData.name.split(/\s+/)[0] || '').trim();
-  const heading = firstName ? `${firstName}, waar mogen we je scan naartoe sturen?` : 'Waar mogen we je scan naartoe sturen?';
-  const intro = 'Vul hieronder je gegevens in en ontvang jouw persoonlijke scan direct per mail.';
+  const heading = firstName ? `${firstName}, je scan staat klaar` : 'Je scan staat klaar';
+  const intro = 'Vul hieronder je gegevens in en ontvang jouw persoonlijke bedrijfsscan direct per mail.';
 
   const validate = useCallback(() => {
     const nextErrors: FormErrors = {};
