@@ -13,6 +13,7 @@ import joostPhoto from './Afbeeldingen/Joost Slot Vloergroep.jpeg';
 import { Button } from './components/Button';
 import { ScreenHeroImage } from './components/ScreenHeroImage';
 import { TextField } from './components/TextField';
+import { formatDutchDate } from './lib/dateFormat';
 import { cn } from './lib/utils';
 import type {
   DemoPreferenceTime,
@@ -266,7 +267,7 @@ export default function DemoSchedulePage() {
                         </span>
                         <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-sm text-white/68">
                         {record.status === 'confirmed'
-                          ? `Bevestigd · ${record.currentProposal.date}`
+                          ? `Bevestigd · ${formatDutchDate(record.currentProposal.date)}`
                           : record.awaitingActor === 'admin'
                             ? 'Wacht op Joost'
                             : 'Wacht op klant'}
@@ -283,12 +284,12 @@ export default function DemoSchedulePage() {
                           <div className="grid gap-3 sm:grid-cols-2">
                             <div className="rounded-[20px] border border-white/8 bg-white/5 px-4 py-4">
                               <div className="text-white/42">Eerste datum</div>
-                              <div className="text-white">{record.currentProposal.date}</div>
+                              <div className="text-white">{formatDutchDate(record.currentProposal.date)}</div>
                             </div>
                           {record.currentProposal.secondaryDate ? (
                               <div className="rounded-[20px] border border-white/8 bg-white/5 px-4 py-4">
                                 <div className="text-white/42">Tweede datum</div>
-                                <div className="text-white">{record.currentProposal.secondaryDate}</div>
+                                <div className="text-white">{formatDutchDate(record.currentProposal.secondaryDate)}</div>
                               </div>
                             ) : null}
                           </div>
@@ -401,7 +402,7 @@ export default function DemoSchedulePage() {
                                     <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-gold">
                                       {key === 'primary' ? 'Eerste datum' : 'Tweede datum'}
                                     </div>
-                                    <div className="mt-1 text-base font-semibold">{date}</div>
+                                    <div className="mt-1 text-base font-semibold">{formatDutchDate(date)}</div>
                                   </button>
                                 ))}
                               </div>

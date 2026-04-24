@@ -128,11 +128,22 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
         </span>
         <div className="max-w-3xl">
           <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
-            Wil je de volledige scan rustig teruglezen?
+            Ontvang de volledige scan met concrete handvatten
           </h3>
           <p className="max-w-2xl text-white/80 leading-7">
-            We sturen de complete berekening voor {companyReference} naar je inbox, inclusief de toelichting achter de cijfers en waar volgens je antwoorden de meeste ruimte zit in {profile.primaryAngle.toLowerCase()}.
+            Je ziet nu de hoofdlijnen. In de complete scan voor {companyReference} werken we uit wat er achter de cijfers zit, waar volgens je antwoorden de meeste ruimte ligt in {profile.primaryAngle.toLowerCase()} en welke stappen je als eerste kunt oppakken.
           </p>
+          <div className="mt-5 grid gap-2 text-left sm:grid-cols-3">
+            {[
+              'De berekening achter je cijfers',
+              'Waar je het snelst winst vrijspeelt',
+              'Praktische stappen om mee te starten',
+            ].map((item) => (
+              <div key={item} className="rounded-2xl border border-white/8 bg-white/[0.045] px-4 py-3 text-sm font-medium leading-5 text-white/78">
+                {item}
+              </div>
+            ))}
+          </div>
           <button
             type="button"
             onClick={onNext}

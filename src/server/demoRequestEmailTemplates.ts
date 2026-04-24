@@ -3,6 +3,7 @@ import type {
   DemoScheduleActor,
   DemoScheduleRecord,
 } from '../types.js';
+import { formatDutchDate } from '../lib/dateFormat.js';
 import { getPreferenceLabel } from './demoScheduleFlow.js';
 
 interface DemoRequestEmailContext {
@@ -116,7 +117,7 @@ function renderPrimaryButton(url: string | null | undefined, label: string) {
 function renderSummaryCard(request: DemoRequestFormData) {
   const secondaryRow = request.preferredDateSecondary
     ? `
-      <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tweede voorkeur: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.preferredDateSecondary)}</span></p>
+      <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tweede voorkeur: <span style="color:#ffffff;font-weight:700;">${escapeHtml(formatDutchDate(request.preferredDateSecondary))}</span></p>
     `
     : '';
   const notesRow = request.notes
@@ -130,7 +131,7 @@ function renderSummaryCard(request: DemoRequestFormData) {
       <tr>
         <td style="padding:20px 20px 16px 20px;">
           <div style="margin:0 0 10px 0;font-size:12px;line-height:1.3;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E0AC3E;">Voorkeur</div>
-          <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Eerste voorkeur: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.preferredDatePrimary)}</span></p>
+          <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Eerste voorkeur: <span style="color:#ffffff;font-weight:700;">${escapeHtml(formatDutchDate(request.preferredDatePrimary))}</span></p>
           ${secondaryRow}
           <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Moment: <span style="color:#ffffff;font-weight:700;">${escapeHtml(getPreferenceLabel(request.preferredTime))}</span></p>
           <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Telefoon: <span style="color:#ffffff;font-weight:700;">${escapeHtml(request.phone)}</span></p>
@@ -144,7 +145,7 @@ function renderSummaryCard(request: DemoRequestFormData) {
 function renderRecordSummary(record: DemoScheduleRecord) {
   const secondaryRow = record.currentProposal.secondaryDate
     ? `
-      <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tweede datum: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.currentProposal.secondaryDate)}</span></p>
+      <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Tweede datum: <span style="color:#ffffff;font-weight:700;">${escapeHtml(formatDutchDate(record.currentProposal.secondaryDate))}</span></p>
     `
     : '';
   const noteRow = record.currentProposal.note
@@ -158,7 +159,7 @@ function renderRecordSummary(record: DemoScheduleRecord) {
       <tr>
         <td style="padding:20px 20px 16px 20px;">
           <div style="margin:0 0 10px 0;font-size:12px;line-height:1.3;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E0AC3E;">Afspraakvoorstel</div>
-          <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.currentProposal.date)}</span></p>
+          <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Datum: <span style="color:#ffffff;font-weight:700;">${escapeHtml(formatDutchDate(record.currentProposal.date))}</span></p>
           ${secondaryRow}
           <p style="margin:0 0 8px 0;font-size:15px;line-height:1.8;color:#FBEFD5;">Moment: <span style="color:#ffffff;font-weight:700;">${escapeHtml(getPreferenceLabel(record.currentProposal.time))}</span></p>
           <p style="margin:0;font-size:15px;line-height:1.8;color:#FBEFD5;">Contact: <span style="color:#ffffff;font-weight:700;">${escapeHtml(record.customer.name)} · ${escapeHtml(record.customer.phone)}</span></p>
@@ -207,8 +208,8 @@ export function buildDemoRequestCustomerEmail({
     `Beste ${firstName},`,
     '',
     `Voor ${request.company} hebben we je voorkeur goed ontvangen.`,
-    `Eerste voorkeur: ${request.preferredDatePrimary}`,
-    request.preferredDateSecondary ? `Tweede voorkeur: ${request.preferredDateSecondary}` : '',
+    `Eerste voorkeur: ${formatDutchDate(request.preferredDatePrimary)}`,
+    request.preferredDateSecondary ? `Tweede voorkeur: ${formatDutchDate(request.preferredDateSecondary)}` : '',
     `Moment: ${getPreferenceLabel(request.preferredTime)}`,
     `Telefoon: ${request.phone}`,
     request.notes ? `Opmerking: ${request.notes}` : '',
@@ -259,8 +260,8 @@ export function buildDemoRequestAdminEmail({
     `Bedrijf: ${request.company}`,
     `E-mail: ${request.email}`,
     `Telefoon: ${request.phone}`,
-    `Eerste voorkeur: ${request.preferredDatePrimary}`,
-    request.preferredDateSecondary ? `Tweede voorkeur: ${request.preferredDateSecondary}` : '',
+    `Eerste voorkeur: ${formatDutchDate(request.preferredDatePrimary)}`,
+    request.preferredDateSecondary ? `Tweede voorkeur: ${formatDutchDate(request.preferredDateSecondary)}` : '',
     `Moment: ${getPreferenceLabel(request.preferredTime)}`,
     request.notes ? `Opmerking: ${request.notes}` : '',
     adminActionUrl ? `Reageer op verzoek: ${adminActionUrl}` : '',
@@ -304,8 +305,8 @@ export function buildDemoScheduleCustomerProposalEmail({
   const text = [
     `${firstName}, Joost heeft een moment voor jullie klaargezet`,
     '',
-    `Datum: ${record.currentProposal.date}`,
-    record.currentProposal.secondaryDate ? `Tweede datum: ${record.currentProposal.secondaryDate}` : '',
+    `Datum: ${formatDutchDate(record.currentProposal.date)}`,
+    record.currentProposal.secondaryDate ? `Tweede datum: ${formatDutchDate(record.currentProposal.secondaryDate)}` : '',
     `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
     record.currentProposal.note ? `Toelichting: ${record.currentProposal.note}` : '',
     actionUrl ? `Bekijk afspraakvoorstel: ${actionUrl}` : '',
@@ -347,8 +348,8 @@ export function buildDemoScheduleAdminProposalEmail({
     `${record.customer.company} stuurde een nieuw moment terug`,
     '',
     `Contact: ${record.customer.name}`,
-    `Datum: ${record.currentProposal.date}`,
-    record.currentProposal.secondaryDate ? `Tweede datum: ${record.currentProposal.secondaryDate}` : '',
+    `Datum: ${formatDutchDate(record.currentProposal.date)}`,
+    record.currentProposal.secondaryDate ? `Tweede datum: ${formatDutchDate(record.currentProposal.secondaryDate)}` : '',
     `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
     calendarUrl ? `Zet voorstel in agenda: ${calendarUrl}` : '',
     actionUrl ? `Open afspraakdossier: ${actionUrl}` : '',
@@ -391,7 +392,7 @@ export function buildDemoScheduleConfirmedCustomerEmail({
   const text = [
     `${firstName}, jullie demo staat vast`,
     '',
-    `Datum: ${record.currentProposal.date}`,
+    `Datum: ${formatDutchDate(record.currentProposal.date)}`,
     `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
     calendarUrl ? `Importeer in agenda: ${calendarUrl}` : '',
   ]
@@ -430,7 +431,7 @@ export function buildDemoScheduleConfirmedAdminEmail({
     `Demo bevestigd voor ${record.customer.company}`,
     '',
     `Contact: ${record.customer.name}`,
-    `Datum: ${record.currentProposal.date}`,
+    `Datum: ${formatDutchDate(record.currentProposal.date)}`,
     `Moment: ${getPreferenceLabel(record.currentProposal.time)}`,
     calendarUrl ? `Zet afspraak in agenda: ${calendarUrl}` : '',
   ]

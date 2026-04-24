@@ -16,6 +16,7 @@ import {
   buildEmailDemoConfirmationHeroUrl,
   buildEmailLogoUrl,
 } from './emailBranding.js';
+import { formatDutchDate } from '../lib/dateFormat.js';
 import { syncDemoRequestToBrevo } from './brevoService.js';
 
 interface DemoRequestEnvironment {
@@ -428,7 +429,7 @@ function buildAdminCalendarUrl(request: DemoRequestFormData): string {
       `Bedrijf: ${request.company}`,
       `E-mail: ${request.email}`,
       `Telefoon: ${request.phone}`,
-      `Tweede voorkeur: ${request.preferredDateSecondary || '-'}`,
+      `Tweede voorkeur: ${request.preferredDateSecondary ? formatDutchDate(request.preferredDateSecondary) : '-'}`,
       request.notes ? `Opmerking: ${request.notes}` : '',
     ]
       .filter(Boolean)

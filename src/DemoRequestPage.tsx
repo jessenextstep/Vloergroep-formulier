@@ -14,6 +14,7 @@ import {
 import { Button } from './components/Button';
 import { ScreenHeroImage } from './components/ScreenHeroImage';
 import { TextField } from './components/TextField';
+import { formatDutchDate } from './lib/dateFormat';
 import { cn } from './lib/utils';
 import agendaConfirmationHero from './Afbeeldingen/Agenda bevestiging.png';
 import joostPhoto from './Afbeeldingen/Joost Slot Vloergroep.jpeg';
@@ -557,7 +558,7 @@ export default function DemoRequestPage() {
                   <div className="grid gap-3 text-sm leading-6 text-white/72 md:grid-cols-2">
                     <div>
                       <span className="text-white/48">Eerste voorkeur</span>
-                      <div className="text-white">{submittedRequest.preferredDatePrimary}</div>
+                      <div className="text-white">{formatDutchDate(submittedRequest.preferredDatePrimary)}</div>
                     </div>
                     <div>
                       <span className="text-white/48">Moment</span>
@@ -566,7 +567,7 @@ export default function DemoRequestPage() {
                     {submittedRequest.preferredDateSecondary ? (
                       <div>
                         <span className="text-white/48">Tweede voorkeur</span>
-                        <div className="text-white">{submittedRequest.preferredDateSecondary}</div>
+                        <div className="text-white">{formatDutchDate(submittedRequest.preferredDateSecondary)}</div>
                       </div>
                     ) : null}
                     <div>

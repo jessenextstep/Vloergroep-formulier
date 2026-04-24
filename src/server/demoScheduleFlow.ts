@@ -8,6 +8,7 @@ import type {
   DemoScheduleProposal,
   DemoScheduleRecord,
 } from '../types.js';
+import { formatDutchDate } from '../lib/dateFormat.js';
 
 interface SignedDemoScheduleToken {
   actor: DemoScheduleActor;
@@ -36,8 +37,8 @@ function signPayload(payload: string): string {
 }
 
 function buildSummary(date: string, time: DemoPreferenceTime, secondaryDate?: string) {
-  const base = `${date} · ${getPreferenceLabel(time)}`;
-  return secondaryDate ? `${base} (backup ${secondaryDate})` : base;
+  const base = `${formatDutchDate(date)} · ${getPreferenceLabel(time)}`;
+  return secondaryDate ? `${base} (backup ${formatDutchDate(secondaryDate)})` : base;
 }
 
 export function getPreferenceLabel(value: DemoPreferenceTime): string {
@@ -152,6 +153,7 @@ export function buildCalendarUrl(record: DemoScheduleRecord, titlePrefix = 'Vloe
       `Bedrijf: ${record.customer.company}`,
       `E-mail: ${record.customer.email}`,
       `Telefoon: ${record.customer.phone}`,
+      `Datum: ${formatDutchDate(record.currentProposal.date)}`,
       record.currentProposal.note ? `Opmerking: ${record.currentProposal.note}` : '',
     ]
       .filter(Boolean)
