@@ -17,7 +17,7 @@ interface Props {
 
 export default function Screen9Results({ state, results, onNext, onBack }: Props) {
   const [showDetails, setShowDetails] = useState(false);
-  const profile = useMemo(() => buildLeadProfile(state, results, 'demo'), [results, state]);
+  const profile = useMemo(() => buildLeadProfile(state, results, 'scan'), [results, state]);
   const companyReference = state.companyName || 'jouw bedrijf';
 
   return (
@@ -128,17 +128,17 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
         </span>
         <div className="max-w-3xl">
           <h3 className="text-2xl md:text-3xl font-bold font-display text-white mb-3 tracking-tight">
-            Klaar om te zien waar voor {companyReference} de eerste winst zit?
+            Wil je de volledige scan rustig teruglezen?
           </h3>
           <p className="max-w-2xl text-white/80 leading-7">
-            Deze scan laat het potentieel zien. In een persoonlijke VloerGroep demo maken we het concreet: waar zit voor jou de snelste winst in {profile.primaryAngle.toLowerCase()} en wat is slim om als eerste op te pakken.
+            We sturen de complete berekening voor {companyReference} naar je inbox, inclusief de toelichting achter de cijfers en waar volgens je antwoorden de meeste ruimte zit in {profile.primaryAngle.toLowerCase()}.
           </p>
           <button
             type="button"
             onClick={onNext}
             className="mt-5 inline-flex items-center gap-2 text-sm font-display font-bold tracking-[-0.02em] text-amber-gold transition-colors hover:text-[#f0bc50]"
           >
-            Plan mijn VloerGroep demo
+            Ontvang mijn volledige scan
             <ArrowRight size={16} />
           </button>
         </div>
@@ -327,7 +327,7 @@ export default function Screen9Results({ state, results, onNext, onBack }: Props
           </button>
           <div className="flex w-full sm:w-auto ml-auto">
             <Button onClick={onNext} className="w-full sm:w-auto !px-10 !py-4 text-[16px] xl:text-[18px] shadow-xl shadow-amber-gold/20 active:scale-95">
-              Plan mijn VloerGroep demo
+              Ontvang mijn volledige scan
             </Button>
           </div>
         </div>
